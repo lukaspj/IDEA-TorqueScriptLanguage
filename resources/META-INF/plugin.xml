@@ -1,0 +1,50 @@
+<idea-plugin>
+    <id>org.lukasj.idea.torquescript</id>
+    <name>TorqueScript Language Support</name>
+    <vendor email="lpjoergensen@gmail.com" url="https://lukasj.org">Lukas Aldershaab</vendor>
+
+    <description><![CDATA[
+        <h1>TorqueScript Language Support</h1>
+        <p>
+            This is a basic implementation of TorqueScript language support. <br />
+            More advanced features are planned, but at the moment this is mostly a syntax highlighter.
+        </p>
+
+        <p>
+            TorqueScript is the proprietary scripting language for the Torque3D Game Engine.
+            Since version 4.0 they are identified by the .tscript extension.
+        </p>
+
+        <h3>Current features</h3>
+        <ul>
+            <li>Syntax Highlighting</li>
+            <li>Function completion</li>
+        </ul>
+        ]]></description>
+
+    <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="TorqueScript File"
+                  implementationClass="org.lukasj.idea.torquescript.TorqueScriptFileType"
+                  fieldName="INSTANCE"
+                  language="TorqueScript"
+                  extensions="tscript"/>
+
+        <lang.parserDefinition language="TorqueScript"
+                               implementationClass="org.lukasj.idea.torquescript.parser.TorqueScriptParserDefinition"/>
+
+        <lang.syntaxHighlighterFactory language="TorqueScript"
+                                       implementationClass="org.lukasj.idea.torquescript.TorqueScriptSyntaxHighlighterFactory"/>
+        <colorSettingsPage implementation="org.lukasj.idea.torquescript.editor.TorqueScriptColorSettingsPage"/>
+        <completion.contributor language="TorqueScript"
+                                implementationClass="org.lukasj.idea.torquescript.editor.TorqueScriptCompletionContributor"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+</idea-plugin>
