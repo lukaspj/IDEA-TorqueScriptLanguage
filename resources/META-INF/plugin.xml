@@ -4,7 +4,6 @@
     <vendor email="lpjoergensen@gmail.com" url="https://lukasj.org">Lukas Aldershaab</vendor>
 
     <description><![CDATA[
-        <h1>TorqueScript Language Support</h1>
         <p>
             This is a basic implementation of TorqueScript language support. <br />
             More advanced features are planned, but at the moment this is mostly a syntax highlighter.

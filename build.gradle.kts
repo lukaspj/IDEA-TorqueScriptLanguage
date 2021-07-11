@@ -9,10 +9,11 @@ plugins {
     kotlin("jvm") version "1.4.32"
 
     id("org.jetbrains.grammarkit") version "2021.1.3"
+    id("org.jetbrains.changelog") version "1.2.0"
 }
 
 group = "org.lukasj"
-version = "0.2.0"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -67,14 +68,13 @@ val generateTorqueScriptLexer = task<GenerateLexer>("GenerateTorqueScriptLexer")
     targetClass = "TorqueScriptLexer"
 }
 
+changelog {
+    version.set(getVersion().toString())
+}
+
 tasks {
     patchPluginXml {
-        changeNotes.set("""
-            <ul>
-                <li>Support namespaced function names.</li>
-            </ul>
-            
-            """.trimIndent())
+        changeNotes.set(provider { changelog.get(getVersion().toString()).toHTML() })
     }
 
     withType<PublishPluginTask> {
