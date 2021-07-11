@@ -13,7 +13,11 @@ plugins {
 }
 
 group = "org.lukasj"
-version = "1.0.0"
+version = if (channel.toLowerCase() == "stable") {
+    prop("pluginVersion")
+} else {
+    "${prop("pluginVersion")}-${channel}"
+}
 
 repositories {
     mavenCentral()
@@ -69,12 +73,12 @@ val generateTorqueScriptLexer = task<GenerateLexer>("GenerateTorqueScriptLexer")
 }
 
 changelog {
-    version.set(getVersion().toString())
+    version.set(prop("pluginVersion"))
 }
 
 tasks {
     patchPluginXml {
-        changeNotes.set(provider { changelog.get(getVersion().toString()).toHTML() })
+        changeNotes.set(provider { changelog.get(prop("pluginVersion")).toHTML() })
     }
 
     withType<PublishPluginTask> {

@@ -14,6 +14,7 @@
 ### Security
 ## [1.0.0]
 ### Added
+- Plugin icon
 
 ### Changed
 - Update version to 1.0.0 this is the initial stable release
