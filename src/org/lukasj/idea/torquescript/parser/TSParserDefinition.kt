@@ -19,7 +19,7 @@ class TSParserDefinition : ParserDefinition {
 
     override fun createLexer(project: Project?) = TSLexerAdapter()
 
-    override fun createParser(project: Project?) = TorqueScriptParser()
+    override fun createParser(project: Project?) = TSParser()
 
     override fun getFileNodeType() = FILE
 

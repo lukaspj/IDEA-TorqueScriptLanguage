@@ -16,7 +16,7 @@ import org.intellij.grammar.livePreview.LivePreviewElementType;import org.lukasj
 %eof}
 
 DIGIT     = [0-9]
-INTEGER   = {DIGIT}*
+INTEGER   = {DIGIT}+
 FLOAT     = ({INTEGER}?\.{INTEGER})|({INTEGER}(\.{INTEGER})?[eE][+-]?{INTEGER})
 LETTER    = [A-Za-z_]
 FILECHAR  = [A-Za-z_\.]
@@ -36,11 +36,11 @@ HEXDIGIT  = [a-fA-F0-9]
 LINE_COMMENT = "//"[^\r\n]*
 MULTILINE_COMMENT = "/*" ( ([^"*"]|[\r\n])* ("*"+ [^"*""/"] )? )* ("*" | "*"+"/")?
 
+ESCAPES = [abfnrtv]|c[rpo0-9]
 TAG =      "\'"
 TAG_STRING = {TAG} ( [^\'\\\n\r] | "\\" ("\\" | {TAG} | {ESCAPES} | [0-8xuU] ) )* {TAG}?
 STR =      "\""
 STRING = {STR} ( [^\"\\\n\r] | "\\" ("\\" | {STR} | {ESCAPES} | [0-8xuU] ) )* {STR}?
-ESCAPES = [abfnrtv]
 
 %%
 
@@ -50,13 +50,18 @@ ESCAPES = [abfnrtv]
 // ----- KEYWORDS START -----
     new                                                     { return TorqueScriptTypes.NEW; }
     if                                                      { return TorqueScriptTypes.IF; }
+    else                                                    { return TorqueScriptTypes.ELSE; }
     switch                                                  { return TorqueScriptTypes.SWITCH; }
+    switch\$                                                { return TorqueScriptTypes.STR_SWITCH; }
     do                                                      { return TorqueScriptTypes.DO; }
     while                                                   { return TorqueScriptTypes.WHILE; }
     for                                                     { return TorqueScriptTypes.FOR; }
     foreach                                                 { return TorqueScriptTypes.FOREACH; }
     foreach\$                                               { return TorqueScriptTypes.STR_FOREACH; }
     in                                                      { return TorqueScriptTypes.IN; }
+    case                                                    { return TorqueScriptTypes.CASE; }
+    or                                                      { return TorqueScriptTypes.CASEOR; }
+    default                                                 { return TorqueScriptTypes.DEFAULT; }
     break                                                   { return TorqueScriptTypes.BREAK; }
     continue                                                { return TorqueScriptTypes.CONTINUE; }
     assert                                                  { return TorqueScriptTypes.ASSERT; }

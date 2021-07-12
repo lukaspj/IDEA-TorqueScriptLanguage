@@ -10,10 +10,10 @@ object TSElementFactory {
             .createFileFromText("dummy.simple", TSFileType.INSTANCE, text) as TSFile
     }
 
-    fun createTorqueScriptFunctionStatement(project: Project, name: String): TSFunctionStatement {
+    fun createTorqueScriptFunctionStatement(project: Project, name: String): TSFunctionDeclaration {
         return createFile(
             project,
             "function ${name}() {}"
-        ).firstChild as TSFunctionStatement
+        ).firstChild as TSFunctionDeclaration
     }
 }

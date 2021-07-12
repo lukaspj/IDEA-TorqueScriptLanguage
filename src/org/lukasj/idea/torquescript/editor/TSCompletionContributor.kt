@@ -22,9 +22,8 @@ class TSCompletionContributor() : CompletionContributor() {
                     context: ProcessingContext,
                     result: CompletionResultSet
                 ) {
-                    println(parameters.position.parent.elementType!!.debugName)
                     if (parameters.position.parent.elementType == TorqueScriptTypes.TYPE_DECLARATION
-                        || parameters.position.parent.elementType == TorqueScriptTypes.PACKAGE_STATEMENT
+                        || parameters.position.parent.elementType == TorqueScriptTypes.PACKAGE_DECLARATION
                         || parameters.position.parent.elementType == TorqueScriptTypes.FUNCTION_IDENTIFIER
                     ) {
                         return

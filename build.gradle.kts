@@ -58,18 +58,23 @@ val generateTorqueScriptParser = task<GenerateParser>("GenerateTorqueScriptParse
 
     targetRoot = "gen"
 
-    pathToParser = "/org/lukasj/idea/torquescript/parser/TorqueScriptParser"
+    pathToParser = "/org/lukasj/idea/torquescript/parser/TSParser"
 
     pathToPsiRoot = "/org/lukasj/idea/torquescript/psi"
 
     purgeOldFiles = true
+
+    outputs.file("${targetRoot}${pathToParser}.java")
+    outputs.dir("${targetRoot}${pathToPsiRoot}")
 }
 
 val generateTorqueScriptLexer = task<GenerateLexer>("GenerateTorqueScriptLexer") {
     source = "src/org/lukasj/idea/torquescript/grammar/TorqueScript.flex"
 
     targetDir = "gen/org/lukasj/idea/torquescript/lexer"
-    targetClass = "TorqueScriptLexer"
+    targetClass = "TSLexer"
+
+    outputs.file("${targetDir}/${targetClass}.java")
 }
 
 changelog {

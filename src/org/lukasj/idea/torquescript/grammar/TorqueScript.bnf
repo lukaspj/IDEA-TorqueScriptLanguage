@@ -1,5 +1,5 @@
 {
-    parserClass="org.lukasj.idea.torquescript.parser.TorqueScriptParser"
+    parserClass="org.lukasj.idea.torquescript.parser.TSParser"
     
     // extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
     extends(".*expression")=expression
@@ -14,12 +14,36 @@
     tokenTypeClass="org.lukasj.idea.torquescript.psi.TSTokenType"
 }
 
-torquescriptFile ::= statement_list
+torquescriptFile ::= declaration*
 
-statement_list ::= statement*
+// ---------------------------------------------------------------------------------------------------------------------
+// Declarations
 
-statement ::= assignment_statement STMT_SEPARATOR
-            | comment_statement
+declaration ::=
+    statement
+    | function_declaration
+    | package_declaration STMT_SEPARATOR
+    | namespace_declaration
+
+package_declaration ::= PACKAGE IDENT LBRACE function_declaration* RBRACE {pin=1}
+
+function_declaration ::= FUNCTION function_identifier LEFT_PAREN params RIGHT_PAREN block_statement {
+    pin=1
+    mixin="org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl"
+    implements="org.lukasj.idea.torquescript.psi.TSNamedElement"
+}
+
+function_identifier ::= IDENT (COLON_COLON IDENT)*
+
+namespace_declaration ::= NAMESPACE IDENT LBRACE function_declaration* RBRACE {pin=1}
+
+params ::= (THISVAR | LOCALVAR)? (COMMA LOCALVAR)*
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Statements
+
+statement ::=
+            comment_statement
             | block_statement
             | if_statement
             | switch_statement
@@ -29,64 +53,74 @@ statement ::= assignment_statement STMT_SEPARATOR
             | str_foreach_statement
             | do_while_statement
             | while_statement
-            | BREAK
-            | CONTINUE
+            | break_statement STMT_SEPARATOR
+            | continue_statement STMT_SEPARATOR
             | return_statement STMT_SEPARATOR
             | assert_statement STMT_SEPARATOR
             | singleton_statement STMT_SEPARATOR
             | datablock_statement STMT_SEPARATOR
             | expression_statement STMT_SEPARATOR
-            | package_statement
-            | function_statement
-            | namespace_statement
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Logical statements
+
+block_statement ::= LBRACE statement* RBRACE {pin=1}
+if_statement ::= IF LEFT_PAREN expression RIGHT_PAREN statement else_statement? {pin=1}
+else_statement ::= ELSE statement
+switch_statement ::= SWITCH LEFT_PAREN expression RIGHT_PAREN LBRACE (comment_statement | case_block)+ default_block? RBRACE {pin=1}
+str_switch_statement ::= STR_SWITCH LEFT_PAREN expression RIGHT_PAREN LBRACE (comment_statement | case_block)+ default_block? RBRACE {pin=1}
+case_block ::= CASE case_expression COLON statement* {pin=1}
+case_expression ::= expression (CASEOR expression)*
+default_block ::= DEFAULT COLON statement* {pin=1}
+for_statement ::= FOR LEFT_PAREN expression? STMT_SEPARATOR expression? STMT_SEPARATOR expression? RIGHT_PAREN statement {pin=1}
+foreach_statement ::= FOREACH LEFT_PAREN expression IN expression RIGHT_PAREN statement {pin=1}
+str_foreach_statement ::= STR_FOREACH LEFT_PAREN expression IN expression RIGHT_PAREN statement {pin=1}
+do_while_statement ::= DO statement WHILE LEFT_PAREN expression RIGHT_PAREN {pin=1}
+while_statement ::= WHILE LEFT_PAREN expression RIGHT_PAREN statement {pin=1}
+break_statement ::= BREAK
+continue_statement ::= CONTINUE
+return_statement ::= RETURN expression? {pin=1}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Type statements
+
+singleton_statement ::= SINGLETON type_declaration {pin=1}
+datablock_statement ::= DATABLOCK type_declaration {pin=1}
+type_declaration ::= IDENT LEFT_PAREN (IDENT (COLON IDENT)*)? RIGHT_PAREN type_declaration_block?
+type_declaration_block ::= LBRACE ((field_assignment | new_instance_expression | singleton_statement) STMT_SEPARATOR)* RBRACE
+field_assignment ::= property (LEFT_BRACK arguments RIGHT_BRACK)? assignoperator expression {pin=3}
+property ::= IDENT
+           // Allow restricted keywords cause TorqueScript
+           | DATABLOCK
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Misc statements
 
 comment_statement ::= LINE_COMMENT
           | DOC_COMMENT
           | BLOCK_COMMENT
 
-package_statement ::= PACKAGE IDENT LBRACE function_statement* RBRACE {pin=1}
+assert_statement ::= ASSERT LEFT_PAREN expression (COMMA QUOTED_STRING)? RIGHT_PAREN {pin=1}
 
-function_statement ::= FUNCTION function_identifier LEFT_PAREN params RIGHT_PAREN block_statement {
-    pin=1
-    mixin="org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl"
-    implements="org.lukasj.idea.torquescript.psi.TSNamedElement"
-}
+expression_statement ::= expression {recoverWhile='recover_statement'}
 
-function_identifier ::= IDENT (COLON_COLON IDENT)*
+private recover_statement ::= !(STMT_SEPARATOR|DATABLOCK|FUNCTION)
 
-namespace_statement ::= NAMESPACE IDENT LBRACE function_statement* RBRACE {pin=1}
+expression ::= assignment_expression
+             | ternary_expression
+             | new_instance_expression
+             | qualifier_expression
+             | call_expression
+             | index_expression
+             | prefix_unary_expression
+             | postfix_unary_expression
+             | binary_expression
+             | literal_expression
+             | element_expression
+             | paren_expression
 
-params ::= (THISVAR | LOCALVAR)? (COMMA LOCALVAR)*
 
-block_statement ::= LBRACE statement_list RBRACE {pin=1}
-if_statement ::= IF LEFT_PAREN expression RIGHT_PAREN statement else_statement? {pin=1}
-else_statement ::= ELSE statement
-switch_statement ::= SWITCH LEFT_PAREN expression RIGHT_PAREN switch_block {pin=1}
-str_switch_statement ::= STR_SWITCH LEFT_PAREN expression RIGHT_PAREN switch_block {pin=1}
-switch_block ::= (CASE expression COLON | DEFAULT COLON) statement_list (BREAK | return_statement) {pin=1}
-for_statement ::= FOR LEFT_PAREN expression STMT_SEPARATOR expression STMT_SEPARATOR expression RIGHT_PAREN statement {pin=1}
-foreach_statement ::= FOREACH LEFT_PAREN expression IN expression RIGHT_PAREN statement {pin=1}
-str_foreach_statement ::= STR_FOREACH LEFT_PAREN expression IN expression RIGHT_PAREN statement {pin=1}
-do_while_statement ::= DO statement WHILE LEFT_PAREN expression RIGHT_PAREN {pin=1}
-while_statement ::= WHILE LEFT_PAREN expression RIGHT_PAREN statement {pin=1}
-
-return_statement ::= RETURN expression? {pin=1}
-assert_statement ::= ASSERT expression {pin=1}
-
-singleton_statement ::= SINGLETON type_declaration {pin=1}
-datablock_statement ::= DATABLOCK type_declaration {pin=1}
-type_declaration ::= IDENT LEFT_PAREN IDENT RIGHT_PAREN type_declaration_block
-type_declaration_block ::= LBRACE (field_assignment STMT_SEPARATOR)* RBRACE
-
-element_expression ::= (THISVAR | LOCALVAR | GLOBALVAR | IDENT)
-
-assignment_statement ::= element_expression accessor_chain? assignoperator expression {pin=3}
-
-field_assignment ::= property assignoperator expression
-
-property ::= IDENT
-           // Allow restricted keywords cause TorqueScript
-           | DATABLOCK
+assignment_expression ::= element_expression accessor_chain? assignoperator expression {pin=3}
 
 assignoperator ::= ASSIGN
                  | ADD_ASSIGN
@@ -99,6 +133,37 @@ assignoperator ::= ASSIGN
                  | BIT_OR_ASSIGN
                  | BIT_SHIFT_LEFT_ASSIGN
                  | BIT_SHIFT_RIGHT_ASSIGN
+
+element_expression ::= (THISVAR | LOCALVAR | GLOBALVAR | IDENT)
+paren_expression ::= LEFT_PAREN expression RIGHT_PAREN {pin=1}
+
+accessor_chain ::= qualifier_accessor | call_accessor | index_accessor
+
+qualifier_expression ::= expression qualifier_accessor
+qualifier_accessor ::= DOT property accessor_chain? {pin=1}
+call_expression ::= expression call_accessor
+call_accessor ::= LEFT_PAREN arguments RIGHT_PAREN accessor_chain? {pin=1}
+index_expression ::= expression index_accessor
+index_accessor ::= LEFT_BRACK arguments RIGHT_BRACK accessor_chain? {pin=1}
+
+literal_expression ::= TRUE
+          | FALSE
+          | HEXDIGIT
+          | INTEGER
+          | FLOAT
+          | QUOTED_STRING
+          | TAGGED_STRING
+
+binary_expression ::= expression binaryoperator expression
+prefix_unary_expression ::= (NOT | MINUS) expression {pin=1}
+postfix_unary_expression ::= expression (INCREMENT | DECREMENT) {pin=1}
+
+ternary_expression ::= expression QUESTION_MARK expression COLON expression {pin=2}
+
+arguments ::= (expression (COMMA expression)*)?
+
+new_instance_expression ::= NEW IDENT LEFT_PAREN (IDENT? (COLON IDENT)* (COMMA arguments)?) RIGHT_PAREN new_instance_block? {pin=1}
+new_instance_block ::= LBRACE (field_assignment STMT_SEPARATOR | new_instance_expression STMT_SEPARATOR)* RBRACE
 
 binaryoperator ::= EQUAL
                  | NOT_EQUAL
@@ -128,51 +193,3 @@ binaryoperator ::= EQUAL
                  | NL
                  | TAB
                  | SPC
-
-unaryoperator ::= DECREMENT
-                | INCREMENT
-                | NOT
-
-expression_statement ::= expression {recoverWhile='recover_statement'}
-
-private recover_statement ::= !(STMT_SEPARATOR|DATABLOCK|FUNCTION)
-
-expression ::= ternary_expression
-             | new_instance_expression
-             | qualifier_expression
-             | call_expression
-             | index_expression
-             | binary_expression
-             | unary_expression
-             | literal_expression
-             | element_expression
-             | paren_expression
-
-paren_expression ::= LEFT_PAREN expression RIGHT_PAREN {pin=1}
-
-accessor_chain ::= qualifier_accessor | call_accessor | index_accessor
-
-qualifier_expression ::= expression qualifier_accessor
-qualifier_accessor ::= DOT property accessor_chain? {pin=1}
-call_expression ::= expression call_accessor
-call_accessor ::= LEFT_PAREN arguments RIGHT_PAREN accessor_chain? {pin=1}
-index_expression ::= expression index_accessor
-index_accessor ::= LEFT_BRACK arguments RIGHT_BRACK accessor_chain? {pin=1}
-
-literal_expression ::= TRUE
-          | FALSE
-          | HEXDIGIT
-          | INTEGER
-          | FLOAT
-          | QUOTED_STRING
-          | TAGGED_STRING
-
-binary_expression ::= expression binaryoperator expression
-unary_expression ::= expression unaryoperator
-
-ternary_expression ::= expression QUESTION_MARK expression COLON expression {pin=2}
-
-arguments ::= (expression (COMMA expression)*)?
-
-new_instance_expression ::= NEW IDENT LEFT_PAREN IDENT RIGHT_PAREN new_instance_block {pin=1}
-new_instance_block ::= LBRACE (field_assignment STMT_SEPARATOR | new_instance_expression)* RBRACE
