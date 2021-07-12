@@ -54,7 +54,7 @@ intellij {
 }
 
 val generateTorqueScriptParser = task<GenerateParser>("GenerateTorqueScriptParser") {
-    source = "src/org/lukasj/idea/torquescript/psi/TorqueScript.bnf"
+    source = "src/org/lukasj/idea/torquescript/grammar/TorqueScript.bnf"
 
     targetRoot = "gen"
 
@@ -66,7 +66,7 @@ val generateTorqueScriptParser = task<GenerateParser>("GenerateTorqueScriptParse
 }
 
 val generateTorqueScriptLexer = task<GenerateLexer>("GenerateTorqueScriptLexer") {
-    source = "src/org/lukasj/idea/torquescript/lexer/TorqueScript.flex"
+    source = "src/org/lukasj/idea/torquescript/grammar/TorqueScript.flex"
 
     targetDir = "gen/org/lukasj/idea/torquescript/lexer"
     targetClass = "TorqueScriptLexer"

@@ -4,7 +4,7 @@ import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
 import com.intellij.openapi.editor.HighlighterColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
 
-object TorqueScriptSyntaxHighlightingColors {
+object TSSyntaxHighlightingColors {
     val PARENTHESES = TextAttributesKey.createTextAttributesKey(
         "TORQUESCRIPT_PARENTHESES",
         DefaultLanguageHighlighterColors.PARENTHESES

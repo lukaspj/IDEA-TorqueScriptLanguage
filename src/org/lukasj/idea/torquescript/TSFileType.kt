@@ -3,7 +3,7 @@ package org.lukasj.idea.torquescript
 import com.intellij.openapi.fileTypes.LanguageFileType
 import javax.swing.Icon
 
-class TorqueScriptFileType : LanguageFileType(TorqueScriptLanguage.INSTANCE) {
+class TSFileType : LanguageFileType(TSLanguage.INSTANCE) {
     override fun getName(): String {
         return "TorqueScript File"
     }
@@ -17,11 +17,11 @@ class TorqueScriptFileType : LanguageFileType(TorqueScriptLanguage.INSTANCE) {
     }
 
     override fun getIcon(): Icon? {
-        return TorqueScriptIcons.FILE
+        return TSIcons.FILE
     }
 
     companion object {
         @JvmField
-        val INSTANCE = TorqueScriptFileType()
+        val INSTANCE = TSFileType()
     }
 }

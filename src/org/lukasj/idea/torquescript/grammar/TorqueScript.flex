@@ -7,7 +7,7 @@ import org.intellij.grammar.livePreview.LivePreviewElementType;import org.lukasj
 
 %%
 
-%class TorqueScriptLexer
+%class TSLexer
 %implements FlexLexer
 %unicode
 %function advance
@@ -15,27 +15,23 @@ import org.intellij.grammar.livePreview.LivePreviewElementType;import org.lukasj
 %eof{  return;
 %eof}
 
-%{
-    StringBuffer string = new StringBuffer();
-%}
-
-DIGIT    = [0-9]
-INTEGER  = {DIGIT}*
-FLOAT    = ({INTEGER}?\.{INTEGER})|({INTEGER}(\.{INTEGER})?[eE][+-]?{INTEGER})
-LETTER   = [A-Za-z_]
-FILECHAR = [A-Za-z_\.]
-VARMID   = [:A-Za-z0-9_]
-IDTAIL   = [A-Za-z0-9_]
-VARTAIL  = {VARMID}*{IDTAIL}
-VAR      = {LETTER}{VARTAIL}*
-THISVAR = %this
-LOCALVAR = %{VAR}
+DIGIT     = [0-9]
+INTEGER   = {DIGIT}*
+FLOAT     = ({INTEGER}?\.{INTEGER})|({INTEGER}(\.{INTEGER})?[eE][+-]?{INTEGER})
+LETTER    = [A-Za-z_]
+FILECHAR  = [A-Za-z_\.]
+VARMID    = [:A-Za-z0-9_]
+IDTAIL    = [A-Za-z0-9_]
+VARTAIL   = {VARMID}*{IDTAIL}
+VAR       = {LETTER}{VARTAIL}*
+THISVAR   = %this
+LOCALVAR  = %{VAR}
 GLOBALVAR = \${VAR}
-ID       = {LETTER}{IDTAIL}*
-ILID     = [$%]{DIGIT}+{LETTER}{VARTAIL}*
-FILENAME = {FILECHAR}+
-SPACE    = [ \t\v\f]
-HEXDIGIT = [a-fA-F0-9]
+ID        = {LETTER}{IDTAIL}*
+ILID      = [$%]{DIGIT}+{LETTER}{VARTAIL}*
+FILENAME  = {FILECHAR}+
+SPACE     = [ \t\v\f]
+HEXDIGIT  = [a-fA-F0-9]
 
 LINE_COMMENT = "//"[^\r\n]*
 MULTILINE_COMMENT = "/*" ( ([^"*"]|[\r\n])* ("*"+ [^"*""/"] )? )* ("*" | "*"+"/")?

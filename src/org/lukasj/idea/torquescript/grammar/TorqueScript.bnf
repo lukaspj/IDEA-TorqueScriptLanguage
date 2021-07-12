@@ -4,14 +4,14 @@
     // extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
     extends(".*expression")=expression
     
-    psiClassPrefix="TorqueScript"
+    psiClassPrefix="TS"
     psiImplClassSuffix="Impl"
     psiPackage="org.lukasj.idea.torquescript.psi"
     psiImplPackage="org.lukasj.idea.torquescript.psi.impl"
     
     elementTypeHolderClass="org.lukasj.idea.torquescript.psi.TorqueScriptTypes"
-    elementTypeClass="org.lukasj.idea.torquescript.psi.TorqueScriptElementType"
-    tokenTypeClass="org.lukasj.idea.torquescript.psi.TorqueScriptTokenType"
+    elementTypeClass="org.lukasj.idea.torquescript.psi.TSElementType"
+    tokenTypeClass="org.lukasj.idea.torquescript.psi.TSTokenType"
 }
 
 torquescriptFile ::= statement_list
@@ -48,8 +48,8 @@ package_statement ::= PACKAGE IDENT LBRACE function_statement* RBRACE {pin=1}
 
 function_statement ::= FUNCTION function_identifier LEFT_PAREN params RIGHT_PAREN block_statement {
     pin=1
-    mixin="org.lukasj.idea.torquescript.psi.impl.TorqueScriptFunctionStatementElementImpl"
-    implements="org.lukasj.idea.torquescript.psi.TorqueScriptNamedElement"
+    mixin="org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl"
+    implements="org.lukasj.idea.torquescript.psi.TSNamedElement"
 }
 
 function_identifier ::= IDENT (COLON_COLON IDENT)*

@@ -28,19 +28,19 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="TorqueScript File"
-                  implementationClass="org.lukasj.idea.torquescript.TorqueScriptFileType"
+                  implementationClass="org.lukasj.idea.torquescript.TSFileType"
                   fieldName="INSTANCE"
                   language="TorqueScript"
                   extensions="tscript"/>
 
         <lang.parserDefinition language="TorqueScript"
-                               implementationClass="org.lukasj.idea.torquescript.parser.TorqueScriptParserDefinition"/>
+                               implementationClass="org.lukasj.idea.torquescript.parser.TSParserDefinition"/>
 
         <lang.syntaxHighlighterFactory language="TorqueScript"
-                                       implementationClass="org.lukasj.idea.torquescript.TorqueScriptSyntaxHighlighterFactory"/>
-        <colorSettingsPage implementation="org.lukasj.idea.torquescript.editor.TorqueScriptColorSettingsPage"/>
+                                       implementationClass="org.lukasj.idea.torquescript.TSSyntaxHighlighterFactory"/>
+        <colorSettingsPage implementation="org.lukasj.idea.torquescript.editor.TSColorSettingsPage"/>
         <completion.contributor language="TorqueScript"
-                                implementationClass="org.lukasj.idea.torquescript.editor.TorqueScriptCompletionContributor"/>
+                                implementationClass="org.lukasj.idea.torquescript.editor.TSCompletionContributor"/>
     </extensions>
 
     <actions>

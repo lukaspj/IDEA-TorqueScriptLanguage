@@ -9,15 +9,15 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IFileElementType
 import com.intellij.psi.tree.TokenSet
-import org.lukasj.idea.torquescript.TorqueScriptLanguage
-import org.lukasj.idea.torquescript.lexer.TorqueScriptLexerAdapter
-import org.lukasj.idea.torquescript.psi.TorqueScriptFile
+import org.lukasj.idea.torquescript.TSLanguage
+import org.lukasj.idea.torquescript.lexer.TSLexerAdapter
+import org.lukasj.idea.torquescript.psi.TSFile
 import org.lukasj.idea.torquescript.psi.TorqueScriptTypes
 import org.lukasj.idea.torquescript.psi.TorqueScriptTypes.*
 
-class TorqueScriptParserDefinition : ParserDefinition {
+class TSParserDefinition : ParserDefinition {
 
-    override fun createLexer(project: Project?) = TorqueScriptLexerAdapter()
+    override fun createLexer(project: Project?) = TSLexerAdapter()
 
     override fun createParser(project: Project?) = TorqueScriptParser()
 
@@ -29,7 +29,7 @@ class TorqueScriptParserDefinition : ParserDefinition {
 
     override fun createElement(node: ASTNode?): PsiElement = TorqueScriptTypes.Factory.createElement(node)
 
-    override fun createFile(viewProvider: FileViewProvider): PsiFile = TorqueScriptFile(viewProvider)
+    override fun createFile(viewProvider: FileViewProvider): PsiFile = TSFile(viewProvider)
 
     override fun spaceExistenceTypeBetweenTokens(left: ASTNode?, right: ASTNode?): ParserDefinition.SpaceRequirements =
         ParserDefinition.SpaceRequirements.MAY
@@ -42,7 +42,7 @@ class TorqueScriptParserDefinition : ParserDefinition {
         val COMMENTS = TokenSet.create(TorqueScriptTypes.LINE_COMMENT, TorqueScriptTypes.BLOCK_COMMENT, TorqueScriptTypes.DOC_COMMENT)
 
         @JvmField
-        val FILE = IFileElementType(TorqueScriptLanguage.INSTANCE)
+        val FILE = IFileElementType(TSLanguage.INSTANCE)
 
         val KEYWORDS = TokenSet.create(
             DATABLOCK, SINGLETON, FUNCTION, PACKAGE, NAMESPACE,

@@ -5,15 +5,15 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
 import com.intellij.psi.util.siblings
-import org.lukasj.idea.torquescript.psi.TorqueScriptFunctionIdentifier
-import org.lukasj.idea.torquescript.psi.TorqueScriptNamedElement
-import org.lukasj.idea.torquescript.psi.TorqueScriptParams
+import org.lukasj.idea.torquescript.psi.TSFunctionIdentifier
+import org.lukasj.idea.torquescript.psi.TSNamedElement
+import org.lukasj.idea.torquescript.psi.TSParams
 import org.lukasj.idea.torquescript.psi.TorqueScriptTypes
 
-abstract class TorqueScriptFunctionStatementElementImpl(node: ASTNode) : ASTWrapperPsiElement(node),
-    TorqueScriptNamedElement {
-    abstract fun getFunctionIdentifier(): TorqueScriptFunctionIdentifier
-    abstract fun getParams(): TorqueScriptParams
+abstract class TSFunctionStatementElementImpl(node: ASTNode) : ASTWrapperPsiElement(node),
+    TSNamedElement {
+    abstract fun getFunctionIdentifier(): TSFunctionIdentifier
+    abstract fun getParams(): TSParams
 
     override fun getNameIdentifier(): PsiElement? =
         getFunctionIdentifier().lastChild

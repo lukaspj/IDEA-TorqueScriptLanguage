@@ -3,12 +3,12 @@ package org.lukasj.idea.torquescript.psi
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.psi.FileViewProvider
-import org.lukasj.idea.torquescript.TorqueScriptFileType
-import org.lukasj.idea.torquescript.TorqueScriptLanguage
+import org.lukasj.idea.torquescript.TSFileType
+import org.lukasj.idea.torquescript.TSLanguage
 
-class TorqueScriptFile(viewProvider:  FileViewProvider) : PsiFileBase(viewProvider, TorqueScriptLanguage.INSTANCE) {
+class TSFile(viewProvider:  FileViewProvider) : PsiFileBase(viewProvider, TSLanguage.INSTANCE) {
     override fun getFileType(): FileType {
-        return TorqueScriptFileType.INSTANCE
+        return TSFileType.INSTANCE
     }
 
     override fun toString(): String {

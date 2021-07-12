@@ -3,9 +3,9 @@ package org.lukasj.idea.torquescript.parser
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
-import org.lukasj.idea.torquescript.TorqueScriptIcons
+import org.lukasj.idea.torquescript.TSIcons
 
-class TorqueScriptReference(element: PsiElement, textRange: TextRange) : PsiReferenceBase<PsiElement>(element, textRange),
+class TSReference(element: PsiElement, textRange: TextRange) : PsiReferenceBase<PsiElement>(element, textRange),
     PsiPolyVariantReference {
     private val key: String = element.text.substring(textRange.startOffset, textRange.endOffset)
 
@@ -30,7 +30,7 @@ class TorqueScriptReference(element: PsiElement, textRange: TextRange) : PsiRefe
         }.map { property ->
             LookupElementBuilder
                 .create(property)
-                .withIcon(TorqueScriptIcons.FILE)
+                .withIcon(TSIcons.FILE)
                 .withTypeText(property.containingFile.name)
         }.toTypedArray()
     }

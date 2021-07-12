@@ -6,11 +6,10 @@ import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.util.elementType
 import com.intellij.util.PlatformIcons
 import com.intellij.util.ProcessingContext
-import org.lukasj.idea.torquescript.TorqueScriptIcons
 import org.lukasj.idea.torquescript.parser.ReferenceUtil
 import org.lukasj.idea.torquescript.psi.TorqueScriptTypes
 
-class TorqueScriptCompletionContributor() : CompletionContributor() {
+class TSCompletionContributor() : CompletionContributor() {
     init {
         extend(CompletionType.BASIC,
             PlatformPatterns.or(
