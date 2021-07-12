@@ -10,6 +10,7 @@
 ### Removed
 
 ### Fixed
+- Improvements to grammars to handle more edge-cases
 
 ### Security
 ## [1.0.0]
