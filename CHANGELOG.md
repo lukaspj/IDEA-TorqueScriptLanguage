@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+## [1.1.0]
+### Added
 - Go to definition on method calls
 - Go to definition on object instances
 - Go to definition on global variables

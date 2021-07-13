@@ -18,6 +18,13 @@
         <ul>
             <li>Syntax Highlighting</li>
             <li>Function completion</li>
+            <li>Go To Definition for:
+                <ul>
+                    <li>Global Variables</li>
+                    <li>Functions</li>
+                    <li>Object Instances</li>
+                </ul>
+            </li>
         </ul>
         ]]></description>
 
