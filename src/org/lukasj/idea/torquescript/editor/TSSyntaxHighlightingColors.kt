@@ -5,6 +5,22 @@ import com.intellij.openapi.editor.HighlighterColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
 
 object TSSyntaxHighlightingColors {
+    val FUNCTION_DECLARATION = TextAttributesKey.createTextAttributesKey(
+        "TORQUESCRIPT_FUNCTION_DECLARATION",
+        DefaultLanguageHighlighterColors.FUNCTION_DECLARATION
+    )
+    val FUNCTION_CALL = TextAttributesKey.createTextAttributesKey(
+        "TORQUESCRIPT_FUNCTION_CALL",
+        DefaultLanguageHighlighterColors.FUNCTION_CALL
+    )
+    val OBJECT_NAME = TextAttributesKey.createTextAttributesKey(
+        "TORQUESCRIPT_OBJECT_NAME",
+        DefaultLanguageHighlighterColors.IDENTIFIER
+    )
+    val CLASS_NAME = TextAttributesKey.createTextAttributesKey(
+        "TORQUESCRIPT_CLASS_NAME",
+        DefaultLanguageHighlighterColors.CLASS_NAME
+    )
     val PARENTHESES = TextAttributesKey.createTextAttributesKey(
         "TORQUESCRIPT_PARENTHESES",
         DefaultLanguageHighlighterColors.PARENTHESES

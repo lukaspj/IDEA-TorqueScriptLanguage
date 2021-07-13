@@ -1,19 +1,17 @@
-package org.lukasj.idea.torquescript.parser
+package org.lukasj.idea.torquescript.reference
 
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 import org.lukasj.idea.torquescript.TSIcons
 
-class TSReference(element: PsiElement, textRange: TextRange) : PsiReferenceBase<PsiElement>(element, textRange),
+class TSObjectReference(element: PsiElement, textRange: TextRange) : PsiReferenceBase<PsiElement>(element, textRange),
     PsiPolyVariantReference {
-    private val key: String = element.text.substring(textRange.startOffset, textRange.endOffset)
-
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
         val project = myElement.project
-        val functions = ReferenceUtil.findFunctions(project)
+        val objects = ReferenceUtil.findObject(myElement, project, element.text)
 
-        return functions.map { PsiElementResolveResult(it) }
+        return objects.map { PsiElementResolveResult(it) }
             .toTypedArray()
     }
 
@@ -24,14 +22,15 @@ class TSReference(element: PsiElement, textRange: TextRange) : PsiReferenceBase<
 
     override fun getVariants(): Array<Any> {
         val project = myElement.project
-        val properties = ReferenceUtil.findFunctions(project)
-        return properties.filter {
+        val objects = ReferenceUtil.getObjects(myElement, project)
+        return objects.filter {
             it.name != null && it.name!!.isNotEmpty()
-        }.map { property ->
+        }.map { obj ->
             LookupElementBuilder
-                .create(property)
+                .create(obj)
                 .withIcon(TSIcons.FILE)
-                .withTypeText(property.containingFile.name)
+                .withTypeText(obj.containingFile.name)
+                .withCaseSensitivity(false)
         }.toTypedArray()
     }
 }

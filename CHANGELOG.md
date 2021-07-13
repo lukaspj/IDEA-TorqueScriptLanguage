@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 ### Added
+- Go to definition on method calls
+- Go to definition on object instances
+- Go to definition on global variables
+- Syntax highlighting for functions and instances
 
 ### Changed
 

@@ -6,14 +6,14 @@ import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.util.elementType
 import com.intellij.util.PlatformIcons
 import com.intellij.util.ProcessingContext
-import org.lukasj.idea.torquescript.parser.ReferenceUtil
-import org.lukasj.idea.torquescript.psi.TorqueScriptTypes
+import org.lukasj.idea.torquescript.reference.ReferenceUtil
+import org.lukasj.idea.torquescript.psi.TSTypes
 
 class TSCompletionContributor() : CompletionContributor() {
     init {
         extend(CompletionType.BASIC,
             PlatformPatterns.or(
-                PlatformPatterns.psiElement(TorqueScriptTypes.IDENT),
+                PlatformPatterns.psiElement(TSTypes.IDENT),
                 PlatformPatterns.psiFile()
             ),
             object : CompletionProvider<CompletionParameters>() {
@@ -22,15 +22,17 @@ class TSCompletionContributor() : CompletionContributor() {
                     context: ProcessingContext,
                     result: CompletionResultSet
                 ) {
-                    if (parameters.position.parent.elementType == TorqueScriptTypes.TYPE_DECLARATION
-                        || parameters.position.parent.elementType == TorqueScriptTypes.PACKAGE_DECLARATION
-                        || parameters.position.parent.elementType == TorqueScriptTypes.FUNCTION_IDENTIFIER
+                    val parentType = parameters.position.parent.elementType
+                    if (parentType == TSTypes.DATABLOCK_STATEMENT
+                        || parentType == TSTypes.SINGLETON_STATEMENT
+                        || parentType == TSTypes.PACKAGE_DECLARATION
+                        || parentType == TSTypes.FUNCTION_IDENTIFIER
                     ) {
                         return
                     }
 
 
-                    ReferenceUtil.findFunctions(parameters.position.project)
+                    ReferenceUtil.getFunctions(parameters.position, parameters.position.project)
                         .filter {
                             it.name != null && it.name!!.isNotEmpty()
                         }.map { function ->

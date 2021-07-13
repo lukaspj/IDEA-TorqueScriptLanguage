@@ -1,6 +1,5 @@
-package org.lukasj.idea.torquescript.parser
+package org.lukasj.idea.torquescript.reference
 
-import com.intellij.openapi.util.TextRange
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.*
 import com.intellij.util.ProcessingContext
@@ -14,9 +13,6 @@ class TSReferenceContributor : PsiReferenceContributor() {
                     element: PsiElement,
                     context: ProcessingContext
                 ): Array<PsiReference> {
-                    val literalExpression = element as PsiLiteralExpression
-                    val value = if (literalExpression.value is String) literalExpression.value as String else null
-
                     return PsiReference.EMPTY_ARRAY
                 }
             })

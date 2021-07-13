@@ -27,7 +27,7 @@ import org.lukasj.idea.torquescript.editor.TSSyntaxHighlightingColors.STRING
 import org.lukasj.idea.torquescript.editor.TSSyntaxHighlightingColors.TAG
 import org.lukasj.idea.torquescript.editor.TSSyntaxHighlightingColors.THISVAR
 import org.lukasj.idea.torquescript.lexer.TSLexerAdapter
-import org.lukasj.idea.torquescript.psi.TorqueScriptTypes
+import org.lukasj.idea.torquescript.psi.TSTypes
 
 
 class TSSyntaxHighlighter : SyntaxHighlighterBase() {
@@ -41,23 +41,23 @@ class TSSyntaxHighlighter : SyntaxHighlighterBase() {
 
         init
         {
-            fillMap(ATTRIBUTES, LINE_COMMENT, TorqueScriptTypes.LINE_COMMENT)
-            fillMap(ATTRIBUTES, DOC_COMMENT, TorqueScriptTypes.DOC_COMMENT)
-            fillMap(ATTRIBUTES, BLOCK_COMMENT, TorqueScriptTypes.BLOCK_COMMENT)
-            fillMap(ATTRIBUTES, PARENTHESES, TorqueScriptTypes.LEFT_PAREN, TorqueScriptTypes.RIGHT_PAREN)
-            fillMap(ATTRIBUTES, BRACES, TorqueScriptTypes.LBRACE, TorqueScriptTypes.RBRACE)
-            fillMap(ATTRIBUTES, BRACKETS, TorqueScriptTypes.LEFT_BRACK, TorqueScriptTypes.RIGHT_BRACK)
+            fillMap(ATTRIBUTES, LINE_COMMENT, TSTypes.LINE_COMMENT)
+            fillMap(ATTRIBUTES, DOC_COMMENT, TSTypes.DOC_COMMENT)
+            fillMap(ATTRIBUTES, BLOCK_COMMENT, TSTypes.BLOCK_COMMENT)
+            fillMap(ATTRIBUTES, PARENTHESES, TSTypes.LEFT_PAREN, TSTypes.RIGHT_PAREN)
+            fillMap(ATTRIBUTES, BRACES, TSTypes.LBRACE, TSTypes.RBRACE)
+            fillMap(ATTRIBUTES, BRACKETS, TSTypes.LEFT_BRACK, TSTypes.RIGHT_BRACK)
             fillMap(ATTRIBUTES, BAD_CHARACTER, TokenType.BAD_CHARACTER)
-            fillMap(ATTRIBUTES, LOCALVAR, TorqueScriptTypes.LOCALVAR)
-            fillMap(ATTRIBUTES, THISVAR, TorqueScriptTypes.THISVAR)
-            fillMap(ATTRIBUTES, GLOBALVAR, TorqueScriptTypes.GLOBALVAR)
-            fillMap(ATTRIBUTES, IDENTIFIER, TorqueScriptTypes.IDENT)
-            fillMap(ATTRIBUTES, DOT, TorqueScriptTypes.DOT)
-            fillMap(ATTRIBUTES, COLON, TorqueScriptTypes.COLON)
-            fillMap(ATTRIBUTES, SEMICOLON, TorqueScriptTypes.STMT_SEPARATOR)
-            fillMap(ATTRIBUTES, COMMA, TorqueScriptTypes.COMMA)
-            fillMap(ATTRIBUTES, STRING, TorqueScriptTypes.QUOTED_STRING)
-            fillMap(ATTRIBUTES, TAG, TorqueScriptTypes.TAGGED_STRING)
+            fillMap(ATTRIBUTES, LOCALVAR, TSTypes.LOCALVAR)
+            fillMap(ATTRIBUTES, THISVAR, TSTypes.THISVAR)
+            fillMap(ATTRIBUTES, GLOBALVAR, TSTypes.GLOBALVAR)
+            fillMap(ATTRIBUTES, IDENTIFIER, TSTypes.IDENT)
+            fillMap(ATTRIBUTES, DOT, TSTypes.DOT)
+            fillMap(ATTRIBUTES, COLON, TSTypes.COLON)
+            fillMap(ATTRIBUTES, SEMICOLON, TSTypes.STMT_SEPARATOR)
+            fillMap(ATTRIBUTES, COMMA, TSTypes.COMMA)
+            fillMap(ATTRIBUTES, STRING, TSTypes.QUOTED_STRING)
+            fillMap(ATTRIBUTES, TAG, TSTypes.TAGGED_STRING)
             fillMap(ATTRIBUTES, TSParserDefinition.OPERATORS, OPERATOR)
             fillMap(ATTRIBUTES, TSParserDefinition.KEYWORDS, KEYWORD)
             fillMap(ATTRIBUTES, TSParserDefinition.NUMBERS, NUMBER)

@@ -41,6 +41,9 @@
         <colorSettingsPage implementation="org.lukasj.idea.torquescript.editor.TSColorSettingsPage"/>
         <completion.contributor language="TorqueScript"
                                 implementationClass="org.lukasj.idea.torquescript.editor.TSCompletionContributor"/>
+
+        <annotator implementationClass="org.lukasj.idea.torquescript.annotator.TSAnnotator"
+                   language="TorqueScript" />
     </extensions>
 
     <actions>

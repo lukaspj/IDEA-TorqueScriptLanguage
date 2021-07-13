@@ -12,8 +12,8 @@ import com.intellij.psi.tree.TokenSet
 import org.lukasj.idea.torquescript.TSLanguage
 import org.lukasj.idea.torquescript.lexer.TSLexerAdapter
 import org.lukasj.idea.torquescript.psi.TSFile
-import org.lukasj.idea.torquescript.psi.TorqueScriptTypes
-import org.lukasj.idea.torquescript.psi.TorqueScriptTypes.*
+import org.lukasj.idea.torquescript.psi.TSTypes
+import org.lukasj.idea.torquescript.psi.TSTypes.*
 
 class TSParserDefinition : ParserDefinition {
 
@@ -27,7 +27,7 @@ class TSParserDefinition : ParserDefinition {
 
     override fun getStringLiteralElements(): TokenSet = TokenSet.EMPTY
 
-    override fun createElement(node: ASTNode?): PsiElement = TorqueScriptTypes.Factory.createElement(node)
+    override fun createElement(node: ASTNode?): PsiElement = TSTypes.Factory.createElement(node)
 
     override fun createFile(viewProvider: FileViewProvider): PsiFile = TSFile(viewProvider)
 
@@ -39,7 +39,7 @@ class TSParserDefinition : ParserDefinition {
         val WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE)
 
         @JvmField
-        val COMMENTS = TokenSet.create(TorqueScriptTypes.LINE_COMMENT, TorqueScriptTypes.BLOCK_COMMENT, TorqueScriptTypes.DOC_COMMENT)
+        val COMMENTS = TokenSet.create(TSTypes.LINE_COMMENT, TSTypes.BLOCK_COMMENT, TSTypes.DOC_COMMENT)
 
         @JvmField
         val FILE = IFileElementType(TSLanguage.INSTANCE)
