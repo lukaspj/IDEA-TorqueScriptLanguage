@@ -20,10 +20,10 @@ torquescriptFile ::= declaration*
 // Declarations
 
 declaration ::=
-    statement
-    | function_declaration
+    function_declaration
     | package_declaration STMT_SEPARATOR
     | namespace_declaration
+    | statement {pin=1}
 
 package_declaration ::= PACKAGE IDENT LBRACE function_declaration* RBRACE {pin=1}
 
@@ -59,7 +59,7 @@ statement ::=
             | assert_statement STMT_SEPARATOR
             | singleton_statement STMT_SEPARATOR
             | datablock_statement STMT_SEPARATOR
-            | expression_statement STMT_SEPARATOR
+            | expression_statement STMT_SEPARATOR {pin=1}
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Logical statements
@@ -111,9 +111,7 @@ comment_statement ::= LINE_COMMENT
 
 assert_statement ::= ASSERT LEFT_PAREN expression (COMMA QUOTED_STRING)? RIGHT_PAREN {pin=1}
 
-expression_statement ::= expression {recoverWhile='recover_statement'}
-
-private recover_statement ::= !(STMT_SEPARATOR|DATABLOCK|FUNCTION|LBRACE|RBRACE|LEFT_PAREN|RIGHT_PAREN|LEFT_BRACK|RIGHT_BRACK)
+expression_statement ::= expression
 
 expression ::= assignment_expression
              | ternary_expression

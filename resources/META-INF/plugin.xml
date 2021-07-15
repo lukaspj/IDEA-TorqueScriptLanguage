@@ -25,6 +25,18 @@
                     <li>Object Instances</li>
                 </ul>
             </li>
+            <li>Basic Run Configuration</li>
+            <li>Code Completion for:
+                <ul>
+                    <li>Local Variables</li>
+                    <li>Global Variables</li>
+                    <li>Global Functions</li>
+                    <li>Namespaced Functions</li>
+                    <li>Methods</li>
+                    <li>Object Names</li>
+                    <li>Keywords</li>
+                </ul>
+            </li>
         </ul>
         ]]></description>
 
@@ -51,6 +63,11 @@
 
         <annotator implementationClass="org.lukasj.idea.torquescript.annotator.TSAnnotator"
                    language="TorqueScript" />
+
+        <configurationType implementation="org.lukasj.idea.torquescript.runner.TSRunConfigurationType" />
+        <typedHandler implementation="org.lukasj.idea.torquescript.completion.TSCompletionAutoPopupHandler" id="ts" />
+        <completion.contributor language="TorqueScript"
+                                implementationClass="org.lukasj.idea.torquescript.completion.TSCompletionContributor" />
     </extensions>
 
     <actions>

@@ -2,7 +2,14 @@
 
 ## [Unreleased]
 ### Added
-
+- Basic run configuration
+- Completion for
+  - Local Variables
+  - Global Variables
+  - Object names
+  - Functions
+  - Methods
+  - Keywords
 ### Changed
 
 ### Deprecated
