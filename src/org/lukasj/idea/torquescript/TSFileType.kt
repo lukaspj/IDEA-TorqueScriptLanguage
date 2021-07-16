@@ -1,6 +1,7 @@
 package org.lukasj.idea.torquescript
 
 import com.intellij.openapi.fileTypes.LanguageFileType
+import icons.TSIcons
 import javax.swing.Icon
 
 class TSFileType : LanguageFileType(TSLanguage.INSTANCE) {

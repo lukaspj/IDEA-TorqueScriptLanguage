@@ -4,7 +4,7 @@ import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
-import org.lukasj.idea.torquescript.TSIcons
+import icons.TSIcons
 import org.lukasj.idea.torquescript.editor.TSVarExpressionElementImpl
 
 class TSGlobalVarReference(element: TSVarExpressionElementImpl, textRange: TextRange) : PsiReferenceBase<PsiElement>(element, textRange),
