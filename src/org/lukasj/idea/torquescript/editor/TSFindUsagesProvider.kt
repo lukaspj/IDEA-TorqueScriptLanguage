@@ -6,15 +6,13 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
 import org.lukasj.idea.torquescript.lexer.TSLexerAdapter
 import org.lukasj.idea.torquescript.psi.*
-import org.lukasj.idea.torquescript.psi.impl.TSFunctionDeclarationImpl
-import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
-import org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl
+import org.lukasj.idea.torquescript.psi.impl.*
 
 class TSFindUsagesProvider : FindUsagesProvider {
     override fun getWordsScanner() =
         DefaultWordsScanner(
             TSLexerAdapter(),
-            TokenSet.create(TSTypes.IDENT,TSTypes.LOCALVAR, TSTypes.GLOBALVAR),
+            TokenSet.create(TSTypes.IDENT, TSTypes.THISVAR, TSTypes.LOCALVAR, TSTypes.GLOBALVAR),
             TokenSet.create(TSTypes.BLOCK_COMMENT, TSTypes.LINE_COMMENT, TSTypes.DOC_COMMENT),
             TokenSet.create(TSTypes.QUOTED_STRING, TSTypes.TAGGED_STRING, TSTypes.FLOAT, TSTypes.HEXDIGIT, TSTypes.INTEGER)
         )
@@ -28,7 +26,9 @@ class TSFindUsagesProvider : FindUsagesProvider {
         when (element) {
             is TSFunctionStatementElementImpl -> "Function"
             is TSFunctionDeclarationImpl -> "Function"
-            is TSVarExpression -> "Variable"
+            is TSFunctionCallExpressionElementImpl -> "Function"
+            is TSFunctionIdentifierElementImpl -> "Function"
+            is TSVarExpressionElementImpl -> "Variable"
             is TSObjectDeclaration -> "Object"
             else -> ""
         }
@@ -37,6 +37,8 @@ class TSFindUsagesProvider : FindUsagesProvider {
         when (element) {
             is TSFunctionStatementElementImpl -> element.name ?: ""
             is TSFunctionDeclarationImpl -> element.name ?: ""
+            is TSFunctionCallExpressionElementImpl -> element.name ?: ""
+            is TSFunctionIdentifierElementImpl -> element.name ?: ""
             is TSVarExpressionElementImpl -> element.name ?: ""
             is TSObjectDeclaration -> element.name ?: ""
             else -> ""

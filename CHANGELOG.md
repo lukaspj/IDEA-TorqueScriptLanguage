@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Parameters did not pass as variables, fixed with a change to the PSI
+- Find usages for functions
+### Security
+## [1.2.0]
+### Added
 - Basic run configuration
 - Completion for
   - Local Variables

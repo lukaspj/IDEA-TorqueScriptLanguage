@@ -8,6 +8,7 @@ import com.intellij.psi.PsiReference
 import com.intellij.psi.util.elementType
 import org.lukasj.idea.torquescript.psi.*
 import org.lukasj.idea.torquescript.reference.TSFunctionCallReference
+import org.lukasj.idea.torquescript.reference.TSFunctionReference
 import org.lukasj.idea.torquescript.reference.TSNamespaceReference
 import org.lukasj.idea.torquescript.reference.TSObjectReference
 
@@ -15,6 +16,10 @@ abstract class TSIdentExpressionElementImpl(node: ASTNode) : ASTWrapperPsiElemen
     override fun getReference(): PsiReference? {
         if(firstChild == null) {
             throw NotImplementedError("The element '${firstChild.text}' with type ${firstChild.elementType} is not handled")
+        }
+
+        if (parent.elementType == TSTypes.CALL_EXPRESSION) {
+            return null
         }
 
         if (firstChild != lastChild) {
@@ -34,7 +39,7 @@ abstract class TSIdentExpressionElementImpl(node: ASTNode) : ASTWrapperPsiElemen
         if (firstChild != lastChild) {
             return arrayOf(
                 TSObjectReference(this, TextRange(0, firstChild.textLength)),
-                TSObjectReference(this, TextRange(firstChild.textLength+2, firstChild.textLength+2+lastChild.textLength))
+                TSFunctionReference(this, TextRange(firstChild.textLength+2, firstChild.textLength+2+lastChild.textLength))
             )
         }
         val ref = reference

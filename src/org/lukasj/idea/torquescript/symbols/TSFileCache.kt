@@ -6,7 +6,6 @@ import org.lukasj.idea.torquescript.psi.TSAssignmentExpression
 import org.lukasj.idea.torquescript.psi.TSFile
 import org.lukasj.idea.torquescript.psi.TSObjectDeclaration
 import org.lukasj.idea.torquescript.psi.TSTypes
-import org.lukasj.idea.torquescript.psi.impl.TSAssignmentExpressionImpl
 import org.lukasj.idea.torquescript.psi.impl.TSDeclarationImpl
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
 import org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl
@@ -67,7 +66,7 @@ class TSFileCache(private val file: TSFile) {
                     CachedValueProvider.Result.create(
                         TSFileCacheGenerator.getFunctions(file)
                             .filter { it.name != null }
-                            .associateBy { it.name!! },
+                            .associateBy { it.getFunctionIdentifier()!!.text },
                         dependencies
                     )
                 },

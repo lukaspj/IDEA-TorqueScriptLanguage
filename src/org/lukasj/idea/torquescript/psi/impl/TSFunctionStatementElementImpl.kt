@@ -8,6 +8,7 @@ import com.intellij.psi.PsiReference
 import com.intellij.psi.util.elementType
 import com.intellij.psi.util.siblings
 import org.lukasj.idea.torquescript.psi.*
+import org.lukasj.idea.torquescript.reference.TSLocalVarReference
 import org.lukasj.idea.torquescript.reference.TSObjectReference
 
 abstract class TSFunctionStatementElementImpl(node: ASTNode) : ASTWrapperPsiElement(node),
@@ -69,25 +70,5 @@ abstract class TSFunctionStatementElementImpl(node: ASTNode) : ASTWrapperPsiElem
     }
 
     override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: 0
-
-
-    override fun getReference(): PsiReference? {
-        if (getFunctionIdentifier() == null) {
-            return null
-        }
-
-        if (getFunctionType() != TSFunctionType.GLOBAL) {
-            val identifier = getFunctionIdentifier()?.firstChild!!
-            return TSObjectReference(identifier, TextRange(firstChild.textLength + firstChild.nextSibling.textLength, firstChild.textLength + firstChild.nextSibling.textLength + identifier.textLength))
-        }
-        return super.getReference()
-    }
-
-    override fun getReferences(): Array<PsiReference> =
-        if (reference != null) {
-            arrayOf(reference!!)
-        } else {
-            super.getReferences()
-        }
 }
 

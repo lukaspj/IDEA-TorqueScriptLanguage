@@ -33,11 +33,21 @@ function_declaration ::= FUNCTION function_identifier LEFT_PAREN params RIGHT_PA
     implements="org.lukasj.idea.torquescript.psi.TSNamedElement"
 }
 
-function_identifier ::= IDENT (COLON_COLON IDENT)?
+function_identifier ::= IDENT (COLON_COLON IDENT)?{
+  pin=1
+  mixin="org.lukasj.idea.torquescript.psi.impl.TSFunctionIdentifierElementImpl"
+}
 
 namespace_declaration ::= NAMESPACE IDENT LBRACE function_declaration* RBRACE {pin=1}
 
-params ::= (THISVAR | LOCALVAR)? (COMMA LOCALVAR)*
+params ::= ((this_var_expression | local_var_expression) (COMMA local_var_expression)*)?
+
+this_var_expression ::= THISVAR {
+    mixin="org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl"
+}
+local_var_expression ::= LOCALVAR {
+    mixin="org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl"
+}
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Statements

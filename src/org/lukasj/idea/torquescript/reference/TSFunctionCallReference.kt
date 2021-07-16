@@ -11,7 +11,7 @@ class TSFunctionCallReference(call: TSFunctionCallExpressionElementImpl, rangeIn
     PsiReferenceBase<PsiElement>(call, rangeInElement),
     PsiPolyVariantReference {
 
-    private val type = call.getFunctionType()
+    private val type = call.functionType
     private val name = call.name!!
     private val namespace =
         if (type != TSFunctionType.GLOBAL)

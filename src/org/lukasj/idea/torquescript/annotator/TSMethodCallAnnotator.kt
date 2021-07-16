@@ -26,7 +26,7 @@ class TSMethodCallAnnotator : TSAnnotator() {
                 }
             }
         } else if (element is TSFunctionCallExpressionElementImpl) {
-            when (element.getFunctionType()) {
+            when (element.functionType) {
                 TSFunctionType.GLOBAL_NS -> {
                     val namespace = element.getExpression().firstChild
                     val functionName = element.getExpression().lastChild

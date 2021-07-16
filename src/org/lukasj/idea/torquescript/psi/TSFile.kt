@@ -8,6 +8,7 @@ import com.intellij.psi.impl.source.PsiFileImpl
 import com.intellij.psi.util.PsiTreeUtil
 import org.lukasj.idea.torquescript.TSFileType
 import org.lukasj.idea.torquescript.TSLanguage
+import org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl
 import org.lukasj.idea.torquescript.symbols.TSFileCache
 
 class TSFile(viewProvider:  FileViewProvider) : PsiFileBase(viewProvider, TSLanguage.INSTANCE) {
@@ -43,6 +44,6 @@ class TSFile(viewProvider:  FileViewProvider) : PsiFileBase(viewProvider, TSLang
         PsiTreeUtil.getChildrenOfType(this, TSDeclaration::class.java)
         ?.filter { it.firstChild is TSStatement }
         ?.flatMap {
-            PsiTreeUtil.findChildrenOfType(it, TSVarExpression::class.java)
+            PsiTreeUtil.findChildrenOfAnyType(it, TSVarExpressionElementImpl::class.java)
         }
 }
