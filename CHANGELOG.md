@@ -10,6 +10,18 @@
 ### Removed
 
 ### Fixed
+
+### Security
+## [1.2.1]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
 - Parameters did not pass as variables, fixed with a change to the PSI
 - Find usages for functions
 ### Security
