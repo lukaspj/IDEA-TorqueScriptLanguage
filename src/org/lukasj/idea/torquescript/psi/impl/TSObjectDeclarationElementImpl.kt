@@ -20,6 +20,18 @@ abstract class TSObjectDeclarationElementImpl(node: ASTNode) : ASTWrapperPsiElem
         nameIdentifier?.text
 
     override fun setName(name: String): PsiElement {
-        TODO("Not yet implemented")
+
+        val nameIdentifier = getObjectName().firstChild
+        val nameNode: ASTNode? = nameIdentifier.firstChild.node
+
+        if (nameNode != null) {
+            val stmt: TSIdentExpression = TSElementFactory.createIdent(project, name)
+            val newNameNode: ASTNode? = stmt.node.findChildByType(TSTypes.IDENT)
+            if (newNameNode != null) {
+                nameIdentifier.node.replaceChild(nameNode, newNameNode)
+            }
+        }
+
+        return this
     }
 }

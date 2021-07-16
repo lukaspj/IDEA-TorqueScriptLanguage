@@ -5,7 +5,7 @@
 
     <description><![CDATA[
         <p>
-            This is a basic implementation of TorqueScript language support. <br />
+            This is a basic implementation of TorqueScript language support. <br/>
             More advanced features are planned, but at the moment this is mostly a syntax highlighter.
         </p>
 
@@ -22,7 +22,6 @@
                 <ul>
                     <li>Global Variables</li>
                     <li>Functions</li>
-                    <li>Object Instances</li>
                 </ul>
             </li>
             <li>Basic Run Configuration</li>
@@ -35,6 +34,22 @@
                     <li>Methods</li>
                     <li>Object Names</li>
                     <li>Keywords</li>
+                </ul>
+            </li>
+            <li>Brace Matching</li>
+            <li>Commenter</li>
+            <li>Find usages for:
+                <ul>
+                    <li>Global Variables</li>
+                    <li>Global Functions</li>
+                    <li>Namespaced Functions</li>
+                    <li>Object Names</li>
+                </ul>
+            </li>
+            <li>Basic Code Folding</li>
+            <li>Navigate to:
+                <ul>
+                    <li>Functions</li>
                 </ul>
             </li>
         </ul>
@@ -57,17 +72,27 @@
 
         <lang.syntaxHighlighterFactory language="TorqueScript"
                                        implementationClass="org.lukasj.idea.torquescript.TSSyntaxHighlighterFactory"/>
+        <lang.findUsagesProvider language="TorqueScript"
+                                 implementationClass="org.lukasj.idea.torquescript.editor.TSFindUsagesProvider"/>
+
+        <lang.braceMatcher language="TorqueScript"
+                           implementationClass="org.lukasj.idea.torquescript.editor.TSBraceMatcher"/>
+
+        <gotoSymbolContributor implementation="org.lukasj.idea.torquescript.editor.TSChooseByNameContributor"/>
+        <lang.commenter language="TorqueScript"
+                        implementationClass="org.lukasj.idea.torquescript.editor.TSCommenter"/>
+        <lang.foldingBuilder language="TorqueScript"
+                             implementationClass="org.lukasj.idea.torquescript.editor.TSFoldingBuilder"/>
+
         <colorSettingsPage implementation="org.lukasj.idea.torquescript.editor.TSColorSettingsPage"/>
-        <completion.contributor language="TorqueScript"
-                                implementationClass="org.lukasj.idea.torquescript.editor.TSCompletionContributor"/>
 
         <annotator implementationClass="org.lukasj.idea.torquescript.annotator.TSAnnotator"
-                   language="TorqueScript" />
+                   language="TorqueScript"/>
 
-        <configurationType implementation="org.lukasj.idea.torquescript.runner.TSRunConfigurationType" />
-        <typedHandler implementation="org.lukasj.idea.torquescript.completion.TSCompletionAutoPopupHandler" id="ts" />
+        <configurationType implementation="org.lukasj.idea.torquescript.runner.TSRunConfigurationType"/>
+        <typedHandler implementation="org.lukasj.idea.torquescript.completion.TSCompletionAutoPopupHandler" id="ts"/>
         <completion.contributor language="TorqueScript"
-                                implementationClass="org.lukasj.idea.torquescript.completion.TSCompletionContributor" />
+                                implementationClass="org.lukasj.idea.torquescript.completion.TSCompletionContributor"/>
     </extensions>
 
     <actions>

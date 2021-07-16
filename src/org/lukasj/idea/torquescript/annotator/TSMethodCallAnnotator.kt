@@ -19,7 +19,7 @@ class TSMethodCallAnnotator : TSAnnotator() {
             if (lastElement.prevSibling?.prevSibling != null) {
                 val namespace = identifier.firstChild
 
-                if (ReferenceUtil.findObject(element, element.project, element.text).isNotEmpty()) {
+                if (ReferenceUtil.findObject(element.project, element.text).isNotEmpty()) {
                     createSuccessAnnotation(namespace, holder, TSSyntaxHighlightingColors.OBJECT_NAME)
                 } else {
                     createSuccessAnnotation(namespace, holder, TSSyntaxHighlightingColors.CLASS_NAME)
@@ -31,7 +31,7 @@ class TSMethodCallAnnotator : TSAnnotator() {
                     val namespace = element.getExpression().firstChild
                     val functionName = element.getExpression().lastChild
 
-                    if (ReferenceUtil.findObject(element, element.project, namespace.text).isNotEmpty()) {
+                    if (ReferenceUtil.findObject(element.project, namespace.text).isNotEmpty()) {
                         createSuccessAnnotation(namespace, holder, TSSyntaxHighlightingColors.OBJECT_NAME)
                     } else {
                         createSuccessAnnotation(namespace, holder, TSSyntaxHighlightingColors.CLASS_NAME)

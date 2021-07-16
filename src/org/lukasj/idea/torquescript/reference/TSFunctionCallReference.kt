@@ -2,10 +2,7 @@ package org.lukasj.idea.torquescript.reference
 
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiElementResolveResult
-import com.intellij.psi.PsiPolyVariantReference
-import com.intellij.psi.PsiReferenceBase
+import com.intellij.psi.*
 import org.lukasj.idea.torquescript.TSIcons
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionCallExpressionElementImpl
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionType
@@ -24,7 +21,7 @@ class TSFunctionCallReference(call: TSFunctionCallExpressionElementImpl, rangeIn
     private val project = call.project
 
     override fun multiResolve(incompleteCode: Boolean): Array<PsiElementResolveResult> =
-        ReferenceUtil.findFunction(myElement, project, name)
+        ReferenceUtil.findFunction(project, name)
             // You can access methods as namespace, but if it's a GLOBAL then the target function type must also be GLOBAL
             .filter { (it.getFunctionType() == TSFunctionType.GLOBAL) == (type == TSFunctionType.GLOBAL) }
             .filter { type == TSFunctionType.GLOBAL || it.getNamespace() == namespace  }
@@ -37,7 +34,7 @@ class TSFunctionCallReference(call: TSFunctionCallExpressionElementImpl, rangeIn
     }
 
     override fun getVariants(): Array<Any> =
-        ReferenceUtil.getFunctions(myElement, project).filter {
+        ReferenceUtil.getFunctions(project).filter {
             it.name != null && it.name!!.isNotEmpty()
         }.map { function ->
             LookupElementBuilder
@@ -48,5 +45,11 @@ class TSFunctionCallReference(call: TSFunctionCallExpressionElementImpl, rangeIn
                 .withCaseSensitivity(false)
         }.toTypedArray()
 
-
+    override fun handleElementRename(newElementName: String): PsiElement {
+        val elem = element
+        if (elem is PsiNameIdentifierOwner) {
+            return elem.setName(newElementName)
+        }
+        return element
+    }
 }

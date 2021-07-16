@@ -16,4 +16,16 @@ object TSElementFactory {
             "function ${name}() {}"
         ).firstChild as TSFunctionDeclaration
     }
+
+    fun createDatablockStatement(project: Project, name: String): TSDatablockStatement {
+        return createFile(
+            project,
+            "datablock ${name}() {};"
+        ).firstChild.firstChild.firstChild as TSDatablockStatement
+    }
+
+    fun createIdent(project: Project, name: String): TSIdentExpression = createFile(
+        project,
+        "${name};"
+    ).firstChild!!.firstChild!!.firstChild!!.firstChild as TSIdentExpression
 }

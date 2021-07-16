@@ -10,6 +10,15 @@
   - Functions
   - Methods
   - Keywords
+- Brace Matchine
+- Commenter
+- Find usages for
+  - Global Variables
+  - Global Functions
+  - Namespaces Functions
+  - Object Names
+- Basic code folding for blocks
+- Navigate to function
 ### Changed
 
 ### Deprecated

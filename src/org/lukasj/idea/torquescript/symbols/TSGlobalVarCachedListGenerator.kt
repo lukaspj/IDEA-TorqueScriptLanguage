@@ -15,34 +15,17 @@ import org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl
 
 class TSGlobalVarCachedListGenerator : TSCachedListGenerator<TSVarExpressionElementImpl>() {
     override fun generate(project: Project): Set<TSVarExpressionElementImpl> {
-        val items: MutableSet<TSVarExpressionElementImpl> = HashSet()
         //Search every file in the project
         val virtualFiles = FileTypeIndex.getFiles(
             TSFileType.INSTANCE, GlobalSearchScope.allScope(
                 project
             )
         )
-        for (virtualFile in virtualFiles) {
-            val tsFile = PsiManager.getInstance(project).findFile(virtualFile!!)
-            if (tsFile != null && tsFile is TSFile) {
-                val assignments = PsiTreeUtil.findChildrenOfType(tsFile, TSAssignmentExpression::class.java)
-                for (assignment in assignments) {
-                    if (assignment.accessorChain != null) {
-                        continue
-                    }
 
-                    val first = assignment.firstChild
-                    if (first !is TSVarExpressionElementImpl
-                        || first.firstChild.elementType != TSTypes.GLOBALVAR
-                    ) {
-                        continue
-                    }
-
-                    items.add(first)
-                }
-            }
-            ProgressManager.progress("Loading symbols")
-        }
-        return items
+        return virtualFiles
+            .map { PsiManager.getInstance(project).findFile(it) }
+            .filterIsInstance<TSFile>()
+            .flatMap(TSFile::getGlobals)
+            .toSet()
     }
 }

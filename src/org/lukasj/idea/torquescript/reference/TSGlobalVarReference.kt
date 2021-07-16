@@ -1,5 +1,6 @@
 package org.lukasj.idea.torquescript.reference
 
+import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
@@ -10,10 +11,9 @@ class TSGlobalVarReference(element: TSVarExpressionElementImpl, textRange: TextR
     PsiPolyVariantReference {
 
     private val project = element.project
-    private val name = element.name
 
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> =
-        ReferenceUtil.findGlobal(myElement, project, element.text)
+        ReferenceUtil.findGlobal(project, element.text)
             .map { PsiElementResolveResult(it) }
             .toTypedArray()
 
@@ -22,8 +22,8 @@ class TSGlobalVarReference(element: TSVarExpressionElementImpl, textRange: TextR
         return if (resolveResults.size == 1) resolveResults[0].element else null
     }
 
-    override fun getVariants(): Array<Any> {
-        val globals = ReferenceUtil.getGlobals(myElement, project)
+    override fun getVariants(): Array<LookupElement> {
+        val globals = ReferenceUtil.getGlobals(project)
         return globals.filter {
             it.name != null && it.name!!.isNotEmpty()
         }.map { global ->

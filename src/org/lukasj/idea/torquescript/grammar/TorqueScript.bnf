@@ -27,7 +27,7 @@ declaration ::=
 
 package_declaration ::= PACKAGE IDENT LBRACE function_declaration* RBRACE {pin=1}
 
-function_declaration ::= FUNCTION function_identifier LEFT_PAREN params RIGHT_PAREN block_statement {
+function_declaration ::= FUNCTION function_identifier LEFT_PAREN params RIGHT_PAREN statement_block {
     pin=1
     mixin="org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl"
     implements="org.lukasj.idea.torquescript.psi.TSNamedElement"
@@ -44,7 +44,6 @@ params ::= (THISVAR | LOCALVAR)? (COMMA LOCALVAR)*
 
 statement ::=
             comment_statement
-            | block_statement
             | if_statement
             | switch_statement
             | str_switch_statement
@@ -64,22 +63,23 @@ statement ::=
 // ---------------------------------------------------------------------------------------------------------------------
 // Logical statements
 
-block_statement ::= LBRACE statement* RBRACE {pin=1}
-if_statement ::= IF LEFT_PAREN expression RIGHT_PAREN statement else_statement? {pin=1}
-else_statement ::= ELSE statement
+if_statement ::= IF LEFT_PAREN expression RIGHT_PAREN (statement_block | statement) else_statement? {pin=1}
+else_statement ::= ELSE (statement_block | statement)
 switch_statement ::= SWITCH LEFT_PAREN expression RIGHT_PAREN LBRACE (comment_statement | case_block)+ default_block? RBRACE {pin=1}
 str_switch_statement ::= STR_SWITCH LEFT_PAREN expression RIGHT_PAREN LBRACE (comment_statement | case_block)+ default_block? RBRACE {pin=1}
 case_block ::= CASE case_expression COLON statement* {pin=1}
 case_expression ::= expression (CASEOR expression)*
 default_block ::= DEFAULT COLON statement* {pin=1}
-for_statement ::= FOR LEFT_PAREN expression? STMT_SEPARATOR expression? STMT_SEPARATOR expression? RIGHT_PAREN statement {pin=1}
-foreach_statement ::= FOREACH LEFT_PAREN expression IN expression RIGHT_PAREN statement {pin=1}
-str_foreach_statement ::= STR_FOREACH LEFT_PAREN expression IN expression RIGHT_PAREN statement {pin=1}
-do_while_statement ::= DO statement WHILE LEFT_PAREN expression RIGHT_PAREN {pin=1}
-while_statement ::= WHILE LEFT_PAREN expression RIGHT_PAREN statement {pin=1}
+for_statement ::= FOR LEFT_PAREN expression? STMT_SEPARATOR expression? STMT_SEPARATOR expression? RIGHT_PAREN (statement_block | statement) {pin=1}
+foreach_statement ::= FOREACH LEFT_PAREN expression IN expression RIGHT_PAREN (statement_block | statement) {pin=1}
+str_foreach_statement ::= STR_FOREACH LEFT_PAREN expression IN expression RIGHT_PAREN (statement_block | statement) {pin=1}
+do_while_statement ::= DO (statement_block | statement) WHILE LEFT_PAREN expression RIGHT_PAREN {pin=1}
+while_statement ::= WHILE LEFT_PAREN expression RIGHT_PAREN (statement_block | statement) {pin=1}
 break_statement ::= BREAK
 continue_statement ::= CONTINUE
 return_statement ::= RETURN expression? {pin=1}
+
+statement_block ::= LBRACE statement* RBRACE {pin=1}
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Type statements

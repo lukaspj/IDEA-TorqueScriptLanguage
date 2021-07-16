@@ -11,7 +11,7 @@ class TSReference(element: PsiElement, textRange: TextRange) : PsiReferenceBase<
 
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
         val project = myElement.project
-        val functions = ReferenceUtil.getFunctions(myElement, project)
+        val functions = ReferenceUtil.getFunctions(project)
 
         return functions.map { PsiElementResolveResult(it) }
             .toTypedArray()
@@ -24,7 +24,7 @@ class TSReference(element: PsiElement, textRange: TextRange) : PsiReferenceBase<
 
     override fun getVariants(): Array<Any> {
         val project = myElement.project
-        val properties = ReferenceUtil.getFunctions(myElement, project)
+        val properties = ReferenceUtil.getFunctions(project)
         return properties.filter {
             it.name != null && it.name!!.isNotEmpty()
         }.map { property ->

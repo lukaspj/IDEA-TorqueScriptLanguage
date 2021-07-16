@@ -2,13 +2,13 @@ package org.lukasj.idea.torquescript.psi.impl
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
+import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiReference
 import com.intellij.psi.util.elementType
 import com.intellij.psi.util.siblings
-import org.lukasj.idea.torquescript.psi.TSFunctionIdentifier
-import org.lukasj.idea.torquescript.psi.TSNamedElement
-import org.lukasj.idea.torquescript.psi.TSParams
-import org.lukasj.idea.torquescript.psi.TSTypes
+import org.lukasj.idea.torquescript.psi.*
+import org.lukasj.idea.torquescript.reference.TSObjectReference
 
 abstract class TSFunctionStatementElementImpl(node: ASTNode) : ASTWrapperPsiElement(node),
     TSNamedElement {
@@ -29,7 +29,8 @@ abstract class TSFunctionStatementElementImpl(node: ASTNode) : ASTWrapperPsiElem
         nameIdentifier?.text
 
     override fun setName(name: String): PsiElement {
-        TODO("Not yet implemented")
+        nameIdentifier?.replace(TSElementFactory.createIdent(project, name))
+        return this
     }
 
     fun getFunctionType(): TSFunctionType {
@@ -56,10 +57,7 @@ abstract class TSFunctionStatementElementImpl(node: ASTNode) : ASTWrapperPsiElem
     }
 
     fun getParameters(): List<PsiElement> {
-        val child = getParams().firstChild
-        if (child == null) {
-            return listOf()
-        }
+        val child = getParams().firstChild ?: return listOf()
         if (child.nextSibling == null) {
             return listOf(child)
         }
@@ -70,7 +68,26 @@ abstract class TSFunctionStatementElementImpl(node: ASTNode) : ASTWrapperPsiElem
             }
     }
 
-    override fun getTextOffset(): Int
-            = nameIdentifier?.textOffset ?: 0
+    override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: 0
+
+
+    override fun getReference(): PsiReference? {
+        if (getFunctionIdentifier() == null) {
+            return null
+        }
+
+        if (getFunctionType() != TSFunctionType.GLOBAL) {
+            val identifier = getFunctionIdentifier()?.firstChild!!
+            return TSObjectReference(identifier, TextRange(firstChild.textLength + firstChild.nextSibling.textLength, firstChild.textLength + firstChild.nextSibling.textLength + identifier.textLength))
+        }
+        return super.getReference()
+    }
+
+    override fun getReferences(): Array<PsiReference> =
+        if (reference != null) {
+            arrayOf(reference!!)
+        } else {
+            super.getReferences()
+        }
 }
 

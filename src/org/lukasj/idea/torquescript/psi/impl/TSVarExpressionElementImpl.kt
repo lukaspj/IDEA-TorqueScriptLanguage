@@ -11,13 +11,14 @@ import com.intellij.util.IncorrectOperationException
 import org.lukasj.idea.torquescript.psi.TSNamedElement
 import org.lukasj.idea.torquescript.psi.TSTypes
 import org.lukasj.idea.torquescript.reference.TSGlobalVarReference
+import org.lukasj.idea.torquescript.reference.TSLocalVarReference
 
 abstract class TSVarExpressionElementImpl(node: ASTNode) : ASTWrapperPsiElement(node), TSNamedElement {
     override fun getReference(): PsiReference? =
         when (firstChild.elementType) {
             TSTypes.GLOBALVAR -> TSGlobalVarReference(this, TextRange(0, firstChild.textLength))
-            TSTypes.LOCALVAR -> null
-            TSTypes.THISVAR -> null
+            TSTypes.LOCALVAR -> TSLocalVarReference(this, TextRange(0, firstChild.textLength))
+            TSTypes.THISVAR -> TSLocalVarReference(this, TextRange(0, firstChild.textLength))
             else -> throw NotImplementedError("The element '${firstChild.text}' with type ${firstChild.elementType} is not handled")
         }
 

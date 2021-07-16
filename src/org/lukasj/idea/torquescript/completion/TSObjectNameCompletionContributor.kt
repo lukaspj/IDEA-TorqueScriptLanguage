@@ -4,6 +4,7 @@ import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.util.PlatformIcons
 import com.intellij.util.ProcessingContext
 import org.lukasj.idea.torquescript.reference.ReferenceUtil
 
@@ -12,16 +13,17 @@ class TSObjectNameCompletionContributor : CompletionProvider<CompletionParameter
         parameters: CompletionParameters,
         context: ProcessingContext,
         result: CompletionResultSet
-    ) {
-        ReferenceUtil.getObjects(parameters.position, parameters.position.project)
-            .forEach { obj ->
-                result.addElement(
-                    LookupElementBuilder.create(obj)
-                        .withPresentableText(obj.name!!)
-                        .withCaseSensitivity(false)
-                        .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
-                )
-            }
-    }
+    ) = ReferenceUtil.getObjects(parameters.position.project)
+        .filter { it.name != null }
+        .forEach { obj ->
+            result.addElement(
+                LookupElementBuilder.create(obj)
+                    .withIcon(PlatformIcons.CLASS_INITIALIZER)
+                    .withPresentableText(obj.name!!)
+                    .withCaseSensitivity(false)
+                    .withTypeText(obj.containingFile.name)
+                    .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
+            )
+        }
 
 }

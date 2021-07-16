@@ -27,7 +27,7 @@ class TSParserDefinition : ParserDefinition {
 
     override fun getStringLiteralElements(): TokenSet = TokenSet.EMPTY
 
-    override fun createElement(node: ASTNode?): PsiElement = TSTypes.Factory.createElement(node)
+    override fun createElement(node: ASTNode?): PsiElement = Factory.createElement(node)
 
     override fun createFile(viewProvider: FileViewProvider): PsiFile = TSFile(viewProvider)
 
@@ -39,7 +39,7 @@ class TSParserDefinition : ParserDefinition {
         val WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE)
 
         @JvmField
-        val COMMENTS = TokenSet.create(TSTypes.LINE_COMMENT, TSTypes.BLOCK_COMMENT, TSTypes.DOC_COMMENT)
+        val COMMENTS = TokenSet.create(LINE_COMMENT, BLOCK_COMMENT, DOC_COMMENT)
 
         @JvmField
         val FILE = IFileElementType(TSLanguage.INSTANCE)

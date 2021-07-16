@@ -12,7 +12,6 @@ import org.lukasj.idea.torquescript.psi.TSObjectDeclaration
 
 class TSObjectCachedListGenerator : TSCachedListGenerator<TSObjectDeclaration>() {
     override fun generate(project: Project): Collection<TSObjectDeclaration> {
-        val items: MutableSet<TSObjectDeclaration> = HashSet()
         //Search every file in the project
         val virtualFiles = FileTypeIndex.getFiles(
             TSFileType.INSTANCE, GlobalSearchScope.allScope(
@@ -20,13 +19,10 @@ class TSObjectCachedListGenerator : TSCachedListGenerator<TSObjectDeclaration>()
             )
         )
 
-        for (virtualFile in virtualFiles) {
-            val tsFile = PsiManager.getInstance(project).findFile(virtualFile!!)
-            if (tsFile != null && tsFile is TSFile) {
-                items.addAll(PsiTreeUtil.findChildrenOfType(tsFile, TSObjectDeclaration::class.java))
-            }
-            ProgressManager.progress("Loading symbols")
-        }
-        return items
+        return virtualFiles
+            .map { PsiManager.getInstance(project).findFile(it) }
+            .filterIsInstance<TSFile>()
+            .flatMap(TSFile::getObjects)
+            .toSet()
     }
 }

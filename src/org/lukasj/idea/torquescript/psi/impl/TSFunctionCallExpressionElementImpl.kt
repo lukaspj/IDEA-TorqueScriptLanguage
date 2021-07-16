@@ -19,7 +19,11 @@ abstract class TSFunctionCallExpressionElementImpl(node: ASTNode) : ASTWrapperPs
     override fun getNameIdentifier(): PsiElement? =
         when {
             getFunctionType() == TSFunctionType.METHOD -> {
-                null
+                if (getExpression() is TSIdentExpression) {
+                    getExpression()
+                } else {
+                    null
+                }
             }
             getFunctionType() == TSFunctionType.GLOBAL -> {
                 firstChild
@@ -34,7 +38,12 @@ abstract class TSFunctionCallExpressionElementImpl(node: ASTNode) : ASTWrapperPs
         nameIdentifier?.text
 
     override fun setName(name: String): PsiElement {
-        TODO("Not yet implemented")
+        var identifier = nameIdentifier ?: return this
+        if (nameIdentifier is TSIdentExpression) {
+            identifier = nameIdentifier?.lastChild!!
+        }
+        identifier.replace(TSElementFactory.createIdent(project, name))
+        return this
     }
 
     fun getFunctionType(): TSFunctionType {
@@ -53,18 +62,17 @@ abstract class TSFunctionCallExpressionElementImpl(node: ASTNode) : ASTWrapperPs
     }
 
     override fun getReference(): PsiReference? {
-        val identifier = nameIdentifier
+        val identifier = nameIdentifier ?: return null
         return when(getFunctionType()) {
             TSFunctionType.GLOBAL -> {
-                TSFunctionCallReference(this, TextRange(0, identifier!!.textLength))
+                TSFunctionCallReference(this, TextRange(0, identifier.textLength))
             }
             TSFunctionType.GLOBAL_NS -> {
-                TSFunctionCallReference(this, TextRange(0, identifier!!.textLength))
+                TSFunctionCallReference(this, TextRange(0, identifier.textLength))
             }
             TSFunctionType.METHOD -> {
-                TSFunctionCallReference(this, TextRange(0, identifier!!.textLength))
+                TSFunctionCallReference(this, TextRange(0, identifier.textLength))
             }
-            else -> null
         }
     }
 }

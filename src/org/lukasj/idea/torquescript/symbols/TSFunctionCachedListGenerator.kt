@@ -24,23 +24,7 @@ class TSFunctionCachedListGenerator : TSCachedListGenerator<TSFunctionStatementE
         return virtualFiles
             .map { PsiManager.getInstance(project).findFile(it) }
             .filterIsInstance<TSFile>()
-            .flatMap { tsFile ->
-                val functions =
-                    PsiTreeUtil.getChildrenOfType(tsFile, TSDeclarationImpl::class.java)
-                        ?.filter { it.functionDeclaration != null }
-                        ?.map { it.functionDeclaration as TSFunctionStatementElementImpl }
-                        ?: setOf()
-                ProgressManager.progress("Loading symbols")
-
-                PsiTreeUtil.getChildrenOfType(tsFile, TSDeclarationImpl::class.java)
-                    ?.filter { it.packageDeclaration != null }
-                    ?.flatMap { it.packageDeclaration?.functionDeclarationList!! }
-                    ?.map { it as TSFunctionStatementElementImpl }
-                    ?.let {
-                        functions.plus(it)
-                    }
-                    ?: functions
-            }
+            .flatMap(TSFile::getFunctions)
             .toSet()
     }
 }
