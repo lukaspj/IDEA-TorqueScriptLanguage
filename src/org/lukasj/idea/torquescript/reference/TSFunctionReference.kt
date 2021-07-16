@@ -3,8 +3,7 @@ package org.lukasj.idea.torquescript.reference
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
-import org.lukasj.idea.torquescript.TSIcons
-import org.lukasj.idea.torquescript.psi.impl.TSFunctionType
+import icons.TSIcons
 
 class TSFunctionReference(element: PsiNamedElement, textRange: TextRange) : PsiReferenceBase<PsiNamedElement>(element, textRange),
     PsiPolyVariantReference {

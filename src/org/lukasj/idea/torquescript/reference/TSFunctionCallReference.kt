@@ -3,7 +3,7 @@ package org.lukasj.idea.torquescript.reference
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
-import org.lukasj.idea.torquescript.TSIcons
+import icons.TSIcons
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionCallExpressionElementImpl
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionType
 

@@ -1,4 +1,4 @@
-package org.lukasj.idea.torquescript
+package icons
 
 import com.intellij.openapi.util.IconLoader
 
