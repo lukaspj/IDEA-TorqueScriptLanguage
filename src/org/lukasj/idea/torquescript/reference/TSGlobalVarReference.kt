@@ -5,7 +5,7 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 import org.lukasj.idea.torquescript.TSIcons
-import org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl
+import org.lukasj.idea.torquescript.editor.TSVarExpressionElementImpl
 
 class TSGlobalVarReference(element: TSVarExpressionElementImpl, textRange: TextRange) : PsiReferenceBase<PsiElement>(element, textRange),
     PsiPolyVariantReference {
@@ -33,5 +33,13 @@ class TSGlobalVarReference(element: TSVarExpressionElementImpl, textRange: TextR
                 .withTypeText(global.containingFile.name)
                 .withCaseSensitivity(false)
         }.toTypedArray()
+    }
+
+    override fun handleElementRename(newElementName: String): PsiElement {
+        val elem = element
+        if (elem is PsiNameIdentifierOwner) {
+            return elem.setName(newElementName)
+        }
+        return element
     }
 }

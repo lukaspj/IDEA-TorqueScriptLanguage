@@ -8,7 +8,7 @@ import org.lukasj.idea.torquescript.psi.TSObjectDeclaration
 import org.lukasj.idea.torquescript.psi.TSTypes
 import org.lukasj.idea.torquescript.psi.impl.TSDeclarationImpl
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
-import org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl
+import org.lukasj.idea.torquescript.editor.TSVarExpressionElementImpl
 
 class TSModificationTracker : ModificationTracker {
     var count = 0L

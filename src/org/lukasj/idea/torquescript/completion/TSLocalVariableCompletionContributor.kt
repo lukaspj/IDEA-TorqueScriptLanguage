@@ -12,7 +12,7 @@ import com.intellij.util.ProcessingContext
 import org.lukasj.idea.torquescript.psi.TSFile
 import org.lukasj.idea.torquescript.psi.TSTypes
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
-import org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl
+import org.lukasj.idea.torquescript.editor.TSVarExpressionElementImpl
 
 
 class TSLocalVariableCompletionContributor : CompletionProvider<CompletionParameters>() {

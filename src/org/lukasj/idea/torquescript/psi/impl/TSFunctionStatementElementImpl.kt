@@ -2,14 +2,12 @@ package org.lukasj.idea.torquescript.psi.impl
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
-import com.intellij.openapi.util.TextRange
+import com.intellij.navigation.ItemPresentation
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiReference
 import com.intellij.psi.util.elementType
 import com.intellij.psi.util.siblings
+import com.intellij.util.PlatformIcons
 import org.lukasj.idea.torquescript.psi.*
-import org.lukasj.idea.torquescript.reference.TSLocalVarReference
-import org.lukasj.idea.torquescript.reference.TSObjectReference
 
 abstract class TSFunctionStatementElementImpl(node: ASTNode) : ASTWrapperPsiElement(node),
     TSNamedElement {
@@ -30,7 +28,7 @@ abstract class TSFunctionStatementElementImpl(node: ASTNode) : ASTWrapperPsiElem
         nameIdentifier?.text
 
     override fun setName(name: String): PsiElement {
-        nameIdentifier?.replace(TSElementFactory.createIdent(project, name))
+        nameIdentifier?.replace(TSElementFactory.createSimple<TSIdentExpressionImpl>(project, name))
         return this
     }
 
@@ -70,5 +68,21 @@ abstract class TSFunctionStatementElementImpl(node: ASTNode) : ASTWrapperPsiElem
     }
 
     override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: 0
+
+    override fun getPresentation(): ItemPresentation? {
+        return object : ItemPresentation {
+            override fun getPresentableText() =
+                if (getNamespace() != null) {
+                    "${getNamespace()}::${name}"
+                } else {
+                    name!!
+                }
+
+            override fun getLocationString() = containingFile.name
+
+            override fun getIcon(unused: Boolean) =
+                PlatformIcons.FUNCTION_ICON
+        }
+    }
 }
 

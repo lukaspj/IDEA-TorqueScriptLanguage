@@ -1,11 +1,10 @@
 package org.lukasj.idea.torquescript.reference
 
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiElement
 import org.lukasj.idea.torquescript.psi.TSObjectDeclaration
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionType
-import org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl
+import org.lukasj.idea.torquescript.editor.TSVarExpressionElementImpl
 import org.lukasj.idea.torquescript.symbols.TSFunctionCachedListGenerator
 import org.lukasj.idea.torquescript.symbols.TSGlobalVarCachedListGenerator
 import org.lukasj.idea.torquescript.symbols.TSObjectCachedListGenerator

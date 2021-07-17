@@ -9,9 +9,18 @@ class TSChooseByNameContributor : ChooseByNameContributor {
     override fun getNames(project: Project, includeNonProjectItems: Boolean): Array<String> =
         ReferenceUtil.getFunctions(project)
             .filter { it.name != null && it.name!!.isNotEmpty() }
-            .map { function ->
-                function.name!!
-            }.toTypedArray()
+            .map { it.name!! }
+            .plus (
+                ReferenceUtil.getObjects(project)
+                    .filter { it.name != null && it.name!!.isNotEmpty() }
+                    .map { it.name!! }
+            )
+            .plus (
+                ReferenceUtil.getGlobals(project)
+                    .filter { it.name != null && it.name!!.isNotEmpty() }
+                    .map { it.name!! }
+            )
+            .toTypedArray()
 
     override fun getItemsByName(
         name: String,
@@ -20,5 +29,12 @@ class TSChooseByNameContributor : ChooseByNameContributor {
         includeNonProjectItems: Boolean
     ): Array<NavigationItem> =
         ReferenceUtil.findFunction(project, name)
+            .plus (
+                ReferenceUtil.findObject(project, name)
+            )
+            .plus (
+                ReferenceUtil.findGlobal(project, name)
+            )
+            .map { it as NavigationItem }
             .toTypedArray()
 }

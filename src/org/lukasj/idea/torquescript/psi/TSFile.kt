@@ -4,15 +4,12 @@ import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.psi.FileViewProvider
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.impl.source.PsiFileImpl
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.psi.util.elementType
-import org.jetbrains.annotations.Nullable
 import org.lukasj.idea.torquescript.TSFileType
 import org.lukasj.idea.torquescript.TSLanguage
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
-import org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl
+import org.lukasj.idea.torquescript.editor.TSVarExpressionElementImpl
 import org.lukasj.idea.torquescript.symbols.TSFileCache
 
 open class TSFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TSLanguage.INSTANCE) {

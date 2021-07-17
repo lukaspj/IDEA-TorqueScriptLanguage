@@ -47,7 +47,7 @@ abstract class TSFunctionCallExpressionElementImpl(node: ASTNode) : ASTWrapperPs
         if (nameIdentifier is TSIdentExpression) {
             identifier = nameIdentifier?.lastChild!!
         }
-        identifier.replace(TSElementFactory.createIdent(project, name))
+        identifier.replace(TSElementFactory.createSimple<TSIdentExpressionImpl>(project, name))
         return this
     }
 

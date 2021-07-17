@@ -37,4 +37,12 @@ class TSNamespaceReference(element: TSIdentExpressionElementImpl, textRange: Tex
                 .withTypeText(property.containingFile.name)
         }.toTypedArray()
     }
+
+    override fun handleElementRename(newElementName: String): PsiElement {
+        val elem = element
+        if (elem is PsiNameIdentifierOwner) {
+            return elem.setName(newElementName)
+        }
+        return element
+    }
 }

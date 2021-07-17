@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- Go to symbol for Objects and Global Variables
 
 ### Changed
 
@@ -10,6 +11,11 @@
 ### Removed
 
 ### Fixed
+- Rename refactoring now works for:
+  - Global Variables
+  - Function Names
+  - Object Names
+
 
 ### Security
 ## [1.3.0]

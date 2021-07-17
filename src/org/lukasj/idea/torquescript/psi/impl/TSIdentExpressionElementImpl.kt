@@ -57,7 +57,7 @@ abstract class TSIdentExpressionElementImpl(node: ASTNode) : ASTWrapperPsiElemen
     override fun getName() = this.text
 
     override fun setName(name: String): PsiElement {
-        this.lastChild.replace(TSElementFactory.createIdent(project, name))
+        this.lastChild.replace(TSElementFactory.createSimple<TSIdentExpressionImpl>(project, name))
         return this
     }
 }

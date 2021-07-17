@@ -22,6 +22,14 @@
                 <ul>
                     <li>Global Variables</li>
                     <li>Functions</li>
+                    <li>Objects</li>
+                </ul>
+            </li>
+            <li>Go To Symbol for:
+                <ul>
+                    <li>Global Variables</li>
+                    <li>Functions</li>
+                    <li>Objects</li>
                 </ul>
             </li>
             <li>Basic Run Configuration</li>
@@ -83,6 +91,11 @@
                                        implementationClass="org.lukasj.idea.torquescript.TSSyntaxHighlighterFactory"/>
         <lang.findUsagesProvider language="TorqueScript"
                                  implementationClass="org.lukasj.idea.torquescript.editor.TSFindUsagesProvider"/>
+        <lang.refactoringSupport language="TorqueScript"
+                                 implementationClass="org.lukasj.idea.torquescript.editor.TSRefactoringSupportProvider" />
+
+        <lang.namesValidator language="TorqueScript"
+                             implementationClass="org.lukasj.idea.torquescript.editor.TSNamesValidator" />
 
         <lang.braceMatcher language="TorqueScript"
                            implementationClass="org.lukasj.idea.torquescript.editor.TSBraceMatcher"/>

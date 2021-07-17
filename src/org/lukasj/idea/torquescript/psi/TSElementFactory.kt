@@ -24,8 +24,8 @@ object TSElementFactory {
         ).firstChild.firstChild.firstChild as TSDatablockStatement
     }
 
-    fun createIdent(project: Project, name: String): TSIdentExpression = createFile(
+    fun <T> createSimple(project: Project, name: String): T = createFile(
         project,
         "${name};"
-    ).firstChild!!.firstChild!!.firstChild!!.firstChild as TSIdentExpression
+    ).firstChild!!.firstChild!!.firstChild!!.firstChild as T
 }

@@ -25,7 +25,7 @@ abstract class TSObjectDeclarationElementImpl(node: ASTNode) : ASTWrapperPsiElem
         val nameNode: ASTNode? = nameIdentifier.firstChild.node
 
         if (nameNode != null) {
-            val stmt: TSIdentExpression = TSElementFactory.createIdent(project, name)
+            val stmt = TSElementFactory.createSimple<TSIdentExpressionImpl>(project, name)
             val newNameNode: ASTNode? = stmt.node.findChildByType(TSTypes.IDENT)
             if (newNameNode != null) {
                 nameIdentifier.node.replaceChild(nameNode, newNameNode)
