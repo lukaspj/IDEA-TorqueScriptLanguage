@@ -52,6 +52,15 @@
                     <li>Functions</li>
                 </ul>
             </li>
+            <li>Debugger with:
+                <ul>
+                    <li>Line Breakpoints</li>
+                    <li>Step-by-step debugging</li>
+                    <li>On-hover evaluation for simple variables</li>
+                    <li>Script stack frame</li>
+                    <li>Evaluation menu support</li>
+                </ul>
+            </li>
         </ul>
         ]]></description>
 
@@ -89,10 +98,14 @@
         <annotator implementationClass="org.lukasj.idea.torquescript.annotator.TSAnnotator"
                    language="TorqueScript"/>
 
-        <configurationType implementation="org.lukasj.idea.torquescript.runner.TSRunConfigurationType"/>
         <typedHandler implementation="org.lukasj.idea.torquescript.completion.TSCompletionAutoPopupHandler" id="ts"/>
         <completion.contributor language="TorqueScript"
                                 implementationClass="org.lukasj.idea.torquescript.completion.TSCompletionContributor"/>
+
+        <programRunner implementation="org.lukasj.idea.torquescript.runner.TSRunner" />
+        <configurationType implementation="org.lukasj.idea.torquescript.runner.TSRunConfigurationType"/>
+
+        <xdebugger.breakpointType implementation="org.lukasj.idea.torquescript.runner.TSLineBreakpointType" />
     </extensions>
 
     <actions>

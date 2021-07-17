@@ -3,16 +3,20 @@ package org.lukasj.idea.torquescript.psi
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.psi.FileViewProvider
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.impl.source.PsiFileImpl
 import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.psi.util.elementType
+import org.jetbrains.annotations.Nullable
 import org.lukasj.idea.torquescript.TSFileType
 import org.lukasj.idea.torquescript.TSLanguage
+import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
 import org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl
 import org.lukasj.idea.torquescript.symbols.TSFileCache
 
-class TSFile(viewProvider:  FileViewProvider) : PsiFileBase(viewProvider, TSLanguage.INSTANCE) {
-    private val bodyCache = TSFileCache(this)
+open class TSFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TSLanguage.INSTANCE) {
+    private val bodyCache by lazy { TSFileCache(this) }
 
     override fun getFileType(): FileType {
         return TSFileType.INSTANCE
@@ -42,8 +46,13 @@ class TSFile(viewProvider:  FileViewProvider) : PsiFileBase(viewProvider, TSLang
 
     fun getVariables() =
         PsiTreeUtil.getChildrenOfType(this, TSDeclaration::class.java)
-        ?.filter { it.firstChild is TSStatement }
-        ?.flatMap {
-            PsiTreeUtil.findChildrenOfAnyType(it, TSVarExpressionElementImpl::class.java)
-        }
+            ?.filter { it.firstChild is TSStatement }
+            ?.flatMap {
+                PsiTreeUtil.findChildrenOfAnyType(it, TSVarExpressionElementImpl::class.java)
+            }
+
+    fun getEnclosingFunction(element: PsiElement): TSFunctionStatementElementImpl? =
+        PsiTreeUtil.findFirstParent(element) {
+            it is TSFunctionStatementElementImpl
+        } as TSFunctionStatementElementImpl?
 }

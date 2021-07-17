@@ -1,2 +1,2 @@
-rootProject.name = "IDEA"
+rootProject.name = "TorqueScript"
 

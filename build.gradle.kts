@@ -31,6 +31,7 @@ sourceSets {
     getByName("main").apply {
         java.srcDirs("src", "gen")
         resources.srcDirs("resources")
+            .exclude("scripts/**")
     }
 }
 
@@ -86,9 +87,21 @@ tasks {
         changeNotes.set(provider { changelog.get(prop("pluginVersion")).toHTML() })
     }
 
+//    buildPlugin {
+//        from(fileTree("resources") { include("scripts/**") }) {
+//            into("/${project.name}")
+//        }
+//    }
+
     withType<PublishPluginTask> {
         token.set(prop("publishToken"))
         channels.set(listOf(channel))
+    }
+
+    prepareSandbox {
+        from(fileTree("resources") { include("scripts/**") }) {
+            into("/${project.name}")
+        }
     }
 
     // Specify the right jvm target for Kotlin

@@ -19,6 +19,7 @@ class TSFoldingBuilder : FoldingBuilderEx() {
         // Generic block statements are easy
         PsiTreeUtil.findChildrenOfType(root, TSStatementBlock::class.java)
             .filter { it.firstChild.node.elementType == TSTypes.LBRACE }
+            .filter { it.firstChild.textOffset != it.lastChild.textOffset }
             .filter { it.firstChild.textOffset + 1 != it.lastChild.textOffset }
             .forEach { block ->
                 descriptors.add(

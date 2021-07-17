@@ -12,6 +12,24 @@
 ### Fixed
 
 ### Security
+## [1.3.0]
+### Added
+- Debugger support for:
+  - Line breakpoints
+  - Step-by-step debugging
+  - On-hover evaluation of variables
+  - Evaluation dialog support
+  - Stack frame with function arguments
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
 ## [1.2.1]
 ### Added
 
