@@ -58,6 +58,8 @@
             <li>Navigate to:
                 <ul>
                     <li>Functions</li>
+                    <li>Global variables</li>
+                    <li>Objects</li>
                 </ul>
             </li>
             <li>Debugger with:

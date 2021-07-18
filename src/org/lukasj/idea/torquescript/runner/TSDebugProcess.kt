@@ -144,31 +144,32 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
                         val file = findFile(stackLines[0].file)
                         if (file != null) {
                             val resolvedBp = getBreakpoint(file, stackLines[0].line)
-                            if (resolvedBp != null) {
+                            val suspendContext = TSSuspendContext(
+                                TSExecutionStack(stackLines
+                                    .filter { it.file != "<none>" }
+                                    .mapIndexed { idx, stackLine ->
+                                        TSStackFrame(
+                                            session.project,
+                                            findSourcePosition(stackLine.file, stackLine.line)!!,
+                                            stackLine.function,
+                                            idx,
+                                            telnetClient!!
+                                        )
+                                    }
+                                ))
+                            if (resolvedBp == null) {
+                                session.positionReached(suspendContext)
+                            } else {
                                 session.breakpointReached(
                                     resolvedBp,
                                     null,
-                                    TSSuspendContext(
-                                        TSExecutionStack(stackLines
-                                            .filter { it.file != "<none>" }
-                                            .mapIndexed { idx, stackLine ->
-                                                TSStackFrame(
-                                                    session.project,
-                                                    findSourcePosition(stackLine.file, stackLine.line)!!,
-                                                    stackLine.function,
-                                                    idx,
-                                                    telnetClient!!
-                                                )
-                                            }
-                                        )))
-                                session.showExecutionPoint()
-                            } else {
-                                print(
-                                    "Debugger error, failed to resolve BP (${file.name}:${stackLines[0].line})",
-                                    LogConsoleType.DEBUGGER,
-                                    ConsoleViewContentType.LOG_WARNING_OUTPUT
+                                    suspendContext
                                 )
                             }
+                            ApplicationManager.getApplication()
+                                .invokeLater {
+                                    session.showExecutionPoint()
+                                }
                         }
                     }
                 }

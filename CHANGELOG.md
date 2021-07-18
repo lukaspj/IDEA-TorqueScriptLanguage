@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+## [1.3.1]
+### Added
 - Go to symbol for Objects and Global Variables
 
 ### Changed
@@ -15,7 +27,7 @@
   - Global Variables
   - Function Names
   - Object Names
-
+- Step-by-step debugging wasn't working properly, should be working better now
 
 ### Security
 ## [1.3.0]

@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.xdebugger.breakpoints.XLineBreakpointTypeBase
 import org.lukasj.idea.torquescript.TSFileType
+import javax.swing.Icon
 
 class TSLineBreakpointType : XLineBreakpointTypeBase(ID, NAME, TSDebuggerEditorsProvider()) {
 
