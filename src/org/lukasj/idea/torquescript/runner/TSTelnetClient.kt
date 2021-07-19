@@ -114,9 +114,9 @@ class TSTelnetClient(address: String, port: Int) {
     fun eval(cmd: String) =
         output.println("CEVAL $cmd")
 
-    fun setBreakpoint(file: String, line: Int, clear: Boolean, passCount: Int) =
+    fun setBreakpoint(file: String, line: Int, clear: Boolean, passCount: Int, condition: String) =
         // TorqueScript has 1-index line numbers, IntelliJ uses 0-indexed
-        output.println("BRKSET $file ${line + 1} ${if (clear) 1 else 0} $passCount true")
+        output.println("BRKSET $file ${line + 1} ${if (clear) 1 else 0} $passCount ${condition}")
 
     fun clearBreakpoint(file: String, line: Int) =
         // TorqueScript has 1-index line numbers, IntelliJ uses 0-indexed

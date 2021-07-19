@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 ### Added
+- Run To Position in Debugger
+- Conditional breakpoint support
 
 ### Changed
 

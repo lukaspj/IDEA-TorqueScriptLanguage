@@ -17,20 +17,12 @@ import com.intellij.xdebugger.XDebugProcess
 import com.intellij.xdebugger.XDebugSession
 import com.intellij.xdebugger.XDebuggerManager
 import com.intellij.xdebugger.XSourcePosition
-import com.intellij.xdebugger.breakpoints.XBreakpointHandler
-import com.intellij.xdebugger.breakpoints.XBreakpointManager
-import com.intellij.xdebugger.breakpoints.XBreakpointProperties
-import com.intellij.xdebugger.breakpoints.XLineBreakpoint
+import com.intellij.xdebugger.breakpoints.*
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
 import com.intellij.xdebugger.frame.XSuspendContext
 import com.intellij.xdebugger.impl.XSourcePositionImpl
-import org.jetbrains.annotations.Nullable
-import org.jetbrains.debugger.BreakpointManager
 import org.lukasj.idea.torquescript.TSFileUtil
-import java.io.BufferedReader
 import java.io.File
-import java.io.PrintWriter
-import java.nio.channels.AsynchronousSocketChannel
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
@@ -43,6 +35,8 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
     private var breakpointThread: Thread? = null
     private var movedBreakpointThread: Thread? = null
     private var telnetClient: TSTelnetClient? = null
+    private var targetBp: XLineBreakpoint<*>? = null
+    private var targetPosition: XSourcePosition? = null
 
     override fun getEditorsProvider(): XDebuggerEditorsProvider =
         TSDebuggerEditorsProvider()
@@ -141,6 +135,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
                 while (!isStopped) {
                     val stackLines = telnetClient!!.breakpointQueue.poll(200, TimeUnit.MILLISECONDS)?.stackLines
                     if (stackLines != null) {
+                        val sourcePosition = findSourcePosition(stackLines[0].file, stackLines[0].line)
                         val file = findFile(stackLines[0].file)
                         if (file != null) {
                             val resolvedBp = getBreakpoint(file, stackLines[0].line)
@@ -150,7 +145,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
                                     .mapIndexed { idx, stackLine ->
                                         TSStackFrame(
                                             session.project,
-                                            findSourcePosition(stackLine.file, stackLine.line)!!,
+                                            sourcePosition!!,
                                             stackLine.function,
                                             idx,
                                             telnetClient!!
@@ -159,6 +154,12 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
                                 ))
                             if (resolvedBp == null) {
                                 session.positionReached(suspendContext)
+                                if (targetPosition != null
+                                    && targetPosition!!.file == sourcePosition!!.file
+                                    && targetPosition!!.line == sourcePosition.line
+                                ) {
+                                    unregisterBreakpoint(sourcePosition)
+                                }
                             } else {
                                 session.breakpointReached(
                                     resolvedBp,
@@ -222,7 +223,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
                 override fun registerBreakpoint(breakpoint: XLineBreakpoint<XBreakpointProperties<*>>) {
                     val sourcePosition = breakpoint.sourcePosition
                     if (sourcePosition != null) {
-                        registerBreakpoint(sourcePosition, breakpoint)
+                        registerBreakpoint(sourcePosition, breakpoint.conditionExpression.toString())
                     }
                 }
 
@@ -232,21 +233,22 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
                 ) {
                     val sourcePosition = breakpoint.sourcePosition
                     if (sourcePosition != null) {
-                        unregisterBreakpoint(sourcePosition, breakpoint)
+                        unregisterBreakpoint(sourcePosition)
                     }
                 }
             }
         )
 
-    fun registerBreakpoint(sourcePosition: XSourcePosition, breakpoint: XLineBreakpoint<*>) =
+    fun registerBreakpoint(sourcePosition: XSourcePosition, condition: String? = null) =
         telnetClient?.setBreakpoint(
             File(sourcePosition.file.path).relativeTo(File(configuration.appPath!!).parentFile).path,
             sourcePosition.line,
             false,
-            0
+            0,
+            condition ?: "true"
         )
 
-    fun unregisterBreakpoint(sourcePosition: XSourcePosition, breakpoint: XLineBreakpoint<*>) =
+    fun unregisterBreakpoint(sourcePosition: XSourcePosition) =
         telnetClient?.clearBreakpoint(
             File(sourcePosition.file.path).relativeTo(File(configuration.appPath!!).parentFile).path,
             sourcePosition.line
@@ -255,7 +257,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
     fun sendAllBreakpoints() {
         if (telnetClient != null) {
             processBreakpoint { bp ->
-                bp.sourcePosition?.let { registerBreakpoint(it, bp) }
+                bp.sourcePosition?.let { registerBreakpoint(it, bp.conditionExpression.toString()) }
                 true
             }
         }
@@ -308,4 +310,14 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
 
     override fun startStepOut(context: XSuspendContext?) =
         telnetClient!!.stepOut()
+
+    override fun runToPosition(position: XSourcePosition, context: XSuspendContext?) {
+        targetPosition = position
+        val bp = getBreakpoint(position.file, position.line)
+        if (bp == null) {
+            registerBreakpoint(position)
+        }
+
+        session.resume()
+    }
 }
