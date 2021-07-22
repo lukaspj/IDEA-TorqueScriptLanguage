@@ -5,21 +5,13 @@ import icons.TSIcons
 import javax.swing.Icon
 
 class TSFileType : LanguageFileType(TSLanguage.INSTANCE) {
-    override fun getName(): String {
-        return "TorqueScript File"
-    }
+    override fun getName() = "TorqueScript File"
 
-    override fun getDescription(): String {
-        return "TorqueScript file"
-    }
+    override fun getDescription() = "TorqueScript file"
 
-    override fun getDefaultExtension(): String {
-        return "tscript"
-    }
+    override fun getDefaultExtension() = "tscript"
 
-    override fun getIcon(): Icon? {
-        return TSIcons.FILE
-    }
+    override fun getIcon() = TSIcons.FILE
 
     companion object {
         @JvmField

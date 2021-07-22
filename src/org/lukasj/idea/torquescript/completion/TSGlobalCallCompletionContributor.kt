@@ -33,7 +33,7 @@ class TSGlobalCallCompletionContributor : CompletionProvider<CompletionParameter
                     .getStaticFunctions()
                     .filter { !it.name.contains(':') }
                     .map {
-                        LookupElementBuilder.create(it.name)
+                        LookupElementBuilder.create(it)
                             .withIcon(PlatformIcons.FUNCTION_ICON)
                             .withCaseSensitivity(false)
                             .withTypeText(it.returnType)

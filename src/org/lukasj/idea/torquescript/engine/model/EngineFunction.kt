@@ -39,5 +39,7 @@ class EngineFunction(
 
         isOverride = false
     }
+
+    override fun toString() = name
 }
 

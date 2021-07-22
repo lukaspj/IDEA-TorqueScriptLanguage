@@ -3,6 +3,7 @@ package org.lukasj.idea.torquescript.psi.impl
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.PsiTreeUtil
 import org.lukasj.idea.torquescript.psi.TSDatablockStatement
 import org.lukasj.idea.torquescript.psi.TSElementFactory
 import org.lukasj.idea.torquescript.psi.TSObjectDeclaration
@@ -11,6 +12,9 @@ import org.lukasj.idea.torquescript.psi.TSTypes
 
 abstract class TSDatablockDeclarationElementImpl(node: ASTNode) : ASTWrapperPsiElement(node),
     TSObjectDeclaration {
+
+    fun getClassName(): String? =
+        firstChild.nextSibling.nextSibling.text
 
     override fun getNameIdentifier(): PsiElement? =
         getObjectName()

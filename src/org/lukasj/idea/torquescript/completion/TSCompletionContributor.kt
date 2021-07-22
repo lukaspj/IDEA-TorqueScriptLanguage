@@ -6,12 +6,16 @@ import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiElement
+import com.intellij.psi.TokenType
 import org.lukasj.idea.torquescript.TSLanguage
 import org.lukasj.idea.torquescript.psi.TSTypes
 
 
 class TSCompletionContributor : CompletionContributor() {
     init {
+        extend(CompletionType.BASIC, inDatablock(), TSClassCompletionContributor())
+        extend(CompletionType.BASIC, inSingleton(), TSClassCompletionContributor())
+        extend(CompletionType.BASIC, inNew(), TSClassCompletionContributor())
         extend(CompletionType.BASIC, isKeywordable(), TSKeywordCompletionContributor())
         extend(CompletionType.BASIC, inGlobalCall(), TSGlobalCallCompletionContributor())
         extend(CompletionType.BASIC, inGlobalNSCall(), TSGlobalNSCallCompletionContributor())
@@ -57,4 +61,28 @@ class TSCompletionContributor : CompletionContributor() {
 
     private fun inObjectName(): ElementPattern<PsiElement> =
         isKeywordable()
+
+    private fun inDatablock(): ElementPattern<PsiElement> =
+        StandardPatterns.or(
+            psiElement(TSTypes.IDENT)
+                .and(psiElement().afterSiblingSkipping(
+                    psiElement(TokenType.WHITE_SPACE),
+                    psiElement(TSTypes.DATABLOCK)))
+        )
+
+    private fun inSingleton(): ElementPattern<PsiElement> =
+        StandardPatterns.or(
+            psiElement(TSTypes.IDENT)
+                .and(psiElement().afterSiblingSkipping(
+                    psiElement(TokenType.WHITE_SPACE),
+                    psiElement(TSTypes.SINGLETON)))
+        )
+
+    private fun inNew(): ElementPattern<PsiElement> =
+        StandardPatterns.or(
+            psiElement(TSTypes.IDENT)
+                .and(psiElement().afterSiblingSkipping(
+                    psiElement(TokenType.WHITE_SPACE),
+                    psiElement(TSTypes.NEW)))
+        )
 }

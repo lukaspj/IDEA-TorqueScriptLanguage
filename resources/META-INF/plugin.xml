@@ -17,7 +17,6 @@
         <h3>Current features</h3>
         <ul>
             <li>Syntax Highlighting</li>
-            <li>Function completion</li>
             <li>Go To Definition for:
                 <ul>
                     <li>Global Variables</li>
@@ -42,6 +41,8 @@
                     <li>Methods</li>
                     <li>Object Names</li>
                     <li>Keywords</li>
+                    <li>Builtin functions</li>
+                    <li>Builtin classes</li>
                 </ul>
             </li>
             <li>Brace Matching</li>
@@ -69,6 +70,13 @@
                     <li>On-hover evaluation for simple variables</li>
                     <li>Script stack frame</li>
                     <li>Evaluation menu support</li>
+                    <li>Condition breakpoints</li>
+                </ul>
+            </li>
+            <li>Documentation support for:
+                <ul>
+                    <li>Builtin functions</li>
+                    <li>Builtin classes</li>
                 </ul>
             </li>
         </ul>
@@ -108,6 +116,8 @@
                         implementationClass="org.lukasj.idea.torquescript.editor.TSCommenter"/>
         <lang.foldingBuilder language="TorqueScript"
                              implementationClass="org.lukasj.idea.torquescript.editor.TSFoldingBuilder"/>
+        <lang.documentationProvider language="TorqueScript"
+                                    implementationClass="org.lukasj.idea.torquescript.documentation.TSDocumentationProvider" />
 
         <colorSettingsPage implementation="org.lukasj.idea.torquescript.editor.TSColorSettingsPage"/>
 

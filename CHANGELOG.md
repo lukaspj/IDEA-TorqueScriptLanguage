@@ -2,9 +2,23 @@
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+## [1.4.0]
+### Added
 - Run To Position in Debugger
 - Conditional breakpoint support
-- Basic support for engine exports
+- Support for generating and importing engine exports
+- Documentation support for builtin functions and classes
+- Completion support for builtin functions and classes
 
 ### Changed
 

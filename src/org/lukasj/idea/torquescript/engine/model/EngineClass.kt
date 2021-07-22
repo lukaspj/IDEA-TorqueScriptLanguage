@@ -13,4 +13,5 @@ class EngineClass(
     val scopeList: List<String>
 ) {
 
+    override fun toString() = name
 }

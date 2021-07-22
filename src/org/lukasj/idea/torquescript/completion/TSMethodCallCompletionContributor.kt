@@ -47,7 +47,7 @@ class TSMethodCallCompletionContributor : CompletionProvider<CompletionParameter
                     .getMethods(namespace ?: "")
                     .filter { !it.isStatic }
                     .map {
-                        LookupElementBuilder.create(it.name)
+                        LookupElementBuilder.create(it)
                             .withIcon(PlatformIcons.FUNCTION_ICON)
                             .withCaseSensitivity(false)
                             .withTypeText(it.returnType)

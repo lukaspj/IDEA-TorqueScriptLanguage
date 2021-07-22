@@ -64,8 +64,10 @@ class EngineApiService(private val project: Project) {
     fun getFunctions() = cachedApi?.value?.getAllFunctions() ?: listOf()
     fun getStaticFunctions() = getFunctions().filter { it.isStatic }
     fun findFunction(name: String) = getFunctions().firstOrNull { it.name == name }
-    fun findClass(className: String) = cachedApi?.value?.getAllClasses()?.firstOrNull {it.name == className}
+    fun getClasses() = cachedApi?.value?.getAllClasses() ?: listOf()
+    fun findClass(className: String) = getClasses().firstOrNull {it.name == className}
     fun getMethods(className: String) = findClass(className)?.methods ?: listOf()
     fun findMethod(className: String, name: String) = getMethods(className)
         .firstOrNull { it.name == name }
+
 }

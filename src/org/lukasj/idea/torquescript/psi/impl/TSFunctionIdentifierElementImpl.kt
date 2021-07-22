@@ -12,7 +12,7 @@ import org.lukasj.idea.torquescript.psi.TSNamedElement
 import org.lukasj.idea.torquescript.reference.TSObjectReference
 
 abstract class TSFunctionIdentifierElementImpl(node: ASTNode) : ASTWrapperPsiElement(node),
-    TSNamedElement, PsiExternalReferenceHost {
+    TSNamedElement {
     override fun getNameIdentifier(): PsiElement =
         lastChild
 
