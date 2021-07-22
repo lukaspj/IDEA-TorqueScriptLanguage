@@ -13,13 +13,25 @@ object TSSyntaxHighlightingColors {
         "TORQUESCRIPT_FUNCTION_CALL",
         DefaultLanguageHighlighterColors.FUNCTION_CALL
     )
+    val BUILTIN_FUNCTION_CALL = TextAttributesKey.createTextAttributesKey(
+        "TORQUESCRIPT_BUILTIN_FUNCTION_CALL",
+        DefaultLanguageHighlighterColors.PREDEFINED_SYMBOL
+    )
     val OBJECT_NAME = TextAttributesKey.createTextAttributesKey(
         "TORQUESCRIPT_OBJECT_NAME",
         DefaultLanguageHighlighterColors.IDENTIFIER
     )
+    val BUILTIN_OBJECT_NAME = TextAttributesKey.createTextAttributesKey(
+        "TORQUESCRIPT_BUILTIN_OBJECT_NAME",
+        DefaultLanguageHighlighterColors.PREDEFINED_SYMBOL
+    )
     val CLASS_NAME = TextAttributesKey.createTextAttributesKey(
         "TORQUESCRIPT_CLASS_NAME",
         DefaultLanguageHighlighterColors.CLASS_NAME
+    )
+    val BUILTIN_CLASS_NAME = TextAttributesKey.createTextAttributesKey(
+        "TORQUESCRIPT_BUILTIN_CLASS_NAME",
+        DefaultLanguageHighlighterColors.PREDEFINED_SYMBOL
     )
     val PARENTHESES = TextAttributesKey.createTextAttributesKey(
         "TORQUESCRIPT_PARENTHESES",
@@ -80,6 +92,10 @@ object TSSyntaxHighlightingColors {
     )
     val GLOBALVAR = TextAttributesKey.createTextAttributesKey(
         "TORQUESCRIPT_GLOBAL_VAR",
+        DefaultLanguageHighlighterColors.GLOBAL_VARIABLE
+    )
+    val BUILTIN_GLOBALVAR = TextAttributesKey.createTextAttributesKey(
+        "TORQUESCRIPT_BUILTIN_GLOBAL_VAR",
         DefaultLanguageHighlighterColors.GLOBAL_VARIABLE
     )
     val IDENTIFIER = TextAttributesKey.createTextAttributesKey(

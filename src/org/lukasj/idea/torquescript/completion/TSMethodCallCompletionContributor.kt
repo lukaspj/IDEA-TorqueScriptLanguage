@@ -6,6 +6,7 @@ import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.util.PlatformIcons
 import com.intellij.util.ProcessingContext
+import org.lukasj.idea.torquescript.engine.EngineApiService
 import org.lukasj.idea.torquescript.psi.TSTypes
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionType
 import org.lukasj.idea.torquescript.reference.ReferenceUtil
@@ -31,18 +32,30 @@ class TSMethodCallCompletionContributor : CompletionProvider<CompletionParameter
 
         ReferenceUtil.getFunctions(project)
             .filter { it.getFunctionType() != TSFunctionType.GLOBAL }
-            .forEach { function ->
-                result.addElement(
-                    LookupElementBuilder.create(function.name!!)
-                        .withIcon(PlatformIcons.METHOD_ICON)
-                        .withCaseSensitivity(false)
-                        .withPresentableText("${function.getNamespace()}::${function.name}")
-                        .withBoldness(namespace != null && function.getNamespace().equals(namespace, true))
-                        .withTailText(function.getParameters().joinToString(prefix = "(", postfix = ")") { it.text })
-                        .withTypeText(function.containingFile.name)
-                        .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
-                )
+            .map { function ->
+                LookupElementBuilder.create(function.name!!)
+                    .withIcon(PlatformIcons.METHOD_ICON)
+                    .withCaseSensitivity(false)
+                    .withPresentableText("${function.getNamespace()}::${function.name}")
+                    .withBoldness(namespace != null && function.getNamespace().equals(namespace, true))
+                    .withTailText(function.getParameters().joinToString(prefix = "(", postfix = ")") { it.text })
+                    .withTypeText(function.containingFile.name)
+                    .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
             }
+            .plus(
+                project.getService(EngineApiService::class.java)
+                    .getMethods(namespace ?: "")
+                    .filter { !it.isStatic }
+                    .map {
+                        LookupElementBuilder.create(it.name)
+                            .withIcon(PlatformIcons.FUNCTION_ICON)
+                            .withCaseSensitivity(false)
+                            .withTypeText(it.returnType)
+                            .withTailText(it.arguments.joinToString(", ", "(", ")") { a -> a.toArgString() })
+                            .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
+                    }
+            )
+            .forEach { result.addElement(it) }
     }
 
 }

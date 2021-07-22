@@ -8,6 +8,7 @@ import java.net.Socket
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 class TSBreakPointStackLine(val file: String, val line: Int, val function: String)
@@ -35,12 +36,11 @@ class TSTelnetClient(address: String, port: Int) {
 
     fun login(password: String): Boolean {
         output.println(password)
-        return loginQueue.take()
+        return loginQueue.poll(3, TimeUnit.SECONDS) ?: false
     }
 
     private fun processOutput(line: String) {
         val trimmed = line.trim()
-        println(trimmed)
         when {
             trimmed.startsWith("PASS") -> {
                 loginQueue.add(equals("PASS Connected."))
@@ -91,7 +91,10 @@ class TSTelnetClient(address: String, port: Int) {
         thread = thread {
             try {
                 while (!isStopped) {
-                    processOutput(input.readLine())
+                    val line = input.readLine()
+                    if (line != null) {
+                        processOutput(line)
+                    }
                 }
             } catch (ioe: IOException) {
                 // Do nothing

@@ -103,6 +103,7 @@
                            implementationClass="org.lukasj.idea.torquescript.editor.TSBraceMatcher"/>
 
         <gotoSymbolContributor implementation="org.lukasj.idea.torquescript.editor.TSChooseByNameContributor"/>
+
         <lang.commenter language="TorqueScript"
                         implementationClass="org.lukasj.idea.torquescript.editor.TSCommenter"/>
         <lang.foldingBuilder language="TorqueScript"
@@ -121,6 +122,8 @@
         <configurationType implementation="org.lukasj.idea.torquescript.runner.TSRunConfigurationType"/>
 
         <xdebugger.breakpointType implementation="org.lukasj.idea.torquescript.runner.TSLineBreakpointType" />
+
+        <projectService serviceImplementation="org.lukasj.idea.torquescript.engine.EngineApiService" />
     </extensions>
 
     <actions>

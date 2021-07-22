@@ -18,7 +18,13 @@ class TSObjectAnnotator : TSAnnotator() {
                 createSuccessAnnotation(element, holder, TSSyntaxHighlightingColors.OBJECT_NAME)
             }
         } else if (element is TSFunctionIdentifier) {
-
+            val ref = element.reference
+            if (ref != null
+                && ref is TSObjectReference
+                && ref.multiResolve(false).isNotEmpty()
+            ) {
+                createSuccessAnnotation(element, holder, TSSyntaxHighlightingColors.OBJECT_NAME)
+            }
         }
     }
 }

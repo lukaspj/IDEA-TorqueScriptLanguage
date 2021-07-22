@@ -4,6 +4,7 @@
 ### Added
 - Run To Position in Debugger
 - Conditional breakpoint support
+- Basic support for engine exports
 
 ### Changed
 
@@ -12,6 +13,7 @@
 ### Removed
 
 ### Fixed
+- Namespaced functions had inversed lookup logic
 
 ### Security
 ## [1.3.1]

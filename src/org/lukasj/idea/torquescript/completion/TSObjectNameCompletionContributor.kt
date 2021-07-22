@@ -15,15 +15,14 @@ class TSObjectNameCompletionContributor : CompletionProvider<CompletionParameter
         result: CompletionResultSet
     ) = ReferenceUtil.getObjects(parameters.position.project)
         .filter { it.name != null }
-        .forEach { obj ->
-            result.addElement(
-                LookupElementBuilder.create(obj)
-                    .withIcon(PlatformIcons.CLASS_INITIALIZER)
-                    .withPresentableText(obj.name!!)
-                    .withCaseSensitivity(false)
-                    .withTypeText(obj.containingFile.name)
-                    .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
-            )
+        .map { obj ->
+            LookupElementBuilder.create(obj)
+                .withIcon(PlatformIcons.CLASS_INITIALIZER)
+                .withPresentableText(obj.name!!)
+                .withCaseSensitivity(false)
+                .withTypeText(obj.containingFile.name)
+                .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
         }
+        .forEach { result.addElement(it) }
 
 }

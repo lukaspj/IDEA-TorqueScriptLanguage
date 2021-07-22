@@ -30,6 +30,25 @@ open class TSAnnotator : Annotator {
             .create()
     }
 
+
+    open fun createSuccessAnnotationWithTooltip(
+        element: PsiElement,
+        holder: AnnotationHolder,
+        key: TextAttributesKey,
+        tooltip: String
+    ) {
+        holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
+            .enforcedTextAttributes(TextAttributes.ERASE_MARKER)
+            .range(element)
+            .create()
+        holder
+            .newAnnotation(HighlightSeverity.INFORMATION, "")
+            .textAttributes(key)
+            .tooltip(tooltip)
+            .range(element)
+            .create()
+    }
+
     open fun createWarnAnnotation(
         element: PsiElement,
         holder: AnnotationHolder,
