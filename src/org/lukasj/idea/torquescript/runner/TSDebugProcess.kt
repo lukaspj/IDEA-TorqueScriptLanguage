@@ -257,7 +257,12 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
     fun sendAllBreakpoints() {
         if (telnetClient != null) {
             processBreakpoint { bp ->
-                bp.sourcePosition?.let { registerBreakpoint(it, bp.conditionExpression.toString()) }
+                bp.sourcePosition?.let {
+                    registerBreakpoint(
+                        it,
+                        if (bp.conditionExpression != null) bp.conditionExpression.toString() else null
+                    )
+                }
                 true
             }
         }
