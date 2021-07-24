@@ -114,6 +114,8 @@
 
         <lang.commenter language="TorqueScript"
                         implementationClass="org.lukasj.idea.torquescript.editor.TSCommenter"/>
+        <lang.formatter language="TorqueScript"
+                        implementationClass="org.lukasj.idea.torquescript.editor.formatting.TSFormattingModelBuilder" />
         <lang.foldingBuilder language="TorqueScript"
                              implementationClass="org.lukasj.idea.torquescript.editor.TSFoldingBuilder"/>
         <lang.documentationProvider language="TorqueScript"

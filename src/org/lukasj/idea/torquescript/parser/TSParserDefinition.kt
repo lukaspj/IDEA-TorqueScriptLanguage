@@ -47,7 +47,7 @@ class TSParserDefinition : ParserDefinition {
         val KEYWORDS = TokenSet.create(
             DATABLOCK, SINGLETON, FUNCTION, PACKAGE, NAMESPACE,
             DO, WHILE, FOR, FOREACH, STR_FOREACH, SWITCH, STR_SWITCH, IF, ELSE,
-            CASE, BREAK, CONTINUE, RETURN, IN,
+            CASE, DEFAULT, BREAK, CONTINUE, RETURN, IN,
             NEW, ASSERT, TRUE, FALSE
         )
 
@@ -60,6 +60,11 @@ class TSParserDefinition : ParserDefinition {
             AND, OR, CONCATENATE, PLUS, MINUS, MULTIPLY, DIVIDE, MODULO, NL, TAB, SPC,
             BIT_SHIFT_LEFT, BIT_SHIFT_RIGHT, BIT_AND, BIT_OR, BIT_XOR, BIT_NOT,
             COLON_COLON, INTERNAL_NAME, INTERNAL_NAME_RECURSIVE, DECREMENT, INCREMENT, NOT
+        )
+
+        val PUNCTUATIONS = TokenSet.create(
+            STMT_SEPARATOR, DOT, COMMA, LBRACE, RBRACE, LEFT_PAREN, RIGHT_PAREN,
+            LEFT_BRACK, RIGHT_BRACK, COLON, QUESTION_MARK
         )
 
         val NUMBERS = TokenSet.create(

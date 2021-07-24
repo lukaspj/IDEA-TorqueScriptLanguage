@@ -107,7 +107,7 @@ datablock_statement ::= DATABLOCK IDENT LEFT_PAREN object_name parent_block? RIG
 }
 
 type_declaration_block ::= LBRACE ((field_assignment | new_instance_expression | singleton_statement) STMT_SEPARATOR)* RBRACE
-field_assignment ::= property (LEFT_BRACK arguments RIGHT_BRACK)? assignoperator expression {pin=3}
+field_assignment ::= property (LEFT_BRACK arguments RIGHT_BRACK)? ASSIGN expression {pin=3}
 property ::= IDENT
            // Allow restricted keywords cause TorqueScript
            | DATABLOCK
