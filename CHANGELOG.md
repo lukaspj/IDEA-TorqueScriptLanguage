@@ -4,12 +4,14 @@
 ### Added
 
 ### Changed
+- Improved documentation for quick-navigation
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+- Fixed an issue with folding in switch statements
 
 ### Security
 ## [1.4.0]
