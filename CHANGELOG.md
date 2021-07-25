@@ -12,6 +12,7 @@
 
 ### Fixed
 - Fixed an issue with folding in switch statements
+- Technical Debt: Renamed brack and paren token types
 
 ### Security
 ## [1.4.0]

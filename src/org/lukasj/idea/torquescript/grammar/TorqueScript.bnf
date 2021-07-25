@@ -27,7 +27,7 @@ declaration ::=
 
 package_declaration ::= PACKAGE IDENT LBRACE function_declaration* RBRACE {pin=1}
 
-function_declaration ::= FUNCTION function_identifier LEFT_PAREN params RIGHT_PAREN statement_block {
+function_declaration ::= FUNCTION function_identifier LPAREN params RPAREN statement_block {
     pin=1
     mixin="org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl"
     implements="org.lukasj.idea.torquescript.psi.TSNamedElement"
@@ -73,18 +73,18 @@ statement ::=
 // ---------------------------------------------------------------------------------------------------------------------
 // Logical statements
 
-if_statement ::= IF LEFT_PAREN expression RIGHT_PAREN (statement_block | statement) else_statement? {pin=1}
+if_statement ::= IF LPAREN expression RPAREN (statement_block | statement) else_statement? {pin=1}
 else_statement ::= ELSE (statement_block | statement)
-switch_statement ::= SWITCH LEFT_PAREN expression RIGHT_PAREN LBRACE (comment_statement | case_block)+ default_block? RBRACE {pin=1}
-str_switch_statement ::= STR_SWITCH LEFT_PAREN expression RIGHT_PAREN LBRACE (comment_statement | case_block)+ default_block? RBRACE {pin=1}
+switch_statement ::= SWITCH LPAREN expression RPAREN LBRACE (comment_statement | case_block)+ default_block? RBRACE {pin=1}
+str_switch_statement ::= STR_SWITCH LPAREN expression RPAREN LBRACE (comment_statement | case_block)+ default_block? RBRACE {pin=1}
 case_block ::= CASE case_expression COLON statement* {pin=1}
 case_expression ::= expression (CASEOR expression)*
 default_block ::= DEFAULT COLON statement* {pin=1}
-for_statement ::= FOR LEFT_PAREN expression? STMT_SEPARATOR expression? STMT_SEPARATOR expression? RIGHT_PAREN (statement_block | statement) {pin=1}
-foreach_statement ::= FOREACH LEFT_PAREN expression IN expression RIGHT_PAREN (statement_block | statement) {pin=1}
-str_foreach_statement ::= STR_FOREACH LEFT_PAREN expression IN expression RIGHT_PAREN (statement_block | statement) {pin=1}
-do_while_statement ::= DO (statement_block | statement) WHILE LEFT_PAREN expression RIGHT_PAREN {pin=1}
-while_statement ::= WHILE LEFT_PAREN expression RIGHT_PAREN (statement_block | statement) {pin=1}
+for_statement ::= FOR LPAREN expression? STMT_SEPARATOR expression? STMT_SEPARATOR expression? RPAREN (statement_block | statement) {pin=1}
+foreach_statement ::= FOREACH LPAREN expression IN expression RPAREN (statement_block | statement) {pin=1}
+str_foreach_statement ::= STR_FOREACH LPAREN expression IN expression RPAREN (statement_block | statement) {pin=1}
+do_while_statement ::= DO (statement_block | statement) WHILE LPAREN expression RPAREN {pin=1}
+while_statement ::= WHILE LPAREN expression RPAREN (statement_block | statement) {pin=1}
 break_statement ::= BREAK
 continue_statement ::= CONTINUE
 return_statement ::= RETURN expression? {pin=1}
@@ -94,20 +94,20 @@ statement_block ::= LBRACE statement* RBRACE {pin=1}
 // ---------------------------------------------------------------------------------------------------------------------
 // Type statements
 
-singleton_statement ::= SINGLETON IDENT LEFT_PAREN (object_name parent_block?)? RIGHT_PAREN type_declaration_block? {
+singleton_statement ::= SINGLETON IDENT LPAREN (object_name parent_block?)? RPAREN type_declaration_block? {
     pin=1
     implements="org.lukasj.idea.torquescript.psi.TSObjectDeclaration"
     mixin="org.lukasj.idea.torquescript.psi.impl.TSObjectDeclarationElementImpl"
 }
 
-datablock_statement ::= DATABLOCK IDENT LEFT_PAREN object_name parent_block? RIGHT_PAREN type_declaration_block? {
+datablock_statement ::= DATABLOCK IDENT LPAREN object_name parent_block? RPAREN type_declaration_block? {
     pin=1
     implements="org.lukasj.idea.torquescript.psi.TSObjectDeclaration"
     mixin="org.lukasj.idea.torquescript.psi.impl.TSObjectDeclarationElementImpl"
 }
 
 type_declaration_block ::= LBRACE ((field_assignment | new_instance_expression | singleton_statement) STMT_SEPARATOR)* RBRACE
-field_assignment ::= property (LEFT_BRACK arguments RIGHT_BRACK)? assignoperator expression {pin=3}
+field_assignment ::= property (LBRACK arguments RBRACK)? assignoperator expression {pin=3}
 property ::= IDENT
            // Allow restricted keywords cause TorqueScript
            | DATABLOCK
@@ -119,7 +119,7 @@ comment_statement ::= LINE_COMMENT
           | DOC_COMMENT
           | BLOCK_COMMENT
 
-assert_statement ::= ASSERT LEFT_PAREN expression (COMMA QUOTED_STRING)? RIGHT_PAREN {pin=1}
+assert_statement ::= ASSERT LPAREN expression (COMMA QUOTED_STRING)? RPAREN {pin=1}
 
 expression_statement ::= expression
 
@@ -162,7 +162,7 @@ ident_expression ::=
 var_expression ::= (THISVAR | LOCALVAR | GLOBALVAR) {
     mixin="org.lukasj.idea.torquescript.editor.TSVarExpressionElementImpl"
 }
-paren_expression ::= LEFT_PAREN expression RIGHT_PAREN {pin=1}
+paren_expression ::= LPAREN expression RPAREN {pin=1}
 
 accessor_chain ::= qualifier_accessor | call_accessor | index_accessor
 
@@ -171,9 +171,9 @@ qualifier_accessor ::= DOT property accessor_chain? {pin=1}
 call_expression ::= expression call_accessor {
     mixin="org.lukasj.idea.torquescript.psi.impl.TSFunctionCallExpressionElementImpl"
 }
-call_accessor ::= LEFT_PAREN arguments RIGHT_PAREN accessor_chain? {pin=1}
+call_accessor ::= LPAREN arguments RPAREN accessor_chain? {pin=1}
 index_expression ::= expression index_accessor
-index_accessor ::= LEFT_BRACK arguments RIGHT_BRACK accessor_chain? {pin=1}
+index_accessor ::= LBRACK arguments RBRACK accessor_chain? {pin=1}
 
 literal_expression ::= TRUE
           | FALSE
@@ -191,7 +191,7 @@ ternary_expression ::= expression QUESTION_MARK expression COLON expression {pin
 
 arguments ::= (expression (COMMA expression)*)?
 
-new_instance_expression ::= NEW IDENT LEFT_PAREN (object_name parent_block? (COMMA arguments)?)? RIGHT_PAREN new_instance_block? {
+new_instance_expression ::= NEW IDENT LPAREN (object_name parent_block? (COMMA arguments)?)? RPAREN new_instance_block? {
     pin=1
     implements="org.lukasj.idea.torquescript.psi.TSObjectDeclaration"
     mixin="org.lukasj.idea.torquescript.psi.impl.TSObjectDeclarationElementImpl"

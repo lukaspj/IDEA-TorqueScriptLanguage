@@ -3,7 +3,7 @@ package org.lukasj.idea.torquescript.lexer;
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.TokenType;
-import org.intellij.grammar.livePreview.LivePreviewElementType;import org.lukasj.idea.torquescript.psi.TSTypes;
+import org.lukasj.idea.torquescript.psi.TSTypes;
 
 %%
 
@@ -76,12 +76,12 @@ STRING = {STR} ( [^\"\\\n\r] | "\\" ("\\" | {STR} | {ESCAPES} | [0-8xuU] ) )* {S
     Parent                                                  { return TSTypes.PARENT; }
 // ----- KEYWORDS END -----
 // ----- PUNCTUATION START -----
-    \(                                                      { return TSTypes.LEFT_PAREN; }
-    \)                                                      { return TSTypes.RIGHT_PAREN; }
+    \(                                                      { return TSTypes.LPAREN; }
+    \)                                                      { return TSTypes.RPAREN; }
     \{                                                      { return TSTypes.LBRACE; }
     \}                                                      { return TSTypes.RBRACE; }
-    \[                                                      { return TSTypes.LEFT_BRACK; }
-    \]                                                      { return TSTypes.RIGHT_BRACK; }
+    \[                                                      { return TSTypes.LBRACK; }
+    \]                                                      { return TSTypes.RBRACK; }
     ;                                                       { return TSTypes.STMT_SEPARATOR; }
 // ----- PUNCTUATION END -----
 // ----- ASSIGNMENTS START -----

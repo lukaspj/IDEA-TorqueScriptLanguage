@@ -15,8 +15,8 @@ class TSBraceMatcher : PairedBraceMatcher {
 
     companion object {
         val BRACE_PAIRS = arrayOf(
-            BracePair(TSTypes.LEFT_PAREN, TSTypes.RIGHT_PAREN, false),
-            BracePair(TSTypes.LEFT_BRACK, TSTypes.RIGHT_BRACK, false),
+            BracePair(TSTypes.LPAREN, TSTypes.RPAREN, false),
+            BracePair(TSTypes.LBRACK, TSTypes.RBRACK, false),
             BracePair(TSTypes.LBRACE, TSTypes.RBRACE, true),
         )
     }
