@@ -13,12 +13,7 @@ plugins {
 }
 
 group = "org.lukasj"
-version = if (channel.toLowerCase() == "stable") {
-    prop("pluginVersion")
-} else {
-    "${prop("pluginVersion")}-${channel}"
-}
-
+version = prop("pluginVersion")
 repositories {
     mavenCentral()
 }

@@ -1,0 +1,103 @@
+datablock ReflectorDesc( DefaultCubeDesc )
+{
+    texSize           = 64;
+    nearDist          = 0.1;
+    farDist           = 1000.0;
+    objectTypeMask    = 0xFFFFFFFF;
+    detailAdjust      = 1.0;
+    priority          = 1.0;
+    maxRateMs         = 15;
+    useOcclusionQuery = true;
+};
+
+if(%a) {
+    echo("2");
+}
+
+function DefaultCubeDesc::foo(%this) {
+}
+
+function bar() {
+}
+
+DefaultCubeDesc::foo();
+
+// foo
+
+foo(2);
+
+%qwe[$asd] = "asd";
+
+%qwe.asd = "asd";
+
+foo('a');
+
+$minion = new AIPlayer(Fubar)
+{
+    datablock = MinionData;
+};
+%a = "asd";
+%v = 'asd';
+
+Fubar::as();
+
+$minion.setMoveDestination("50 0 0");
+
+%a = 1;
+%a -= 0x213;
+%a += 1;
+%a *= 1;
+%a /= 1;
+%a %= 1;
+%a &= 1;
+%a ^= 1;
+%a |= 1;
+%a <<= 1;
+%a >>= 1;
+
+%a = %a + 2;
+
+datablock ASD(QWE)
+{
+    qwe = zxc;
+    vxa = "qwe";
+    vda = 21;
+};
+foo(%a);
+ASD(%this);
+
+QWE::ASD();
+
+ASD.id;
+
+singleton lcks(lal)
+{
+    sd = 2;
+    qw = 3;
+};
+
+$minion = new AIPlayer(foo)
+{
+    qwe       = 2;
+    datablock = MinionData;
+};
+
+function foo(%b) {
+}
+
+package A
+{
+    function foo(%a) {
+        return echo(%a);
+    }
+};
+
+function ASD(%this, %qwe) {
+    %asd = 2;
+    return 4;
+}
+
+ASD();
+
+ASD();
+

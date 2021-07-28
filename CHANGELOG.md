@@ -4,6 +4,19 @@
 ### Added
 
 ### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+## [1.5.0]
+### Added
+- Experimental formatter support
+
+### Changed
 - Improved documentation for quick-navigation
 
 ### Deprecated
@@ -13,6 +26,7 @@
 ### Fixed
 - Fixed an issue with folding in switch statements
 - Technical Debt: Renamed brack and paren token types
+- Fixed highlighting of `default` keyword
 
 ### Security
 ## [1.4.0]

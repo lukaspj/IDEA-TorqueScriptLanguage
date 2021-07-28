@@ -47,7 +47,7 @@ class TSParserDefinition : ParserDefinition {
         val KEYWORDS = TokenSet.create(
             DATABLOCK, SINGLETON, FUNCTION, PACKAGE, NAMESPACE,
             DO, WHILE, FOR, FOREACH, STR_FOREACH, SWITCH, STR_SWITCH, IF, ELSE,
-            CASE, BREAK, CONTINUE, RETURN, IN,
+            CASE, DEFAULT, BREAK, CONTINUE, RETURN, IN,
             NEW, ASSERT, TRUE, FALSE
         )
 
