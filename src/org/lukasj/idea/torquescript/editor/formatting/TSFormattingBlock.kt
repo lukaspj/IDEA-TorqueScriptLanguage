@@ -98,6 +98,7 @@ class TSFormattingBlock(
     private fun calcIndent(child: ASTNode) =
         when (node.elementType) {
             TSTypes.NEW_INSTANCE_BLOCK -> indentIfNotBrace(child)
+            TSTypes.NEW_INSTANCE_EXPRESSION, TSTypes.FUNCTION_DECLARATION -> Indent.getNoneIndent()
             TSTypes.STATEMENT_BLOCK -> indentIfNotBrace(child)
             TSTypes.DEFAULT_BLOCK -> indentIfType(child, TSTypes.STATEMENT)
             TSTypes.CASE_BLOCK -> indentIfType(child, TSTypes.STATEMENT)

@@ -101,6 +101,7 @@
                                        implementationClass="org.lukasj.idea.torquescript.TSSyntaxHighlighterFactory"/>
         <lang.findUsagesProvider language="TorqueScript"
                                  implementationClass="org.lukasj.idea.torquescript.editor.TSFindUsagesProvider"/>
+        <usageTypeProvider implementation="org.lukasj.idea.torquescript.editor.TSUsageTypeProvider"/>
         <lang.refactoringSupport language="TorqueScript"
                                  implementationClass="org.lukasj.idea.torquescript.editor.TSRefactoringSupportProvider"/>
 

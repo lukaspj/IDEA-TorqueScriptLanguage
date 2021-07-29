@@ -180,7 +180,9 @@ literal_expression ::= TRUE
           | INTEGER
           | FLOAT
           | QUOTED_STRING
-          | TAGGED_STRING
+          | TAGGED_STRING {
+    mixin="org.lukasj.idea.torquescript.psi.impl.TSLiteralExpressionElementImpl"
+}
 
 binary_expression ::= expression binaryoperator expression
 prefix_unary_expression ::= (NOT | MINUS) expression {pin=1}

@@ -61,6 +61,7 @@ open class TSAnnotator : Annotator {
                 TSMethodCallAnnotator(),
                 TSObjectAnnotator(),
                 TSClassNameAnnotator(),
+                TSPathAnnotator(),
             )
         }
     }

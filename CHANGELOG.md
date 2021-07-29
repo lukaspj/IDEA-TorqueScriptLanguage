@@ -2,14 +2,17 @@
 
 ## [Unreleased]
 ### Added
+- Hyperlinks for simple file paths in strings
 
 ### Changed
+- Classified find usages results on objects
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+- Fixed a bug with formatter indenting body on new instance expressions
 
 ### Security
 ## [1.5.0]

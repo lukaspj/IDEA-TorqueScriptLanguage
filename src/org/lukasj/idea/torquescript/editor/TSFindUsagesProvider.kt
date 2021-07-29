@@ -24,12 +24,13 @@ class TSFindUsagesProvider : FindUsagesProvider {
 
     override fun getType(element: PsiElement): String =
         when (element) {
-            is TSFunctionStatementElementImpl -> "Function"
-            is TSFunctionDeclarationImpl -> "Function"
-            is TSFunctionCallExpressionElementImpl -> "Function"
-            is TSFunctionIdentifierElementImpl -> "Function"
-            is TSVarExpressionElementImpl -> "Variable"
-            is TSObjectDeclaration -> "Object"
+            is TSFunctionStatementElementImpl -> "function"
+            is TSFunctionDeclarationImpl -> "function"
+            is TSFunctionCallExpressionElementImpl -> "function"
+            is TSFunctionIdentifierElementImpl -> "function"
+            is TSVarExpressionElementImpl -> "variable"
+            is TSObjectDeclaration -> "object"
+            is TSNewInstanceExpression -> "object"
             else -> ""
         }
 
