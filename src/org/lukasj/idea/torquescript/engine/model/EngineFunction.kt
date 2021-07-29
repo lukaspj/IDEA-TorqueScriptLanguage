@@ -15,11 +15,12 @@ class EngineFunction(
     val isVariadic: Boolean
 
     init {
-        if (arguments.isNotEmpty() && arguments.first().name == "this") {
-            isStatic = arguments.first().name.split(':').last() == scopeList.last()
-        } else {
-            isStatic = true
-        }
+        isStatic =
+            if (arguments.isNotEmpty() && arguments.first().name == "this") {
+                arguments.first().typeName.split(':').last() != scopeList.last()
+            } else {
+                true
+            }
 
         isVariadic = when {
             arguments.size == 2
@@ -40,6 +41,11 @@ class EngineFunction(
         isOverride = false
     }
 
-    override fun toString() = name
+    override fun toString() =
+        if (scopeList.isNotEmpty()) {
+            "${scopeList.last()}::$name"
+        } else {
+            name
+        }
 }
 

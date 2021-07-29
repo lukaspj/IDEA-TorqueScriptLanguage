@@ -200,7 +200,9 @@ new_instance_expression ::= NEW IDENT LPAREN (object_name parent_block? (COMMA a
 new_instance_block ::= LBRACE ((field_assignment | new_instance_expression | singleton_statement) STMT_SEPARATOR)* RBRACE
 
 object_name ::= expression
-parent_block ::= COLON IDENT
+parent_block ::= COLON IDENT {
+    mixin="org.lukasj.idea.torquescript.psi.impl.TSParentBlockElementImpl"
+}
 
 binaryoperator ::= EQUAL
                  | NOT_EQUAL

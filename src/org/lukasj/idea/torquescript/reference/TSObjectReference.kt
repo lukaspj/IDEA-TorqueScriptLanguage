@@ -9,7 +9,7 @@ class TSObjectReference(element: PsiElement, textRange: TextRange) : PsiReferenc
     PsiPolyVariantReference {
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
         val project = myElement.project
-        val objects = ReferenceUtil.findObject(project, element.text)
+        val objects = ReferenceUtil.findObject(project, rangeInElement.substring(element.text))
 
         return objects.map { PsiElementResolveResult(it) }
             .toTypedArray()
@@ -36,7 +36,7 @@ class TSObjectReference(element: PsiElement, textRange: TextRange) : PsiReferenc
 
     override fun handleElementRename(newElementName: String): PsiElement {
         val elem = element
-        if (elem is PsiNameIdentifierOwner) {
+        if (elem is PsiNamedElement) {
             return elem.setName(newElementName)
         }
         return element

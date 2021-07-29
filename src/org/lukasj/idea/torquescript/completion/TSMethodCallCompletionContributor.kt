@@ -4,10 +4,13 @@ import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.project.Project
 import com.intellij.util.PlatformIcons
 import com.intellij.util.ProcessingContext
 import org.lukasj.idea.torquescript.engine.EngineApiService
 import org.lukasj.idea.torquescript.psi.TSTypes
+import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionType
 import org.lukasj.idea.torquescript.reference.ReferenceUtil
 
@@ -22,16 +25,18 @@ class TSMethodCallCompletionContributor : CompletionProvider<CompletionParameter
             .prevSibling
             .prevSibling
 
-        val namespace =
-            if (caller.node.elementType.equals(TSTypes.IDENT))
-                caller.text
-            else
-                null
+        val namespace = ReferenceUtil.tryResolveType(caller)
 
         val project = parameters.originalFile.project
+        val namespaces =
+            if (namespace != null)
+                ReferenceUtil.getNamespaces(namespace, project)
+            else
+                listOf()
 
         ReferenceUtil.getFunctions(project)
             .filter { it.getFunctionType() != TSFunctionType.GLOBAL }
+            .filter { func -> namespaces.isEmpty() || namespaces.any { func.getNamespace() == it } }
             .map { function ->
                 LookupElementBuilder.create(function.name!!)
                     .withIcon(PlatformIcons.METHOD_ICON)
@@ -43,19 +48,27 @@ class TSMethodCallCompletionContributor : CompletionProvider<CompletionParameter
                     .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
             }
             .plus(
-                project.getService(EngineApiService::class.java)
-                    .getMethods(namespace ?: "")
+                namespaces
+                    .flatMap { project.getService(EngineApiService::class.java).getMethods(it) }
+                    .plus(
+                        if (namespaces.isEmpty()) {
+                            project.getService(EngineApiService::class.java)
+                                .getFunctions()
+                        } else {
+                            listOf()
+                        }
+                    )
                     .filter { !it.isStatic }
-                    .map {
-                        LookupElementBuilder.create(it)
+                    .map { method ->
+                        LookupElementBuilder.create(method, method.name)
                             .withIcon(PlatformIcons.FUNCTION_ICON)
                             .withCaseSensitivity(false)
-                            .withTypeText(it.returnType)
-                            .withTailText(it.arguments.joinToString(", ", "(", ")") { a -> a.toArgString() })
+                            .withTypeText(method.returnType)
+                            .withPresentableText(method.toString())
+                            .withTailText(method.arguments.joinToString(", ", "(", ")") { a -> a.toArgString() })
                             .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
                     }
             )
             .forEach { result.addElement(it) }
     }
-
 }

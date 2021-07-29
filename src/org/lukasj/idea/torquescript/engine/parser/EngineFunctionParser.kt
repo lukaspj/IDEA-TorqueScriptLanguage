@@ -17,7 +17,6 @@ class EngineFunctionParser(private val eventReader: XMLEventReader, private val 
         val isVariadic = EngineApiUtil.stringToBool(xmlEvent.getAttributeByName(QName("", "isVariadic")).value)
         var arguments = listOf<EngineFunctionArgument>()
 
-
         while (eventReader.hasNext()) {
             val nextEvent = eventReader.nextEvent()
             if (nextEvent.isStartElement) {

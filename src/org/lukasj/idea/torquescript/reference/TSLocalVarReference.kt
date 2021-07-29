@@ -15,25 +15,13 @@ import org.lukasj.idea.torquescript.editor.TSVarExpressionElementImpl
 class TSLocalVarReference(element: PsiElement, textRange: TextRange) : PsiReferenceBase<PsiElement>(element, textRange),
     PsiPolyVariantReference {
 
-    override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
-        val functionParent = element.parentOfTypes(TSFunctionStatementElementImpl::class)
-        if (functionParent != null) {
-            return PsiTreeUtil.findChildrenOfType(functionParent, TSVarExpressionElementImpl::class.java)
-                .plus(functionParent.getParameters()
-                    .filter { it.elementType == TSTypes.LOCALVAR || it.elementType == TSTypes.THISVAR })
-                .filter { it.text.equals(element.text, true) }
-                .map { PsiElementResolveResult(it) }
-                .toTypedArray()
-        } else {
-            // Assume file-scoped
-            val file = element.containingFile as TSFile
-            return file.getVariables()
-                ?.filter { it.text.equals(element.text, true) }
-                ?.map { PsiElementResolveResult(it) }
-                ?.toTypedArray()
-                ?: arrayOf()
-        }
-    }
+    override fun multiResolve(incompleteCode: Boolean) =
+        ReferenceUtil.findLocalVariablesForContext(element)
+            .filter { it.parent is TSAssignmentExpression }
+            .filterNot { it.textRange.contains(element.textRange) }
+            .filter { it.text.equals(element.text, true) }
+            .map { PsiElementResolveResult(it) }
+            .toTypedArray()
 
     override fun getVariants(): Array<LookupElement> {
         val functionParent = element.parentOfTypes(TSFunctionStatementElementImpl::class)

@@ -2,10 +2,25 @@
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Parent references in object initializers are now properly resolved and highlighted
+
+### Security
+## [1.5.1]
+### Added
 - Hyperlinks for simple file paths in strings
 
 ### Changed
 - Classified find usages results on objects
+- Context-aware completion for method calls on named objects and when type-analysis succeeds
+- Context-aware completion for callbacks
 
 ### Deprecated
 
@@ -13,6 +28,7 @@
 
 ### Fixed
 - Fixed a bug with formatter indenting body on new instance expressions
+- Find usages for local variables is now working
 
 ### Security
 ## [1.5.0]

@@ -35,7 +35,7 @@ class EngineClassParser(private val eventReader: XMLEventReader, private val sco
                             scopeList
                         ).parse(nextStartEvent)
                     )
-                    "EngineFunction" -> methods.plus(EngineFunctionParser(eventReader, scopeList.plus(name)).parse(nextStartEvent))
+                    "EngineFunction" -> methods = methods.plus(EngineFunctionParser(eventReader, scopeList.plus(name)).parse(nextStartEvent))
                     else -> throw Throwable("Unexpected Engine Function child")
                 }
             }
