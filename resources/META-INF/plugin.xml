@@ -5,8 +5,10 @@
 
     <description><![CDATA[
         <p>
-            This is a basic implementation of TorqueScript language support. <br/>
-            More advanced features are planned, but at the moment this is mostly a syntax highlighter.
+            This is an implementation of TorqueScript language support. <br/>
+            It supports a wide range of features, but it is very new and
+            hasn't been exposed to rigorous testing, so there might be a bunch of
+            edge-cases that need taken care of. Please report any you find.
         </p>
 
         <p>

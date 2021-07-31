@@ -10,6 +10,33 @@
 ### Removed
 
 ### Fixed
+
+### Security
+## [1.6.1]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Handle more illegal XML chars in the Rebuild Exports action
+
+### Security
+## [1.6.0]
+### Added
+- Auto-show local variables when breakpoint is hit
+
+### Changed
+- Specify compatibility range of plugin to be anything from 211
+
+### Deprecated
+
+### Removed
+
+### Fixed
 - Parent references in object initializers are now properly resolved and highlighted
 
 ### Security

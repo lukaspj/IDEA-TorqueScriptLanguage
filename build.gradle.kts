@@ -43,7 +43,7 @@ tasks.runIde {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version.set("2021.1.3")
+    version.set("2021.2")
     pluginName.set("TorqueScript")
 
     plugins.set(listOf("com.intellij.java"))
@@ -80,13 +80,9 @@ changelog {
 tasks {
     patchPluginXml {
         changeNotes.set(provider { changelog.get(prop("pluginVersion")).toHTML() })
+        sinceBuild.set("211")
+        untilBuild.set(null as String?)
     }
-
-//    buildPlugin {
-//        from(fileTree("resources") { include("scripts/**") }) {
-//            into("/${project.name}")
-//        }
-//    }
 
     withType<PublishPluginTask> {
         token.set(prop("publishToken"))

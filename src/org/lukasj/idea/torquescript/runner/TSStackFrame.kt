@@ -1,16 +1,31 @@
 package org.lukasj.idea.torquescript.runner
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.util.PsiUtil
+import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.ColoredTextContainer
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.util.PlatformIcons
 import com.intellij.xdebugger.XSourcePosition
 import com.intellij.xdebugger.evaluation.XDebuggerEvaluator
-import com.intellij.xdebugger.frame.XExecutionStack
-import com.intellij.xdebugger.frame.XStackFrame
+import com.intellij.xdebugger.frame.*
 import com.intellij.xdebugger.impl.frame.XStackFrameContainerEx
 import org.lukasj.idea.torquescript.psi.TSFile
+import org.lukasj.idea.torquescript.reference.ReferenceUtil
+
+class TSValue(name: String, val value: String, val type: String?) : XNamedValue(name) {
+    override fun computePresentation(node: XValueNode, place: XValuePlace) {
+        node.setPresentation(
+            PlatformIcons.VARIABLE_ICON,
+            type,
+            value,
+            false
+        )
+    }
+}
 
 class TSStackFrame(
     private val project: Project,
@@ -20,6 +35,30 @@ class TSStackFrame(
     private val telnetClient: TSTelnetClient
 ) : XStackFrame() {
     var paramValuesCache: String? = null
+
+    val variables: XValueChildrenList =
+        XValueChildrenList()
+            .let { valueList ->
+                ApplicationManager.getApplication().runReadAction {
+                    ReferenceUtil.findLocalVariablesForContext(
+                        (PsiUtil.getPsiFile(project, position.file) as TSFile)
+                            .findElementAt(position.offset)!!
+                    )
+                        .filter {
+                            PsiDocumentManager.getInstance(project)
+                                .getDocument(it.containingFile)
+                                ?.getLineNumber(it.startOffset) ?: 0 <= position.line
+                        }
+                        .distinctBy { it.text }
+                        .map { TSValue(it.text, telnetClient.evalAtLevel(level, it.text), ReferenceUtil.tryResolveType(it)) }
+                        .fold(valueList) { acc, namedValue ->
+                            acc.also {
+                                it.add(namedValue)
+                            }
+                        }
+                }
+                valueList
+            }
 
     override fun getSourcePosition(): XSourcePosition = position
 
@@ -34,7 +73,8 @@ class TSStackFrame(
         val tsFile = PsiUtil.getPsiFile(project, position.file) as TSFile
         val tsFunction = tsFile.getEnclosingFunction(
             PsiUtil.getElementAtOffset(
-                tsFile, position.offset)
+                tsFile, position.offset
+            )
         )
 
         paramValuesCache =
@@ -44,6 +84,11 @@ class TSStackFrame(
                 ?: ""
 
         return paramValuesCache!!
+    }
+
+
+    override fun computeChildren(node: XCompositeNode) {
+        node.addChildren(variables, true)
     }
 
     override fun customizePresentation(component: ColoredTextContainer) {

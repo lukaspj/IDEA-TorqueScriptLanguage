@@ -40,15 +40,17 @@ class EngineApiService(private val project: Project) {
                         ?: return@createCachedValue null
 
                     val string = String(engineApiFile.inputStream.readAllBytes())
-                    val xmlStream = string
-                        .replace("&#x1C", "")
-                        .replace("&#x1D", "")
-                        .replace("&#x1A", "")
-                        .replace("&#x01", "")
-                        .replace("&#x04", "")
-                        .replace("&#x18", "")
-                        .replace("&#x19", "")
-                        .byteInputStream()
+                    val illegalXmlChars = listOf(0x9, 0xA, 0xD)
+                        .plus(0x20..0xD7FF)
+                        .plus(0xE000..0xFFFD)
+                        .plus(0x10000..0x10FFFF)
+                        .map {
+                            "&#x%s;".format(it.toString(16).toUpperCase())
+                        }
+                    val xmlStream =
+                        illegalXmlChars.fold(string) { acc, illegalString ->
+                            acc.replace(illegalString, "")
+                        }.byteInputStream()
 
                     val eventReader = xmlInputFactory.createXMLEventReader(xmlStream, "UTF-8")
 
