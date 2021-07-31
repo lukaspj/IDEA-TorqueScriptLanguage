@@ -12,6 +12,19 @@
 ### Fixed
 
 ### Security
+## [1.6.2]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Global Functions are no longer incorrectly prefixed with :: in auto-completion
+
+### Security
 ## [1.6.1]
 ### Added
 

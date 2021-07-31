@@ -39,7 +39,6 @@ class EngineApiService(private val project: Project) {
                     val engineApiFile = VfsUtil.findFile(Path.of(project.basePath, "engineApi.xml"), true)
                         ?: return@createCachedValue null
 
-                    println("Parsing EngineAPI")
                     val string = String(engineApiFile.inputStream.readAllBytes())
                     val xmlStream = Regex("&#x([A-Za-z0-9]+);")
                         .findAll(string, 0)
@@ -55,11 +54,9 @@ class EngineApiService(private val project: Project) {
                         }
                         .toList()
                         .foldRight(string) { match, acc ->
-                            println("Removing ${match.value} at ${match.range}")
                             acc.removeRange(match.range)
                         }
                         .byteInputStream()
-                    println("Done removing illegal chars")
 
                     val eventReader = xmlInputFactory.createXMLEventReader(xmlStream, "UTF-8")
 
