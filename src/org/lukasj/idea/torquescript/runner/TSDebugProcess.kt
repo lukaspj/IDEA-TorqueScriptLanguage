@@ -223,7 +223,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
                 override fun registerBreakpoint(breakpoint: XLineBreakpoint<XBreakpointProperties<*>>) {
                     val sourcePosition = breakpoint.sourcePosition
                     if (sourcePosition != null) {
-                        registerBreakpoint(sourcePosition, breakpoint.conditionExpression.toString())
+                        registerBreakpoint(sourcePosition, breakpoint.conditionExpression?.toString())
                     }
                 }
 
@@ -260,7 +260,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
                 bp.sourcePosition?.let {
                     registerBreakpoint(
                         it,
-                        if (bp.conditionExpression != null) bp.conditionExpression.toString() else null
+                        bp.conditionExpression?.toString()
                     )
                 }
                 true

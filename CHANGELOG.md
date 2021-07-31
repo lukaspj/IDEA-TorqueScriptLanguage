@@ -12,6 +12,20 @@
 ### Fixed
 
 ### Security
+## [1.6.3]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Breakpoints added after application had started would get the 
+  string "null" as a condition if no condition were specified. Now it correctly defaults to "true"
+
+### Security
 ## [1.6.2]
 ### Added
 
