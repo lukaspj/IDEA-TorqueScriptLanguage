@@ -12,6 +12,19 @@
 ### Fixed
 
 ### Security
+## [1.6.4]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Improved error handling in Rebuild Exports action
+
+### Security
 ## [1.6.3]
 ### Added
 

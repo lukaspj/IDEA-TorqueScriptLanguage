@@ -36,7 +36,7 @@ class EngineApiService(private val project: Project) {
         cachedApi =
             manager.createCachedValue(
                 {
-                    val engineApiFile = VfsUtil.findFile(Path.of(project.basePath, "engineApi.xml"), true)
+                    val engineApiFile = VfsUtil.findFile(Path.of(project.basePath, "engineApi.xml"), false)
                         ?: return@createCachedValue null
 
                     val string = String(engineApiFile.inputStream.readAllBytes())

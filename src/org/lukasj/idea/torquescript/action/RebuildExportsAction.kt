@@ -99,9 +99,9 @@ class RebuildExportsAction : AnAction() {
                         override fun run(indicator: ProgressIndicator) {
                             try {
                                 telnetClient.login("password")
-                                telnetClient.eval("exportEngineAPIToXML().saveFile(\"${dir.replace('\\', '/')}/engineApi.xml\");\n" +
-                                        "quit();")
                                 telnetClient.resume()
+                                telnetClient.eval("exportEngineAPIToXML().saveFile(\"${dir.replace('\\', '/')}/engineApi.xml\");")
+                                telnetClient.eval("quit();")
                                 if (processHandler.waitFor(3000)) {
                                     ApplicationManager.getApplication()
                                         .invokeLater {
@@ -112,14 +112,29 @@ class RebuildExportsAction : AnAction() {
                                                 Messages.getInformationIcon()
                                             )
                                         }
+                                } else {
+                                    ApplicationManager.getApplication()
+                                        .invokeLater {
+                                            Messages.showMessageDialog(
+                                                project,
+                                                "Engine failed to terminate, killing it manually.\nPlease check whether engineApi.xml was generated successfully",
+                                                "Build Exports Timeout",
+                                                Messages.getWarningIcon()
+                                            )
+                                        }
                                 }
                             } catch (ex: Exception) {
-                                Messages.showMessageDialog(
-                                    project,
-                                    "Something went wrong while building exports: $ex",
-                                    "Build Exports Error",
-                                    Messages.getErrorIcon()
-                                )
+                                ApplicationManager.getApplication()
+                                    .invokeLater {
+                                        Messages.showMessageDialog(
+                                            project,
+                                            "Something went wrong while building exports: $ex",
+                                            "Build Exports Error",
+                                            Messages.getErrorIcon()
+                                        )
+                                    }
+                            } finally {
+                                processHandler.killProcess()
                             }
                         }
 
