@@ -1,0 +1,66 @@
+<idea-plugin>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="TorqueScript File"
+                  implementationClass="org.lukasj.idea.torquescript.TSFileType"
+                  fieldName="INSTANCE"
+                  language="TorqueScript"
+                  extensions="tscript"/>
+
+        <lang.parserDefinition language="TorqueScript"
+                               implementationClass="org.lukasj.idea.torquescript.parser.TSParserDefinition"/>
+
+        <lang.syntaxHighlighterFactory language="TorqueScript"
+                                       implementationClass="org.lukasj.idea.torquescript.TSSyntaxHighlighterFactory"/>
+        <lang.findUsagesProvider language="TorqueScript"
+                                 implementationClass="org.lukasj.idea.torquescript.editor.TSFindUsagesProvider"/>
+        <usageTypeProvider implementation="org.lukasj.idea.torquescript.editor.TSUsageTypeProvider"/>
+        <lang.refactoringSupport language="TorqueScript"
+                                 implementationClass="org.lukasj.idea.torquescript.editor.TSRefactoringSupportProvider"/>
+
+        <lang.namesValidator language="TorqueScript"
+                             implementationClass="org.lukasj.idea.torquescript.editor.TSNamesValidator"/>
+
+        <lang.braceMatcher language="TorqueScript"
+                           implementationClass="org.lukasj.idea.torquescript.editor.TSBraceMatcher"/>
+
+        <gotoSymbolContributor implementation="org.lukasj.idea.torquescript.editor.TSChooseByNameContributor"/>
+
+        <lang.commenter language="TorqueScript"
+                        implementationClass="org.lukasj.idea.torquescript.editor.TSCommenter"/>
+        <lang.foldingBuilder language="TorqueScript"
+                             implementationClass="org.lukasj.idea.torquescript.editor.TSFoldingBuilder"/>
+        <lang.documentationProvider language="TorqueScript"
+                                    implementationClass="org.lukasj.idea.torquescript.documentation.TSDocumentationProvider"/>
+        <lang.formatter language="TorqueScript"
+                        implementationClass="org.lukasj.idea.torquescript.editor.formatting.TSFormattingModelBuilder"/>
+        <colorSettingsPage implementation="org.lukasj.idea.torquescript.editor.TSColorSettingsPage"/>
+        <codeStyleSettingsProvider
+                implementation="org.lukasj.idea.torquescript.editor.formatting.TSCodeStyleSettingsProvider"/>
+        <langCodeStyleSettingsProvider
+                implementation="org.lukasj.idea.torquescript.editor.formatting.TSLanguageCodeStyleSettingsProvider"/>
+
+        <annotator implementationClass="org.lukasj.idea.torquescript.annotator.TSAnnotator"
+                   language="TorqueScript"/>
+
+        <typedHandler implementation="org.lukasj.idea.torquescript.completion.TSCompletionAutoPopupHandler" id="ts"/>
+        <completion.contributor language="TorqueScript"
+                                implementationClass="org.lukasj.idea.torquescript.completion.TSCompletionContributor"/>
+
+        <programRunner implementation="org.lukasj.idea.torquescript.runner.TSRunner"/>
+        <configurationType implementation="org.lukasj.idea.torquescript.runner.TSRunConfigurationType"/>
+
+        <xdebugger.breakpointType implementation="org.lukasj.idea.torquescript.runner.TSLineBreakpointType"/>
+
+        <projectService serviceImplementation="org.lukasj.idea.torquescript.engine.EngineApiService"/>
+    </extensions>
+
+    <actions>
+        <action class="org.lukasj.idea.torquescript.action.RebuildExportsAction"
+                id="org.lukasj.idea.torquescript.action.RebuildExportsAction"
+                text="Rebuild Exports" description="Rebuild Engine Exports"
+                icon="TSIcons.FILE">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>

@@ -16,6 +16,7 @@
 ### Added
 
 ### Changed
+- Removed dependency on `com.intellij.java`
 
 ### Deprecated
 

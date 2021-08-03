@@ -45,8 +45,6 @@ tasks.runIde {
 intellij {
     version.set("2021.2")
     pluginName.set("TorqueScript")
-
-    plugins.set(listOf("com.intellij.java"))
 }
 
 val generateTorqueScriptParser = task<GenerateParser>("GenerateTorqueScriptParser") {
