@@ -2,9 +2,8 @@ package org.lukasj.idea.torquescript.runner
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.util.PsiUtil
+import com.intellij.psi.util.PsiUtilCore
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.ColoredTextContainer
 import com.intellij.ui.SimpleTextAttributes
@@ -41,7 +40,7 @@ class TSStackFrame(
             .let { valueList ->
                 ApplicationManager.getApplication().runReadAction {
                     ReferenceUtil.findLocalVariablesForContext(
-                        (PsiUtil.getPsiFile(project, position.file) as TSFile)
+                        (PsiUtilCore.getPsiFile(project, position.file) as TSFile)
                             .findElementAt(position.offset)!!
                     )
                         .filter {
@@ -70,9 +69,9 @@ class TSStackFrame(
             return paramValuesCache!!
         }
 
-        val tsFile = PsiUtil.getPsiFile(project, position.file) as TSFile
+        val tsFile = PsiUtilCore.getPsiFile(project, position.file) as TSFile
         val tsFunction = tsFile.getEnclosingFunction(
-            PsiUtil.getElementAtOffset(
+            PsiUtilCore.getElementAtOffset(
                 tsFile, position.offset
             )
         )

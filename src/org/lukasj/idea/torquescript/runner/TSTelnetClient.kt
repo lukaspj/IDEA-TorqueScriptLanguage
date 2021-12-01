@@ -1,10 +1,18 @@
 package org.lukasj.idea.torquescript.runner
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.retry
+import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.io.PrintWriter
+import java.lang.IllegalArgumentException
+import java.net.InetSocketAddress
 import java.net.Socket
+import java.net.SocketTimeoutException
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.ConcurrentHashMap
@@ -23,9 +31,9 @@ class TSExecutionStackLines(rawLine: String) {
 class TSBreakpointMovedEvent(val file: String, val line: Int, val newLine: Int?)
 
 class TSTelnetClient(address: String, port: Int) {
-    private val socket = Socket(address, port)
-    private val input = BufferedReader(InputStreamReader(socket.getInputStream()))
-    private val output = PrintWriter(socket.getOutputStream(), true)
+    private var socket = Socket()
+    private var input: BufferedReader? = null
+    private var output: PrintWriter? = null
     private val loginQueue = ArrayBlockingQueue<Boolean>(1)
     val evalSubscribers = ConcurrentHashMap<String, ArrayBlockingQueue<String>>()
     val outputQueue = ArrayBlockingQueue<String>(100)
@@ -34,9 +42,23 @@ class TSTelnetClient(address: String, port: Int) {
     private var thread: Thread? = null
     private var isStopped = false
 
-    fun login(password: String): Boolean {
-        output.println(password)
-        return loginQueue.poll(3, TimeUnit.SECONDS) ?: false
+    init {
+        val inetAddress = InetSocketAddress(address, port)
+
+        for (i in 1..3) {
+            try {
+                socket = Socket(address, port)
+                input = BufferedReader(InputStreamReader(socket.getInputStream()))
+                output = PrintWriter(socket.getOutputStream(), true)
+                break
+            } catch (ste: SocketTimeoutException) {
+                Thread.sleep(1000)
+                continue
+            } catch (ioe: IOException) {
+                Thread.sleep(1000)
+                continue
+            }
+        }
     }
 
     private fun processOutput(line: String) {
@@ -91,10 +113,8 @@ class TSTelnetClient(address: String, port: Int) {
         thread = thread {
             try {
                 while (!isStopped) {
-                    val line = input.readLine()
-                    if (line != null) {
-                        processOutput(line)
-                    }
+                    input?.let { processOutput(it.readLine()) }
+                    Thread.sleep(10)
                 }
             } catch (ioe: IOException) {
                 // Do nothing
@@ -108,36 +128,41 @@ class TSTelnetClient(address: String, port: Int) {
         thread = null
     }
 
+    fun login(password: String): Boolean {
+        output!!.println(password)
+        return loginQueue.poll(3, TimeUnit.SECONDS) ?: false
+    }
+
     fun pause() =
-        output.println("BRKNEXT")
+        output!!.println("BRKNEXT")
 
     fun resume() =
-        output.println("CONTINUE")
+        output!!.println("CONTINUE")
 
     fun eval(cmd: String) =
-        output.println("CEVAL $cmd")
+        output!!.println("CEVAL $cmd")
 
     fun setBreakpoint(file: String, line: Int, clear: Boolean, passCount: Int, condition: String) =
         // TorqueScript has 1-index line numbers, IntelliJ uses 0-indexed
-        output.println("BRKSET $file ${line + 1} ${if (clear) 1 else 0} $passCount ${condition}")
+        output!!.println("BRKSET $file ${line + 1} ${if (clear) 1 else 0} $passCount ${condition}")
 
     fun clearBreakpoint(file: String, line: Int) =
         // TorqueScript has 1-index line numbers, IntelliJ uses 0-indexed
-        output.println("BRKCLR $file ${line + 1}")
+        output!!.println("BRKCLR $file ${line + 1}")
 
     fun stepOver() =
-        output.println("STEPOVER")
+        output!!.println("STEPOVER")
 
     fun stepIn() =
-        output.println("STEPIN")
+        output!!.println("STEPIN")
 
     fun stepOut() =
-        output.println("STEPOUT")
+        output!!.println("STEPOUT")
 
     fun evalAtLevel(level: Int, expression: String): String {
         val tag = UUID.randomUUID().toString()
         val queue = subscribeForEval(tag)
-        output.println("EVAL $tag $level $expression")
+        output!!.println("EVAL $tag $level $expression")
         return queue.take()
     }
 }

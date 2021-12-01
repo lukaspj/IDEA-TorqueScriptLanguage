@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.psi.util.PsiUtil
+import com.intellij.psi.util.PsiUtilCore
 import com.intellij.psi.util.elementType
 import com.intellij.util.PlatformIcons
 import com.intellij.xdebugger.XSourcePosition
@@ -26,7 +26,7 @@ class TSDebuggerEvaluator(private val telnetClient: TSTelnetClient, private val 
         PsiDocumentManager.getInstance(project).commitAndRunReadAction {
             val tsFile = PsiDocumentManager.getInstance(project).getPsiFile(document) ?: return@commitAndRunReadAction
 
-            val element = PsiUtil.getElementAtOffset(tsFile, offset)
+            val element = PsiUtilCore.getElementAtOffset(tsFile, offset)
 
             currentRange = when(element.elementType) {
                 TSTypes.LOCALVAR -> element.textRange
