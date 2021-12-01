@@ -31,7 +31,7 @@ class TSExecutionStackLines(rawLine: String) {
 class TSBreakpointMovedEvent(val file: String, val line: Int, val newLine: Int?)
 
 class TSTelnetClient(address: String, port: Int) {
-    private var socket = Socket()
+    private var socket: Socket? = null
     private var input: BufferedReader? = null
     private var output: PrintWriter? = null
     private val loginQueue = ArrayBlockingQueue<Boolean>(1)
@@ -43,18 +43,23 @@ class TSTelnetClient(address: String, port: Int) {
     private var isStopped = false
 
     init {
-        val inetAddress = InetSocketAddress(address, port)
+        retry(3) {
+            socket = Socket(address, port)
+            input = BufferedReader(InputStreamReader(socket!!.getInputStream()))
+            output = PrintWriter(socket!!.getOutputStream(), true)
+        }
+    }
 
-        for (i in 1..3) {
+    private fun retry(retries: Int, fn: () -> Unit) {
+        for (i in 1..retries) {
             try {
-                socket = Socket(address, port)
-                input = BufferedReader(InputStreamReader(socket.getInputStream()))
-                output = PrintWriter(socket.getOutputStream(), true)
+                fn()
                 break
-            } catch (ste: SocketTimeoutException) {
-                Thread.sleep(1000)
-                continue
-            } catch (ioe: IOException) {
+            } catch (ex: Exception) {
+                if (i == retries) {
+                    throw ex
+                }
+
                 Thread.sleep(1000)
                 continue
             }

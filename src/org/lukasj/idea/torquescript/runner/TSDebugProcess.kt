@@ -47,8 +47,8 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
         val commandLine = GeneralCommandLine(configuration.appPath)
         commandLine.addParameters(debugMain)
 
-        val dir = configuration.workingDir
-        commandLine.workDirectory = File(dir!!)
+        val dir = configuration.workingDir!!
+        commandLine.workDirectory = File(dir)
 
         try {
             processHandler = TSProcessHandler(commandLine)
@@ -187,7 +187,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
             telnetClient!!.eval("exec(\"main.tscript\");")
             telnetClient!!.resume()
         } catch (e: Exception) {
-            e.message?.let { error(it) }
+            e.message?.let { error("An unexpected error occured in the IntelliJ debugger: $it \n ${e.stackTraceToString()}") }
             session.stop()
         }
     }
@@ -300,7 +300,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
         session.consoleView.printHyperlink(text, handler)
 
     override fun error(text: String, consoleType: LogConsoleType) =
-        print("$text\n", consoleType, ConsoleViewContentType.ERROR_OUTPUT)
+        print("\n$text\n", consoleType, ConsoleViewContentType.ERROR_OUTPUT)
 
     override fun startPausing() =
         telnetClient!!.pause()
