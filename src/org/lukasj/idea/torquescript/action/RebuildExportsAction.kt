@@ -81,7 +81,7 @@ class RebuildExportsAction : AnAction() {
             })
             processHandler.startNotify()
 
-            val telnetClient = TSTelnetClient("127.0.0.1", 17432)
+            val telnetClient = TSTelnetClient("127.0.0.1", 17433)
             telnetClient.connect()
 
             thread {

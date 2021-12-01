@@ -12,6 +12,12 @@
 ### Fixed
 
 ### Security
+## [1.6.6]
+
+### Fixed
+- Use project root as game root when setting breakpoints
+  
+  This solves an issue on OSX where the game executable is not in the root folder
 
 ## [1.6.5]
 ### Fixed

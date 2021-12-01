@@ -43,9 +43,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
 
     override fun sessionInitialized() {
         val debugMain = TSFileUtil.getPluginVirtualFile("scripts/debuggermain.tscript")
-        println(debugMain)
 
-        println(configuration.workingDir)
         val commandLine = GeneralCommandLine(configuration.appPath)
         commandLine.addParameters(debugMain)
 
@@ -241,7 +239,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
 
     fun registerBreakpoint(sourcePosition: XSourcePosition, condition: String? = null) =
         telnetClient?.setBreakpoint(
-            File(sourcePosition.file.path).relativeTo(File(configuration.appPath!!).parentFile).path,
+            File(sourcePosition.file.path).relativeTo(File(configuration.workingDir!!)).path,
             sourcePosition.line,
             false,
             0,
@@ -250,7 +248,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
 
     fun unregisterBreakpoint(sourcePosition: XSourcePosition) =
         telnetClient?.clearBreakpoint(
-            File(sourcePosition.file.path).relativeTo(File(configuration.appPath!!).parentFile).path,
+            File(sourcePosition.file.path).relativeTo(File(configuration.workingDir!!)).path,
             sourcePosition.line
         )
 

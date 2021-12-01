@@ -37,9 +37,7 @@ class TSRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
         }
 
     private val defaultWorkingDir: String
-        get() = if (appPath != null) {
-            Path.of(appPath).parent.toString()
-        } else {
-            project.basePath!!
-        }
+        // On MacOS, executable is not necessarily placed in root, so always use project.basePath as the root.
+        // At least as long as it's a base assumption, that users open the game/ folder in IDEA.
+        get() = project.basePath!!
 }
