@@ -99,31 +99,29 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
                     val movedBreakpointEvent = telnetClient!!.movedBreakpointQueue.poll(200, TimeUnit.MILLISECONDS)
                     if (movedBreakpointEvent != null) {
                         val file = findFile(movedBreakpointEvent.file)
-                        if (file != null) {
-                            val resolvedBp = getBreakpoint(file, movedBreakpointEvent.line)
-                            if (resolvedBp != null) {
-                                val breakpointManager = XDebuggerManager.getInstance(session.project).breakpointManager
-                                WriteCommandAction.runWriteCommandAction(session.project) {
-                                    breakpointManager.removeBreakpoint(resolvedBp)
-                                    if (movedBreakpointEvent.newLine != null) {
-                                        breakpointManager.addLineBreakpoint(
-                                            TSLineBreakpointType(),
-                                            file.url,
-                                            movedBreakpointEvent.newLine,
-                                            (resolvedBp.type as TSLineBreakpointType).createBreakpointProperties(
-                                                file,
-                                                movedBreakpointEvent.newLine
-                                            )
+                        val resolvedBp = file?.let { getBreakpoint(it, movedBreakpointEvent.line) }
+                        if (resolvedBp != null) {
+                            val breakpointManager = XDebuggerManager.getInstance(session.project).breakpointManager
+                            WriteCommandAction.runWriteCommandAction(session.project) {
+                                breakpointManager.removeBreakpoint(resolvedBp)
+                                if (movedBreakpointEvent.newLine != null) {
+                                    breakpointManager.addLineBreakpoint(
+                                        TSLineBreakpointType(),
+                                        file.url,
+                                        movedBreakpointEvent.newLine,
+                                        (resolvedBp.type as TSLineBreakpointType).createBreakpointProperties(
+                                            file,
+                                            movedBreakpointEvent.newLine
                                         )
-                                    }
+                                    )
                                 }
-                            } else {
-                                print(
-                                    "Debugger error, failed to resolve BP (${file.name}:${movedBreakpointEvent.line})",
-                                    LogConsoleType.DEBUGGER,
-                                    ConsoleViewContentType.LOG_WARNING_OUTPUT
-                                )
                             }
+                        } else {
+                            print(
+                                "Debugger error, failed to resolve BP (${movedBreakpointEvent.file}:${movedBreakpointEvent.line})",
+                                LogConsoleType.DEBUGGER,
+                                ConsoleViewContentType.LOG_WARNING_OUTPUT
+                            )
                         }
                     }
                 }
@@ -135,41 +133,46 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
                     if (stackLines != null) {
                         val sourcePosition = findSourcePosition(stackLines[0].file, stackLines[0].line)
                         val file = findFile(stackLines[0].file)
-                        if (file != null) {
-                            val resolvedBp = getBreakpoint(file, stackLines[0].line)
-                            val suspendContext = TSSuspendContext(
-                                TSExecutionStack(stackLines
-                                    .filter { it.file != "<none>" }
-                                    .mapIndexed { idx, stackLine ->
-                                        TSStackFrame(
-                                            session.project,
-                                            sourcePosition!!,
-                                            stackLine.function,
-                                            idx,
-                                            telnetClient!!
-                                        )
-                                    }
-                                ))
-                            if (resolvedBp == null) {
-                                session.positionReached(suspendContext)
-                                if (targetPosition != null
-                                    && targetPosition!!.file == sourcePosition!!.file
-                                    && targetPosition!!.line == sourcePosition.line
-                                ) {
-                                    unregisterBreakpoint(sourcePosition)
+                        val resolvedBp = file?.let { getBreakpoint(it, stackLines[0].line) }
+                        val suspendContext = TSSuspendContext(
+                            TSExecutionStack(stackLines
+                                .filter { it.file != "<none>" }
+                                .mapIndexed { idx, stackLine ->
+                                    TSStackFrame(
+                                        session.project,
+                                        sourcePosition,
+                                        stackLine.function,
+                                        idx,
+                                        telnetClient!!
+                                    )
                                 }
+                            ))
+                        if (resolvedBp == null) {
+                            session.positionReached(suspendContext)
+                            if (targetPosition != null
+                                && targetPosition!!.file == sourcePosition?.file
+                                && targetPosition!!.line == sourcePosition.line
+                            ) {
+                                targetPosition = null
+                                unregisterBreakpoint(sourcePosition)
                             } else {
-                                session.breakpointReached(
-                                    resolvedBp,
-                                    null,
-                                    suspendContext
+                                print(
+                                    "Debugger error, failed to resolve BP (${stackLines[0].file}:${stackLines[0].line})",
+                                    LogConsoleType.DEBUGGER,
+                                    ConsoleViewContentType.LOG_WARNING_OUTPUT
                                 )
                             }
-                            ApplicationManager.getApplication()
-                                .invokeLater {
-                                    session.showExecutionPoint()
-                                }
+                        } else {
+                            session.breakpointReached(
+                                resolvedBp,
+                                null,
+                                suspendContext
+                            )
                         }
+                        ApplicationManager.getApplication()
+                            .invokeLater {
+                                session.showExecutionPoint()
+                            }
                     }
                 }
             }
@@ -190,7 +193,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
     }
 
     private fun findFile(file: String): VirtualFile? = VfsUtil.findFile(
-        Path.of(configuration.appPath!!).parent
+        Path.of(configuration.workingDir!!)
             .resolve(Path.of(file)),
         false
     )

@@ -77,7 +77,9 @@ changelog {
 
 tasks {
     patchPluginXml {
-        changeNotes.set(provider { changelog.get(prop("pluginVersion")).toHTML() })
+        if (!prop("pluginVersion").contains("beta")) {
+            changeNotes.set(provider { changelog.get(prop("pluginVersion")).toHTML() })
+        }
         sinceBuild.set("211")
         untilBuild.set(null as String?)
     }

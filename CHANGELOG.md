@@ -12,8 +12,21 @@
 ### Fixed
 
 ### Security
-## [1.6.6]
+## [1.6.7]
+### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Improve error handling when breakpoint file is not found
+- Resolve files from root directory upon hitting a breakpoint
+
+### Security
+## [1.6.6]
 ### Fixed
 - Use project root as game root when setting breakpoints
   

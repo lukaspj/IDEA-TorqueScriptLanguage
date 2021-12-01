@@ -28,7 +28,7 @@ class TSValue(name: String, val value: String, val type: String?) : XNamedValue(
 
 class TSStackFrame(
     private val project: Project,
-    private val position: XSourcePosition,
+    private val position: XSourcePosition?,
     private val function: String,
     private val level: Int,
     private val telnetClient: TSTelnetClient
@@ -36,30 +36,32 @@ class TSStackFrame(
     var paramValuesCache: String? = null
 
     val variables: XValueChildrenList =
-        XValueChildrenList()
-            .let { valueList ->
-                ApplicationManager.getApplication().runReadAction {
-                    ReferenceUtil.findLocalVariablesForContext(
-                        (PsiUtilCore.getPsiFile(project, position.file) as TSFile)
-                            .findElementAt(position.offset)!!
-                    )
-                        .filter {
-                            PsiDocumentManager.getInstance(project)
-                                .getDocument(it.containingFile)
-                                ?.getLineNumber(it.startOffset) ?: 0 <= position.line
-                        }
-                        .distinctBy { it.text }
-                        .map { TSValue(it.text, telnetClient.evalAtLevel(level, it.text), ReferenceUtil.tryResolveType(it)) }
-                        .fold(valueList) { acc, namedValue ->
-                            acc.also {
-                                it.add(namedValue)
+        position?.let { position ->
+            XValueChildrenList()
+                .let { valueList ->
+                    ApplicationManager.getApplication().runReadAction {
+                        ReferenceUtil.findLocalVariablesForContext(
+                            (PsiUtilCore.getPsiFile(project, position.file) as TSFile)
+                                .findElementAt(position.offset)!!
+                        )
+                            .filter {
+                                (PsiDocumentManager.getInstance(project)
+                                    .getDocument(it.containingFile)
+                                    ?.getLineNumber(it.startOffset) ?: 0) <= position.line
                             }
-                        }
+                            .distinctBy { it.text }
+                            .map { TSValue(it.text, telnetClient.evalAtLevel(level, it.text), ReferenceUtil.tryResolveType(it)) }
+                            .fold(valueList) { acc, namedValue ->
+                                acc.also {
+                                    it.add(namedValue)
+                                }
+                            }
+                    }
+                    valueList
                 }
-                valueList
-            }
+        } ?: XValueChildrenList()
 
-    override fun getSourcePosition(): XSourcePosition = position
+    override fun getSourcePosition(): XSourcePosition? = position
 
     override fun getEvaluator(): XDebuggerEvaluator =
         TSDebuggerEvaluator(telnetClient, level)
@@ -68,6 +70,8 @@ class TSStackFrame(
         if (paramValuesCache != null) {
             return paramValuesCache!!
         }
+
+        if (position == null) return "<Unknown>"
 
         val tsFile = PsiUtilCore.getPsiFile(project, position.file) as TSFile
         val tsFunction = tsFile.getEnclosingFunction(
