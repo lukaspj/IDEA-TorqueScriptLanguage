@@ -16,13 +16,9 @@ import org.lukasj.idea.torquescript.engine.docstring.elements.*
 import org.lukasj.idea.torquescript.engine.docstring.parsers.EngineApiDocStringParser
 import org.lukasj.idea.torquescript.engine.model.EngineClass
 import org.lukasj.idea.torquescript.engine.model.EngineFunction
-import org.lukasj.idea.torquescript.psi.TSElementFactory
-import org.lukasj.idea.torquescript.psi.TSNewInstanceExpression
-import org.lukasj.idea.torquescript.psi.TSTypes
-import org.lukasj.idea.torquescript.psi.impl.TSDatablockDeclarationElementImpl
-import org.lukasj.idea.torquescript.psi.impl.TSFunctionCallExpressionElementImpl
-import org.lukasj.idea.torquescript.psi.impl.TSFunctionIdentifierElementImpl
-import org.lukasj.idea.torquescript.psi.impl.TSIdentExpressionImpl
+import org.lukasj.idea.torquescript.psi.*
+import org.lukasj.idea.torquescript.psi.impl.*
+import org.lukasj.idea.torquescript.reference.TSFunctionReference
 
 class TSDocumentationProvider : AbstractDocumentationProvider() {
     override fun getCustomDocumentationElement(
@@ -63,6 +59,15 @@ class TSDocumentationProvider : AbstractDocumentationProvider() {
                         } else {
                             renderFunctionIdentifier(element.parent as TSFunctionIdentifierElementImpl)
                         }
+                    is TSProperty ->
+                        element.parent.reference
+                            .let {
+                                when (it) {
+                                    is TSFunctionReference ->
+                                        renderFunctionReference(it)
+                                    else -> super.generateDoc(element, originalElement)
+                                }
+                            }
                     else -> super.generateDoc(element, originalElement)
                 }
             }

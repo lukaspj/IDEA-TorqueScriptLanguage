@@ -13,7 +13,7 @@ class TSFormattingModelBuilder : FormattingModelBuilder {
         settings.getCommonSettings(TSLanguage.INSTANCE.id)
             .let { commonSettings ->
                 SpacingBuilder(settings, TSLanguage.INSTANCE)
-                    .after(TokenSet.create(TSTypes.LINE_COMMENT, TSTypes.DOC_COMMENT)).lineBreakInCode()
+                    .after(TokenSet.create(TSTypes.LINE_COMMENT, TSTypes.DOC_COMMENT_BLOCK)).lineBreakInCode()
                     .around(TSTypes.NEW_INSTANCE_BLOCK).lineBreakOrForceSpace(
                         commonSettings.CLASS_BRACE_STYLE >= CommonCodeStyleSettings.NEXT_LINE,
                         true

@@ -21,16 +21,16 @@ class TSColorSettingsPage : ColorSettingsPage {
 
     override fun getDemoText(): String = """// asd
 
-%qwe["${"$"}asd] = "asd";
+%qwe["${"$"}asd"] = "asd";
 %qwe.asd = "asd";
 
-"${"$"}minion = new AIPlayer(Fubar) {
+${"$"}minion = new AIPlayer(Fubar) {
    datablock = MinionData;
 };
 %a = "asd";
 %v = 'asd';
 
-"${"$"}minion.setMoveDestination("50 0 0");
+${"$"}minion.setMoveDestination("50 0 0");
 
 {
     %a = 2;

@@ -12,6 +12,9 @@ import org.lukasj.idea.torquescript.engine.model.EngineFunction
 import org.lukasj.idea.torquescript.psi.TSElementFactory
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionCallExpressionElementImpl
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionIdentifierElementImpl
+import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
+import org.lukasj.idea.torquescript.reference.ReferenceUtil
+import org.lukasj.idea.torquescript.reference.TSFunctionReference
 
 
 fun renderClassDoc(project: Project, className: String): String {
@@ -29,21 +32,53 @@ fun renderClassDoc(project: Project, className: String): String {
 }
 
 fun renderFunctionCall(element: TSFunctionCallExpressionElementImpl) =
-    element.reference?.resolve()
+    element.reference?.let { renderFunctionReference(it as TSFunctionReference) }
+
+fun renderFunctionReference(funcRef: TSFunctionReference) =
+    funcRef.resolve()
         .let {
             if (it == null) {
-                if (element.name != null) {
-                    renderBuiltinFunction(element.project, element.name!!)
+                if (funcRef.element.name != null) {
+                    renderBuiltinFunction(funcRef.element.project, funcRef.element.name!!)
                 } else {
                     null
                 }
             } else {
                 when (it) {
+                    is TSFunctionStatementElementImpl -> renderFunctionStatement(it)
                     is TSFunctionIdentifierElementImpl -> renderFunctionIdentifier(it)
                     else -> null
                 }
             }
         }
+
+fun renderFunctionStatement(function: TSFunctionStatementElementImpl): String {
+    return EngineApiDocStringParser()
+        .parse(function.getDocstring() ?: "")
+        .let { docString ->
+            StringBuilder()
+                .append(DocumentationMarkup.CONTENT_START)
+                .append(function.name)
+                .append(function.getParameters().joinToString(", ", "(", ")") { it.text })
+                .append(
+                    docString.children
+                        .flatMap { it.children }
+                        .filterIsInstance<SummaryDocElement>().map { renderSummary(function.project, it) }
+                        .firstOrNull() ?: ""
+                )
+                .append(DocumentationMarkup.CONTENT_END)
+                .append(DocumentationMarkup.SECTIONS_START)
+                .append(
+                    renderDocstring(
+                        function.project,
+                        docString
+                    )
+
+                )
+                .append(DocumentationMarkup.SECTIONS_END)
+                .toString()
+        }
+}
 
 fun renderFunctionIdentifier(function: TSFunctionIdentifierElementImpl): String {
     return StringBuilder()
@@ -129,6 +164,7 @@ fun renderDocstring(project: Project, element: IDocElement): String =
         is ParameterDocElement -> renderParameter(project, element)
         is ParameterRefDocElement -> StringBuilder().append(element.parameterName).toString()
         is ReturnDocElement -> renderReturn(project, element)
+        is SeeDocElement -> renderSee(project, element)
         is InternalDocElement -> ""
         is RemarkDocElement -> StringBuilder().append("<b>")
             .append(element.children.joinToString { renderDocstring(project, it) }).append("</b>").toString()
@@ -170,6 +206,17 @@ fun renderReturn(project: Project, element: ReturnDocElement) =
         .append(DocumentationMarkup.SECTION_END)
         .toString()
 
+fun renderSee(project: Project, element: SeeDocElement) =
+    StringBuilder()
+        .append(DocumentationMarkup.SECTION_HEADER_START)
+        .append("see")
+        .append(DocumentationMarkup.SECTION_SEPARATOR)
+        .append(
+            element.children.joinToString("") { renderDocstring(project, it) }
+        )
+        .append(DocumentationMarkup.SECTION_END)
+        .toString()
+
 fun renderParameter(project: Project, element: ParameterDocElement) =
     StringBuilder()
         .append(DocumentationMarkup.SECTION_HEADER_START)
@@ -182,15 +229,20 @@ fun renderParameter(project: Project, element: ParameterDocElement) =
         .toString()
 
 fun renderDescription(project: Project, element: DescriptionDocElement) =
-    StringBuilder()
-        .append(DocumentationMarkup.SECTION_HEADER_START)
-        .append("description")
-        .append(DocumentationMarkup.SECTION_SEPARATOR)
-        .append(
-            element.children.joinToString("") { renderDocstring(project, it) }
-        )
-        .append(DocumentationMarkup.SECTION_END)
-        .toString()
+    // Trim empty descriptions
+    if (element.children.joinToString("") { renderDocstring(project, it) }.trim() == "") {
+        ""
+    } else {
+        StringBuilder()
+            .append(DocumentationMarkup.SECTION_HEADER_START)
+            .append("description")
+            .append(DocumentationMarkup.SECTION_SEPARATOR)
+            .append(
+                element.children.joinToString("") { renderDocstring(project, it) }
+            )
+            .append(DocumentationMarkup.SECTION_END)
+            .toString()
+    }
 
 fun renderCodeExample(project: Project, element: CodeExampleDocElement) =
     StringBuilder()

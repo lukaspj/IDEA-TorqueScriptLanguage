@@ -118,7 +118,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
                             }
                         } else {
                             print(
-                                "Debugger error, failed to resolve BP (${movedBreakpointEvent.file}:${movedBreakpointEvent.line})",
+                                "Debugger error, failed to resolve moved BP (${movedBreakpointEvent.file}:${movedBreakpointEvent.line})",
                                 LogConsoleType.DEBUGGER,
                                 ConsoleViewContentType.LOG_WARNING_OUTPUT
                             )
@@ -136,13 +136,16 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
                         val resolvedBp = file?.let { getBreakpoint(it, stackLines[0].line) }
                         val suspendContext = TSSuspendContext(
                             TSExecutionStack(stackLines
-                                .filter { it.file != "<none>" }
                                 .mapIndexed { idx, stackLine ->
+                                    Pair(idx, stackLine)
+                                }
+                                .filter { it.second.file != "<none>" }
+                                .map { idxStackline ->
                                     TSStackFrame(
                                         session.project,
-                                        sourcePosition,
-                                        stackLine.function,
-                                        idx,
+                                        findSourcePosition(idxStackline.second.file, idxStackline.second.line),
+                                        idxStackline.second.function,
+                                        idxStackline.first,
                                         telnetClient!!
                                     )
                                 }
@@ -157,7 +160,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
                                 unregisterBreakpoint(sourcePosition)
                             } else {
                                 print(
-                                    "Debugger error, failed to resolve BP (${stackLines[0].file}:${stackLines[0].line})",
+                                    "Debugger error, failed to resolve triggered BP (${stackLines[0].file}:${stackLines[0].line})",
                                     LogConsoleType.DEBUGGER,
                                     ConsoleViewContentType.LOG_WARNING_OUTPUT
                                 )
@@ -242,7 +245,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
 
     fun registerBreakpoint(sourcePosition: XSourcePosition, condition: String? = null) =
         telnetClient?.setBreakpoint(
-            File(sourcePosition.file.path).relativeTo(File(configuration.workingDir!!)).path,
+            File(sourcePosition.file.path).relativeTo(File(configuration.workingDir!!)).path.replace('\\', '/'),
             sourcePosition.line,
             false,
             0,

@@ -5,7 +5,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 import icons.TSIcons
 
-class TSObjectReference(element: PsiElement, textRange: TextRange) : PsiReferenceBase<PsiElement>(element, textRange),
+class TSObjectReference(element: PsiNamedElement, textRange: TextRange) : PsiReferenceBase<PsiNamedElement>(element, textRange),
     PsiPolyVariantReference {
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
         val project = myElement.project
@@ -34,11 +34,5 @@ class TSObjectReference(element: PsiElement, textRange: TextRange) : PsiReferenc
         }.toTypedArray()
     }
 
-    override fun handleElementRename(newElementName: String): PsiElement {
-        val elem = element
-        if (elem is PsiNamedElement) {
-            return elem.setName(newElementName)
-        }
-        return element
-    }
+    override fun handleElementRename(newElementName: String): PsiElement = element.setName(newElementName)
 }

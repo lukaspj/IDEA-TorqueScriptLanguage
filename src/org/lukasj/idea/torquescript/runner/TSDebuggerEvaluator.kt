@@ -23,33 +23,31 @@ class TSDebuggerEvaluator(private val telnetClient: TSTelnetClient, private val 
         sideEffectsAllowed: Boolean
     ): TextRange? {
         var currentRange: TextRange? = null
-        PsiDocumentManager.getInstance(project).commitAndRunReadAction {
-            val tsFile = PsiDocumentManager.getInstance(project).getPsiFile(document) ?: return@commitAndRunReadAction
+        val tsFile = PsiDocumentManager.getInstance(project).getPsiFile(document) ?: return null
 
-            val element = PsiUtilCore.getElementAtOffset(tsFile, offset)
+        val element = PsiUtilCore.getElementAtOffset(tsFile, offset)
 
-            currentRange = when(element.elementType) {
-                TSTypes.LOCALVAR -> element.textRange
-                TSTypes.GLOBALVAR -> element.textRange
-                TSTypes.FLOAT -> element.textRange
-                TSTypes.INTEGER -> element.textRange
-                TSTypes.HEXDIGIT -> element.textRange
-                TSTypes.QUOTED_STRING -> element.textRange
-                TSTypes.TAGGED_STRING -> element.textRange
-                else -> currentRange
-            }
-
-            currentRange = when (element) {
-                is TSVarExpression -> element.textRange
-                is TSLiteralExpression -> element.textRange
-                is TSIdentExpression -> element.textRange
-                else -> currentRange
-            }
-
-            currentRange = PsiTreeUtil.findFirstParent(element) {
-                it is TSIdentExpression
-            }?.textRange ?: currentRange
+        currentRange = when(element.elementType) {
+            TSTypes.LOCALVAR -> element.textRange
+            TSTypes.GLOBALVAR -> element.textRange
+            TSTypes.FLOAT -> element.textRange
+            TSTypes.INTEGER -> element.textRange
+            TSTypes.HEXDIGIT -> element.textRange
+            TSTypes.QUOTED_STRING -> element.textRange
+            TSTypes.TAGGED_STRING -> element.textRange
+            else -> currentRange
         }
+
+        currentRange = when (element) {
+            is TSVarExpression -> element.textRange
+            is TSLiteralExpression -> element.textRange
+            is TSIdentExpression -> element.textRange
+            else -> currentRange
+        }
+
+        currentRange = PsiTreeUtil.findFirstParent(element) {
+            it is TSIdentExpression
+        }?.textRange ?: currentRange
 
         return currentRange
     }

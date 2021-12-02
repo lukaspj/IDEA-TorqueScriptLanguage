@@ -109,14 +109,18 @@ datablock_statement ::= DATABLOCK IDENT LPAREN object_name parent_block? RPAREN 
 field_assignment ::= property (LBRACK arguments RBRACK)? assignoperator expression {pin=3}
 property ::= IDENT
            // Allow restricted keywords cause TorqueScript
-           | DATABLOCK
+           | DATABLOCK {
+                           mixin="org.lukasj.idea.torquescript.psi.impl.TSPropertyElementImpl"
+                       }
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Misc statements
 
 comment_statement ::= LINE_COMMENT
-          | DOC_COMMENT
+          | DOC_COMMENT_BLOCK
           | BLOCK_COMMENT
+
+doc_comment_statement ::= DOC_COMMENT_BLOCK
 
 assert_statement ::= ASSERT LPAREN expression (COMMA QUOTED_STRING)? RPAREN {pin=1}
 

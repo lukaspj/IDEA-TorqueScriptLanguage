@@ -33,6 +33,7 @@ FILENAME  = {FILECHAR}+
 SPACE     = [ \t\f]
 HEXDIGIT  = [a-fA-F0-9]
 
+DOC_COMMENT_BLOCK = ("///"([^/\n\r][^\n\r]*)?[\n\r]+)+
 LINE_COMMENT = "//"[^\r\n]*
 MULTILINE_COMMENT = "/*" ( ([^"*"]|[\r\n])* ("*"+ [^"*""/"] )? )* ("*" | "*"+"/")?
 
@@ -45,6 +46,7 @@ STRING = {STR} ( [^\"\\\n\r] | "\\" ("\\" | {STR} | {ESCAPES} | [0-8xuU] ) )* {S
 %%
 
 <YYINITIAL> {
+    {DOC_COMMENT_BLOCK}                                     { return TSTypes.DOC_COMMENT_BLOCK; }
     {LINE_COMMENT}                                          { return TSTypes.LINE_COMMENT; }
     {MULTILINE_COMMENT}                                     { return TSTypes.BLOCK_COMMENT; }
 // ----- KEYWORDS START -----

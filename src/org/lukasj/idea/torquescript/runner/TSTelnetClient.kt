@@ -118,7 +118,10 @@ class TSTelnetClient(address: String, port: Int) {
         thread = thread {
             try {
                 while (!isStopped) {
-                    input?.let { processOutput(it.readLine()) }
+                    val input = this.input
+                    if (input != null && input.ready()) {
+                        processOutput(input.readLine())
+                    }
                     Thread.sleep(10)
                 }
             } catch (ioe: IOException) {
@@ -168,6 +171,6 @@ class TSTelnetClient(address: String, port: Int) {
         val tag = UUID.randomUUID().toString()
         val queue = subscribeForEval(tag)
         output!!.println("EVAL $tag $level $expression")
-        return queue.take()
+        return queue.poll(5, TimeUnit.SECONDS) ?: "<Timeout in eval>"
     }
 }

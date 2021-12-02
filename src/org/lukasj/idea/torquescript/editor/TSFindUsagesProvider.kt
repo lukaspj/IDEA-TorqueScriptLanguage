@@ -13,7 +13,7 @@ class TSFindUsagesProvider : FindUsagesProvider {
         DefaultWordsScanner(
             TSLexerAdapter(),
             TokenSet.create(TSTypes.IDENT, TSTypes.THISVAR, TSTypes.LOCALVAR, TSTypes.GLOBALVAR),
-            TokenSet.create(TSTypes.BLOCK_COMMENT, TSTypes.LINE_COMMENT, TSTypes.DOC_COMMENT),
+            TokenSet.create(TSTypes.BLOCK_COMMENT, TSTypes.LINE_COMMENT, TSTypes.DOC_COMMENT_BLOCK),
             TokenSet.create(TSTypes.QUOTED_STRING, TSTypes.TAGGED_STRING, TSTypes.FLOAT, TSTypes.HEXDIGIT, TSTypes.INTEGER)
         )
 

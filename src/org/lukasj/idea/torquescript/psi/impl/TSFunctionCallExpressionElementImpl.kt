@@ -99,7 +99,7 @@ abstract class TSFunctionCallExpressionElementImpl(node: ASTNode) : ASTWrapperPs
         return if (identifier.firstChild != identifier.lastChild) {
             arrayOf(
                 reference!!,
-                TSObjectReference(identifier.firstChild, TextRange(0, identifier.firstChild.textLength))
+                TSObjectReference(this, TextRange(0, identifier.firstChild.textLength))
             )
         } else {
             arrayOf(reference!!)

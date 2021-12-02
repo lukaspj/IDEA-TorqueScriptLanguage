@@ -5,15 +5,15 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 import icons.TSIcons
 
-class TSFunctionReference(element: PsiNamedElement, textRange: TextRange) : PsiReferenceBase<PsiNamedElement>(element, textRange),
-    PsiPolyVariantReference {
+class TSFunctionReference(element: PsiNamedElement, textRange: TextRange, private val functionName: String? = null)
+    : PsiReferenceBase<PsiNamedElement>(element, textRange), PsiPolyVariantReference {
 
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
         val project = myElement.project
-        val functions = ReferenceUtil.findFunction(project, element.name!!)
+        val functions = ReferenceUtil.findFunction(project, functionName ?: element.name!!)
 
         return functions
-            .map { PsiElementResolveResult(it.getFunctionIdentifier()!!) }
+            .map { PsiElementResolveResult(it) }
             .toTypedArray()
     }
 

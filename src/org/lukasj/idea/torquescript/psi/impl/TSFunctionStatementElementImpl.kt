@@ -55,6 +55,17 @@ abstract class TSFunctionStatementElementImpl(node: ASTNode) : ASTWrapperPsiElem
         return TSFunctionType.GLOBAL_NS
     }
 
+    fun getDocstring(): String {
+        if (parent.prevSibling.elementType == TSTypes.DOC_COMMENT_BLOCK) {
+            return parent.prevSibling.text
+                .split('\n')
+                .filter { it.startsWith("///") }
+                .map { it.substring(3).trim() }
+                .joinToString("\n") { it }
+        }
+        return "No Docstring Available"
+    }
+
     fun getParameters(): List<PsiElement> {
         val child = getParams().firstChild ?: return listOf()
         if (child.nextSibling == null) {
@@ -62,8 +73,8 @@ abstract class TSFunctionStatementElementImpl(node: ASTNode) : ASTWrapperPsiElem
         }
         return child.siblings().toList()
             .filter {
-                it.elementType == TSTypes.LOCALVAR
-                        || it.elementType == TSTypes.THISVAR
+                it.elementType == TSTypes.LOCAL_VAR_EXPRESSION
+                        || it.elementType == TSTypes.THIS_VAR_EXPRESSION
             }
     }
 

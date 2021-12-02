@@ -39,7 +39,7 @@ class TSParserDefinition : ParserDefinition {
         val WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE)
 
         @JvmField
-        val COMMENTS = TokenSet.create(LINE_COMMENT, BLOCK_COMMENT, DOC_COMMENT)
+        val COMMENTS = TokenSet.create(LINE_COMMENT, BLOCK_COMMENT, DOC_COMMENT_BLOCK)
 
         @JvmField
         val FILE = IFileElementType(TSLanguage.INSTANCE)

@@ -12,6 +12,40 @@
 ### Fixed
 
 ### Security
+## [1.7.1]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Named object function reference resolution
+- Trim empty description elements in documentation
+
+### Security
+## [1.7.0]
+### Added
+- Support for TorqueScript docstrings (comments starting with three slashes)
+  on functions
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Some Null Pointer Exceptions
+- Rendering of @see attributes in docstrings
+- Preview code snippets in code style editor
+- Some reference exceptions
+- Debugger issues with latest version of Torque3D 4.0
+- Made the IDE more robust against engine crashes
+
+### Security
 ## [1.6.7]
 ### Added
 

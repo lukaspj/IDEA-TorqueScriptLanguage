@@ -23,7 +23,7 @@ class TSMethodCallCompletionContributor : CompletionProvider<CompletionParameter
         val caller = parameters
             .position
             .prevSibling
-            .prevSibling
+            ?.prevSibling ?: return
 
         val namespace = ReferenceUtil.tryResolveType(caller)
 

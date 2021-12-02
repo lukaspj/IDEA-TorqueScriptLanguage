@@ -42,7 +42,7 @@ class TSSyntaxHighlighter : SyntaxHighlighterBase() {
         init
         {
             fillMap(ATTRIBUTES, LINE_COMMENT, TSTypes.LINE_COMMENT)
-            fillMap(ATTRIBUTES, DOC_COMMENT, TSTypes.DOC_COMMENT)
+            fillMap(ATTRIBUTES, DOC_COMMENT, TSTypes.DOC_COMMENT_BLOCK)
             fillMap(ATTRIBUTES, BLOCK_COMMENT, TSTypes.BLOCK_COMMENT)
             fillMap(ATTRIBUTES, PARENTHESES, TSTypes.LPAREN, TSTypes.RPAREN)
             fillMap(ATTRIBUTES, BRACES, TSTypes.LBRACE, TSTypes.RBRACE)

@@ -121,7 +121,7 @@ class TSFormattingBlock(
             .mapNotNull {
                 when (child.elementType) {
                     it -> Indent.getNormalIndent()
-                    TSTypes.LINE_COMMENT, TSTypes.BLOCK_COMMENT, TSTypes.DOC_COMMENT -> Indent.getNormalIndent()
+                    TSTypes.LINE_COMMENT, TSTypes.BLOCK_COMMENT, TSTypes.DOC_COMMENT_BLOCK -> Indent.getNormalIndent()
                     else -> null
                 }
             }

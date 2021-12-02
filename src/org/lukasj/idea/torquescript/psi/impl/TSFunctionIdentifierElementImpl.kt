@@ -9,6 +9,7 @@ import com.intellij.psi.PsiReference
 import org.lukasj.idea.torquescript.psi.TSElementFactory
 import org.lukasj.idea.torquescript.psi.TSIdentExpression
 import org.lukasj.idea.torquescript.psi.TSNamedElement
+import org.lukasj.idea.torquescript.reference.TSFunctionReference
 import org.lukasj.idea.torquescript.reference.TSObjectReference
 
 abstract class TSFunctionIdentifierElementImpl(node: ASTNode) : ASTWrapperPsiElement(node),
@@ -24,16 +25,17 @@ abstract class TSFunctionIdentifierElementImpl(node: ASTNode) : ASTWrapperPsiEle
     }
 
     override fun getReference(): PsiReference? =
-        if (firstChild != lastChild) {
-            TSObjectReference(firstChild, TextRange(0, firstChild.textLength))
-        } else {
-            null
-        }
+        references.last()
 
     override fun getReferences(): Array<PsiReference> =
-        if (reference != null) {
-            arrayOf(reference!!)
+        if (firstChild != lastChild) {
+            arrayOf(
+                TSObjectReference(this, TextRange(0, firstChild.textLength)),
+                TSFunctionReference(this, TextRange(0, lastChild.textLength))
+            )
         } else {
-            arrayOf()
+            arrayOf(
+                TSFunctionReference(this, TextRange(0, firstChild.textLength)),
+            )
         }
 }

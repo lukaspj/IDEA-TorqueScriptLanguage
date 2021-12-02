@@ -16,6 +16,7 @@ class TSFileReference(literal: TSLiteralExpressionElementImpl, rangeInElement: T
     override fun resolve(): PsiElement? {
         val value = concatenateSiblings(element.text.substring(rangeInElement.startOffset, rangeInElement.endOffset), element)
         return when {
+            // ./ -> relative path
             value.startsWith("./") ->
                 VfsUtil.findRelativeFile(
                     value,
@@ -28,6 +29,7 @@ class TSFileReference(literal: TSLiteralExpressionElementImpl, rangeInElement: T
                             null
                         }
                     }
+            // / -> from root
             value.contains("/") ->
                 VfsUtil.findRelativeFile(
                     toRelative(value),
@@ -40,7 +42,19 @@ class TSFileReference(literal: TSLiteralExpressionElementImpl, rangeInElement: T
                             null
                         }
                     }
-            else -> null
+            // If nothing else works, just try to resolve from root.
+            else ->
+                VfsUtil.findRelativeFile(
+                    toRelative(value),
+                    VfsUtil.findFileByIoFile(File(element.project.basePath!!), true)
+                )
+                    .let {
+                        if (it != null) {
+                            PsiManager.getInstance(element.project).findFile(it)
+                        } else {
+                            null
+                        }
+                    }
         }
     }
 
