@@ -28,15 +28,26 @@ class TSPropertiesCompletionContributor : CompletionProvider<CompletionParameter
             .findClass(contextElement.getTypeName())
             ?.let { engineClass ->
                 engineClass.properties
-                    .map { property ->
-                        LookupElementBuilder.create(property)
-                            .withIcon(PlatformIcons.FIELD_ICON)
-                            .withCaseSensitivity(false)
-                            .withTypeText(property.typeName)
-                            .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
-                    }
-                    .forEach {
-                        result.addElement(it)
+                    .forEach { property ->
+                        if (property.indexedSize == 1) {
+                            result.addElement(
+                                LookupElementBuilder.create(property)
+                                    .withIcon(PlatformIcons.FIELD_ICON)
+                                    .withCaseSensitivity(false)
+                                    .withTypeText(property.typeName)
+                                    .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
+                            )
+                        } else {
+                            for (idx in 1..property.indexedSize) {
+                                result.addElement(
+                                    LookupElementBuilder.create("${property}[${idx}]")
+                                        .withIcon(PlatformIcons.FIELD_ICON)
+                                        .withCaseSensitivity(false)
+                                        .withTypeText(property.typeName)
+                                        .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
+                                )
+                            }
+                        }
                     }
             }
 

@@ -4,10 +4,10 @@ class EngineClassProperty(
     val name: String,
     val docs: String,
     val typeName: String,
-    val indexedSize: String,
-    val isConstant: String,
-    val isTransient: String,
-    val isVisible: String
+    val indexedSize: Int,
+    val isConstant: Boolean,
+    val isTransient: Boolean,
+    val isVisible: Boolean
 ) {
     override fun toString() = name
 }
