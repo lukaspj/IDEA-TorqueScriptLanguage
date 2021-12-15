@@ -1,13 +1,13 @@
 package org.lukasj.idea.torquescript.engine.model
 
 class EngineClassProperty(
-    name: String,
-    docs: String,
-    typeName: String,
-    indexedSize: String,
-    isConstant: String,
-    isTransient: String,
-    isVisible: String
+    val name: String,
+    val docs: String,
+    val typeName: String,
+    val indexedSize: String,
+    val isConstant: String,
+    val isTransient: String,
+    val isVisible: String
 ) {
-
+    override fun toString() = name
 }

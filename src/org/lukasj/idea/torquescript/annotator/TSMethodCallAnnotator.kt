@@ -15,9 +15,9 @@ class TSMethodCallAnnotator : TSAnnotator() {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         val engineApiService = element.project.getService(EngineApiService::class.java)
         if (element is TSFunctionStatementElementImpl) {
-            val identifier = element.getFunctionIdentifier()
+            val identifier = element.getFunctionIdentifier() ?: return
 
-            val lastElement = identifier!!.lastChild
+            val lastElement = identifier.lastChild
             createSuccessAnnotation(lastElement, holder, TSSyntaxHighlightingColors.FUNCTION_DECLARATION)
 
             if (lastElement.prevSibling?.prevSibling != null) {

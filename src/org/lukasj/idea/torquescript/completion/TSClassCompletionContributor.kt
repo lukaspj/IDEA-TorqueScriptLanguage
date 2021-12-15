@@ -28,6 +28,8 @@ class TSClassCompletionContributor : CompletionProvider<CompletionParameters>() 
             .forEach {
                 result.addElement(it)
             }
+
+        result.stopHere()
     }
 
 }

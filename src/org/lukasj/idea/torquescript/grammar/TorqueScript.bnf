@@ -106,10 +106,11 @@ datablock_statement ::= DATABLOCK IDENT LPAREN object_name parent_block? RPAREN 
     mixin="org.lukasj.idea.torquescript.psi.impl.TSObjectDeclarationElementImpl"
 }
 
-field_assignment ::= property (LBRACK arguments RBRACK)? assignoperator expression {pin=3}
+field_assignment ::= property (LBRACK arguments RBRACK)? assignoperator expression {pin=1}
 property ::= IDENT
            // Allow restricted keywords cause TorqueScript
            | DATABLOCK {
+                           pin(".*")=1
                            mixin="org.lukasj.idea.torquescript.psi.impl.TSPropertyElementImpl"
                        }
 
@@ -119,8 +120,6 @@ property ::= IDENT
 comment_statement ::= LINE_COMMENT
           | DOC_COMMENT_BLOCK
           | BLOCK_COMMENT
-
-doc_comment_statement ::= DOC_COMMENT_BLOCK
 
 assert_statement ::= ASSERT LPAREN expression (COMMA QUOTED_STRING)? RPAREN {pin=1}
 
@@ -201,7 +200,16 @@ new_instance_expression ::= NEW IDENT LPAREN (object_name parent_block? (COMMA a
     implements="org.lukasj.idea.torquescript.psi.TSObjectDeclaration"
     mixin="org.lukasj.idea.torquescript.psi.impl.TSObjectDeclarationElementImpl"
 }
-new_instance_block ::= LBRACE ((field_assignment | new_instance_expression | singleton_statement) STMT_SEPARATOR)* RBRACE
+new_instance_block ::= LBRACE (property_stmt STMT_SEPARATOR)* RBRACE {
+    pin=1
+}
+
+property_stmt ::= (new_instance_expression | singleton_statement | field_assignment) {
+    pin=1
+    recoverWhile="stmt_recover"
+}
+
+private stmt_recover  ::= !(STMT_SEPARATOR|IDENT)
 
 object_name ::= expression
 parent_block ::= COLON IDENT {

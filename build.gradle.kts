@@ -5,11 +5,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val channel = prop("publishChannel")
 
 plugins {
-    id("org.jetbrains.intellij") version "1.1.2"
+    id("org.jetbrains.intellij") version "1.3.0"
     kotlin("jvm") version "1.4.32"
 
-    id("org.jetbrains.grammarkit") version "2021.1.3"
-    id("org.jetbrains.changelog") version "1.2.0"
+    id("org.jetbrains.grammarkit") version "2021.2.1"
+    id("org.jetbrains.changelog") version "1.3.1"
 }
 
 group = "org.lukasj"
@@ -22,8 +22,14 @@ dependencies {
     implementation(kotlin("stdlib"))
 }
 
+idea {
+    module {
+        generatedSourceDirs.add(file("gen"))
+    }
+}
+
 sourceSets {
-    getByName("main").apply {
+    main {
         java.srcDirs("src", "gen")
         resources.srcDirs("resources")
             .exclude("scripts/**")
@@ -46,30 +52,32 @@ intellij {
     version.set("2021.3")
     pluginName.set("TorqueScript")
 }
+/*
+val generateTorqueScriptParser = task<GenerateParserTask>("GenerateTorqueScriptParser") {
+    source.set("src/org/lukasj/idea/torquescript/grammar/TorqueScript.bnf")
 
-val generateTorqueScriptParser = task<GenerateParser>("GenerateTorqueScriptParser") {
-    source = "src/org/lukasj/idea/torquescript/grammar/TorqueScript.bnf"
+    targetRoot.set("gen")
 
-    targetRoot = "gen"
+    pathToParser.set("/org/lukasj/idea/torquescript/parser/TSParser")
 
-    pathToParser = "/org/lukasj/idea/torquescript/parser/TSParser"
+    pathToPsiRoot.set("/org/lukasj/idea/torquescript/psi")
 
-    pathToPsiRoot = "/org/lukasj/idea/torquescript/psi"
-
-    purgeOldFiles = true
+    purgeOldFiles.set(true)
 
     outputs.file("${targetRoot}${pathToParser}.java")
     outputs.dir("${targetRoot}${pathToPsiRoot}")
 }
 
-val generateTorqueScriptLexer = task<GenerateLexer>("GenerateTorqueScriptLexer") {
-    source = "src/org/lukasj/idea/torquescript/grammar/TorqueScript.flex"
+val generateTorqueScriptLexer = task<GenerateLexerTask>("GenerateTorqueScriptLexer") {
+    source.set("src/org/lukasj/idea/torquescript/grammar/TorqueScript.flex")
 
-    targetDir = "gen/org/lukasj/idea/torquescript/lexer"
-    targetClass = "TSLexer"
+    targetDir.set("gen/org/lukasj/idea/torquescript/lexer")
+    targetClass.set("TSLexer")
+
+    purgeOldFiles.set(true)
 
     outputs.file("${targetDir}/${targetClass}.java")
-}
+}*/
 
 changelog {
     version.set(prop("pluginVersion"))
@@ -82,6 +90,32 @@ tasks {
         }
         sinceBuild.set("211")
         untilBuild.set(null as String?)
+    }
+
+    generateLexer {
+        source.set("src/org/lukasj/idea/torquescript/grammar/TorqueScript.flex")
+
+        targetDir.set("gen/org/lukasj/idea/torquescript/lexer")
+        targetClass.set("TSLexer")
+
+        purgeOldFiles.set(true)
+
+        outputs.file("${targetDir.get()}/${targetClass.get()}.java")
+    }
+
+    generateParser {
+        source.set("src/org/lukasj/idea/torquescript/grammar/TorqueScript.bnf")
+
+        targetRoot.set("gen")
+
+        pathToParser.set("/org/lukasj/idea/torquescript/parser/TSParser")
+
+        pathToPsiRoot.set("/org/lukasj/idea/torquescript/psi")
+
+        purgeOldFiles.set(true)
+
+        outputs.file("${targetRoot.get()}${pathToParser.get()}.java")
+        outputs.dir("${targetRoot.get()}${pathToPsiRoot.get()}")
     }
 
     withType<PublishPluginTask> {
@@ -97,7 +131,7 @@ tasks {
 
     // Specify the right jvm target for Kotlin
     withType<KotlinCompile>().configureEach {
-        dependsOn(generateTorqueScriptLexer, generateTorqueScriptParser)
+        dependsOn("generateLexer", "generateParser")
 
         sourceCompatibility = JavaVersion.VERSION_11.toString()
         targetCompatibility = JavaVersion.VERSION_11.toString()

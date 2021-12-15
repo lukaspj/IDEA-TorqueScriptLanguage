@@ -7,6 +7,9 @@
                   language="TorqueScript"
                   extensions="tscript"/>
 
+        <internalFileTemplate name="TorqueScript Module" />
+        <internalFileTemplate name="TorqueScript File" />
+
         <lang.parserDefinition language="TorqueScript"
                                implementationClass="org.lukasj.idea.torquescript.parser.TSParserDefinition"/>
 
@@ -58,9 +61,23 @@
     <actions>
         <action class="org.lukasj.idea.torquescript.action.RebuildExportsAction"
                 id="org.lukasj.idea.torquescript.action.RebuildExportsAction"
-                text="Rebuild Exports" description="Rebuild Engine Exports"
+                text="Rebuild Exports" description="Rebuild engine exports"
                 icon="TSIcons.FILE">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+
+        <action id="TS.NewFile"
+                class="org.lukasj.idea.torquescript.action.TSCreateFileAction"
+                text="TorqueScript File"
+                description="Create new TorqueScript file">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile" />
+        </action>
+
+        <action id="TS.NewModule"
+                class="org.lukasj.idea.torquescript.action.TSCreateModuleAction"
+                text="TorqueScript Module"
+                description="Create new TorqueScript module">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile" />
         </action>
     </actions>
 </idea-plugin>

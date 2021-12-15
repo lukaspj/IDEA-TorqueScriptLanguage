@@ -12,30 +12,24 @@
 ### Fixed
 
 ### Security
-## [1.7.1]
+
+## [1.8.0]
 ### Added
+- Auto-completion for fields
 
 ### Changed
+- Auto-completion will now only show class names when instantiating new objects
 
-### Deprecated
-
-### Removed
-
+## [1.7.1]
 ### Fixed
 - Named object function reference resolution
 - Trim empty description elements in documentation
 
-### Security
 ## [1.7.0]
 ### Added
 - Support for TorqueScript docstrings (comments starting with three slashes)
   on functions
 
-### Changed
-
-### Deprecated
-
-### Removed
 
 ### Fixed
 - Some Null Pointer Exceptions
@@ -45,21 +39,11 @@
 - Debugger issues with latest version of Torque3D 4.0
 - Made the IDE more robust against engine crashes
 
-### Security
 ## [1.6.7]
-### Added
-
-### Changed
-
-### Deprecated
-
-### Removed
-
 ### Fixed
 - Improve error handling when breakpoint file is not found
 - Resolve files from root directory upon hitting a breakpoint
 
-### Security
 ## [1.6.6]
 ### Fixed
 - Use project root as game root when setting breakpoints
@@ -73,6 +57,7 @@
 ## [1.6.4]
 ### Changed
 - Removed dependency on `com.intellij.java`
+
 
 ### Fixed
 - Improved error handling in Rebuild Exports action
@@ -94,8 +79,10 @@
 ### Added
 - Auto-show local variables when breakpoint is hit
 
+
 ### Changed
 - Specify compatibility range of plugin to be anything from 211
+
 
 ### Fixed
 - Parent references in object initializers are now properly resolved and highlighted
@@ -104,10 +91,12 @@
 ### Added
 - Hyperlinks for simple file paths in strings
 
+
 ### Changed
 - Classified find usages results on objects
 - Context-aware completion for method calls on named objects and when type-analysis succeeds
 - Context-aware completion for callbacks
+
 
 ### Fixed
 - Fixed a bug with formatter indenting body on new instance expressions
@@ -117,8 +106,10 @@
 ### Added
 - Experimental formatter support
 
+
 ### Changed
 - Improved documentation for quick-navigation
+
 
 ### Fixed
 - Fixed an issue with folding in switch statements
@@ -133,12 +124,14 @@
 - Documentation support for builtin functions and classes
 - Completion support for builtin functions and classes
 
+
 ### Fixed
 - Namespaced functions had inversed lookup logic
 
 ## [1.3.1]
 ### Added
 - Go to symbol for Objects and Global Variables
+
 
 ### Fixed
 - Rename refactoring now works for:
@@ -189,12 +182,14 @@
 - Syntax highlighting for functions and instances
 
 
+
 ### Fixed
 - Improvements to grammars to handle more edge-cases
 
 ## [1.0.0]
 ### Added
 - Plugin icon
+
 
 ### Changed
 - Update version to 1.0.0 this is the initial stable release
@@ -204,7 +199,7 @@
 ### Added
 - Support for simple completion of functions
 
+
 ### Fixed
 - Parsing of block statements
 - Error-handling
-

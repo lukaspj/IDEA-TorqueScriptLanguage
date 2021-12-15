@@ -9,6 +9,8 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.TokenSet
 import org.lukasj.idea.torquescript.TSLanguage
+import org.lukasj.idea.torquescript.psi.TSFieldAssignment
+import org.lukasj.idea.torquescript.psi.TSProperty
 import org.lukasj.idea.torquescript.psi.TSTypes
 
 
@@ -18,6 +20,7 @@ class TSCompletionContributor : CompletionContributor() {
         extend(CompletionType.BASIC, inDatablock(), TSClassCompletionContributor())
         extend(CompletionType.BASIC, inSingleton(), TSClassCompletionContributor())
         extend(CompletionType.BASIC, inNew(), TSClassCompletionContributor())
+        extend(CompletionType.BASIC, inProperties(), TSPropertiesCompletionContributor())
         extend(CompletionType.BASIC, isKeywordable(), TSKeywordCompletionContributor())
         extend(CompletionType.BASIC, inGlobalCall(), TSGlobalCallCompletionContributor())
         extend(CompletionType.BASIC, inGlobalNSCall(), TSGlobalNSCallCompletionContributor())
@@ -113,4 +116,8 @@ class TSCompletionContributor : CompletionContributor() {
                     psiElement(TSTypes.NEW)
                 )
             )
+
+    private fun inProperties(): ElementPattern<PsiElement> =
+        psiElement(TSTypes.IDENT)
+            .withParent(TSProperty::class.java)
 }
