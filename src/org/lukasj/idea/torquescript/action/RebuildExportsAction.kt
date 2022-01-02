@@ -100,7 +100,23 @@ class RebuildExportsAction : AnAction() {
                             try {
                                 telnetClient.login("password")
                                 telnetClient.resume()
-                                telnetClient.eval("exportEngineAPIToXML().saveFile(\"${dir.replace('\\', '/')}/engineApi.xml\");")
+                                telnetClient.eval("" +
+                                        "setLogMode(6);" +
+
+                                        // For sanity/compatibility, let's set it for both T2D and T3D.
+                                        // Not a fan of this way of doing things..
+                                        "\$pref::T2D::TAMLSchema = \"${dir.replace('\\', '/')}/engineApiSchema.xsd\";" +
+                                        "\$pref::T3D::TAMLSchema = \"${dir.replace('\\', '/')}/engineApiSchema.xsd\";" +
+
+                                        "exportEngineAPIToXML().saveFile(\"${dir.replace('\\', '/')}/engineApi.xml\");" +
+                                        "GenerateTamlSchema();" +
+                                        "quit();"
+                                )
+
+                                telnetClient.eval("\$pref::T2D::TAMLSchema = \"engineApiSchema.xsd\";")
+                                telnetClient.eval("\$pref::T3D::TAMLSchema = \"engineApiSchema.xsd\";")
+
+                                telnetClient.eval("GenerateTamlSchema();")
                                 telnetClient.eval("quit();")
                                 if (processHandler.waitFor(3000)) {
                                     ApplicationManager.getApplication()

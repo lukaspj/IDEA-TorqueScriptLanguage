@@ -1,8 +1,9 @@
 package org.lukasj.idea.torquescript
 
+import com.intellij.ide.highlighter.XmlLikeFileType
+import com.intellij.lang.xml.XMLLanguage
 import com.intellij.openapi.fileTypes.LanguageFileType
 import icons.TSIcons
-import javax.swing.Icon
 
 class TSFileType : LanguageFileType(TSLanguage.INSTANCE) {
     override fun getName() = "TorqueScript File"
@@ -16,5 +17,20 @@ class TSFileType : LanguageFileType(TSLanguage.INSTANCE) {
     companion object {
         @JvmField
         val INSTANCE = TSFileType()
+    }
+}
+
+class TamlFileType : XmlLikeFileType(XMLLanguage.INSTANCE) {
+    override fun getName() = "TAML File"
+
+    override fun getDescription() = "TAML file"
+
+    override fun getDefaultExtension() = "taml"
+
+    override fun getIcon() = TSIcons.TAML
+
+    companion object {
+        @JvmField
+        val INSTANCE = TamlFileType()
     }
 }

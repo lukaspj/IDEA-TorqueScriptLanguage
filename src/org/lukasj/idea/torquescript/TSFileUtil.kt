@@ -1,11 +1,14 @@
 package org.lukasj.idea.torquescript
 
+import com.intellij.execution.RunManager
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.util.io.exists
+import org.lukasj.idea.torquescript.runner.TSRunConfiguration
 import java.io.File
 import java.nio.file.Path
 
@@ -36,4 +39,21 @@ object TSFileUtil {
         }
         return null
     }
+
+    fun getSchemaFile(project: Project): Path? =
+        RunManager.getInstance(project)
+            .allConfigurationsList
+            .filterIsInstance<TSRunConfiguration>()
+            .first { !it.appPath.isNullOrEmpty() }
+            .workingDir
+            ?.let { pwd ->
+                Path.of(pwd, "engineApiSchema.xsd")
+                    .let { schemaFilePath ->
+                        if (schemaFilePath.exists()) {
+                            schemaFilePath
+                        } else {
+                            null
+                        }
+                    }
+            }
 }

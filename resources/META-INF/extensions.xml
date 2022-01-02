@@ -6,6 +6,18 @@
                   fieldName="INSTANCE"
                   language="TorqueScript"
                   extensions="tscript"/>
+        <fileType name="TAML File"
+                  implementationClass="org.lukasj.idea.torquescript.TamlFileType"
+                  fieldName="INSTANCE"
+                  language="XML"
+                  extensions="taml"/>
+
+        <xml.schemaProvider implementation="org.lukasj.idea.torquescript.editor.TamlXmlSchemaProvider" />
+        <metaDataContributor implementation="org.lukasj.idea.torquescript.editor.TamlFileNSInfoProvider"/>
+        <xml.fileNSInfoProvider implementation="org.lukasj.idea.torquescript.editor.TamlFileNSInfoProvider" />
+        <xml.namespaceHelper implementation="org.lukasj.idea.torquescript.editor.TamlNamespaceHelper" />
+
+        <!-- <treeStructureProvider implementation="org.lukasj.idea.torquescript.editor.TSTreeStructureProvider" /> -->
 
         <internalFileTemplate name="TorqueScript Module" />
         <internalFileTemplate name="TorqueScript File" />

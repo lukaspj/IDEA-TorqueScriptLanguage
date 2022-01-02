@@ -6,5 +6,7 @@ class TSIcons {
     companion object {
         @JvmField
         val FILE = IconLoader.getIcon("/icons/file.png", TSIcons::class.java)
+        @JvmField
+        val TAML = IconLoader.getIcon("/icons/taml.png", TSIcons::class.java)
     }
 }

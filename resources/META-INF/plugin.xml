@@ -20,6 +20,9 @@
         <h3>Current features</h3>
         <ul>
             <li>Syntax Highlighting</li>
+            <li>TAML file support
+                <ul>Currently, this only works with files ending in `.taml` because of a quirk in IDEA</ul>
+            </li>
             <li>File path detection and hyperlinking</li>
             <li>Go To Definition for:
                 <ul>
