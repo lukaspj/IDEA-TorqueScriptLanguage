@@ -58,7 +58,7 @@ class TSFileCache(private val file: TSFile) {
 
     private fun buildCaches() {
         val manager = CachedValuesManager.getManager(file.project)
-        val dependencies = arrayOf<Any>(modificationTracker)
+        val dependencies = arrayOf(file, modificationTracker)
 
         cachedFunctions =
             manager.createCachedValue(

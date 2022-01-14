@@ -7,9 +7,16 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiManager
 import com.intellij.util.io.exists
+import com.intellij.util.io.isDirectory
 import org.lukasj.idea.torquescript.runner.TSRunConfiguration
+import org.lukasj.idea.torquescript.taml.TamlModuleService
 import java.io.File
+import java.net.URI
+import java.net.URL
 import java.nio.file.Path
 
 object TSFileUtil {
@@ -40,20 +47,83 @@ object TSFileUtil {
         return null
     }
 
-    fun getSchemaFile(project: Project): Path? =
-        RunManager.getInstance(project)
-            .allConfigurationsList
-            .filterIsInstance<TSRunConfiguration>()
-            .first { !it.appPath.isNullOrEmpty() }
-            .workingDir
+    fun getSchemaFile(project: Project): URI =
+        project.basePath
             ?.let { pwd ->
                 Path.of(pwd, "engineApiSchema.xsd")
                     .let { schemaFilePath ->
                         if (schemaFilePath.exists()) {
-                            schemaFilePath
+                            schemaFilePath.toUri()
                         } else {
                             null
                         }
                     }
+            }
+            ?: this::class.java.getResource("/samples/engineApiSchema.xsd")!!.toURI()
+
+    fun findFilesWithSuffix(root: VirtualFile, suffix: String) =
+        findFiles(root) {
+            it.name.endsWith(suffix)
+        }
+
+    fun findFiles(root: VirtualFile, pred: (VirtualFile) -> Boolean): List<VirtualFile> =
+        if (root.isDirectory) {
+            root.children
+                .flatMap { findFiles(it, pred) }
+        } else if (pred(root)) {
+            listOf(root)
+        } else {
+            emptyList()
+        }
+
+    fun resolveScriptPath(context: PsiElement, path: String, isAssetPath: Boolean = false): VirtualFile? {
+        return when {
+            // ./ -> relative path
+            path.startsWith("./") ->
+                VfsUtil.findRelativeFile(
+                    path,
+                    context.containingFile.virtualFile
+                )
+            // / -> from root
+            path.startsWith("/") ->
+                VfsUtil.findRelativeFile(
+                    toRelative(path),
+                    VfsUtil.findFileByIoFile(File(context.project.basePath!!), true)
+                )
+            // : -> asset reference
+            path.contains(":") ->
+                path.split(':')
+                    .let { split ->
+                        context.project.getService(TamlModuleService::class.java)
+                            .let { moduleService ->
+                                moduleService.getAsset(split[0], split[1])
+                                    ?.file
+                            }
+                    }
+            // If nothing else works, just try to resolve from root.
+            else ->
+                VfsUtil.findRelativeFile(
+                    path,
+                    // Handle an inconsistency
+                    if (isAssetPath) {
+                        context.containingFile.virtualFile
+                    } else {
+                        VfsUtil.findFileByIoFile(File(context.project.basePath!!), true)
+                    }
+                )
+        }
+    }
+
+        private fun toRelative(value: String) =
+            when {
+                value.startsWith("./") -> {
+                    value
+                }
+                value.startsWith("/") -> {
+                    ".$value"
+                }
+                else -> {
+                    "./$value"
+                }
             }
 }

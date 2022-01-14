@@ -6,56 +6,22 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiReferenceBase
 import com.intellij.psi.util.PsiTreeUtil
+import org.lukasj.idea.torquescript.TSFileUtil
 import org.lukasj.idea.torquescript.psi.TSLiteralExpression
 import org.lukasj.idea.torquescript.psi.impl.TSAssignmentExpressionImpl
 import org.lukasj.idea.torquescript.psi.impl.TSLiteralExpressionElementImpl
+import org.lukasj.idea.torquescript.taml.TamlModuleService
 import java.io.File
 
-class TSFileReference(literal: TSLiteralExpressionElementImpl, rangeInElement: TextRange) :
+class TSFileReference(literal: PsiElement, rangeInElement: TextRange, val isAssetPath: Boolean = false) :
     PsiReferenceBase<PsiElement>(literal, rangeInElement) {
     override fun resolve(): PsiElement? {
-        val value = concatenateSiblings(element.text.substring(rangeInElement.startOffset, rangeInElement.endOffset), element)
-        return when {
-            // ./ -> relative path
-            value.startsWith("./") ->
-                VfsUtil.findRelativeFile(
-                    value,
-                    element.containingFile.virtualFile
-                )
-                    .let {
-                        if (it != null) {
-                            PsiManager.getInstance(element.project).findFile(it)
-                        } else {
-                            null
-                        }
-                    }
-            // / -> from root
-            value.contains("/") ->
-                VfsUtil.findRelativeFile(
-                    toRelative(value),
-                    VfsUtil.findFileByIoFile(File(element.project.basePath!!), true)
-                )
-                    .let {
-                        if (it != null) {
-                            PsiManager.getInstance(element.project).findFile(it)
-                        } else {
-                            null
-                        }
-                    }
-            // If nothing else works, just try to resolve from root.
-            else ->
-                VfsUtil.findRelativeFile(
-                    toRelative(value),
-                    VfsUtil.findFileByIoFile(File(element.project.basePath!!), true)
-                )
-                    .let {
-                        if (it != null) {
-                            PsiManager.getInstance(element.project).findFile(it)
-                        } else {
-                            null
-                        }
-                    }
-        }
+        val value =
+            concatenateSiblings(element.text.substring(rangeInElement.startOffset, rangeInElement.endOffset), element)
+        return TSFileUtil.resolveScriptPath(element, value, isAssetPath)
+            ?.let {
+                PsiManager.getInstance(element.project).findFile(it)
+            }
     }
 
     private fun concatenateSiblings(path: String, element: PsiElement): String {
@@ -99,17 +65,4 @@ class TSFileReference(literal: TSLiteralExpressionElementImpl, rangeInElement: T
         }
         return path
     }
-
-    private fun toRelative(value: String) =
-        when {
-            value.startsWith("./") -> {
-                value
-            }
-            value.startsWith("/") -> {
-                ".$value"
-            }
-            else -> {
-                "./$value"
-            }
-        }
 }

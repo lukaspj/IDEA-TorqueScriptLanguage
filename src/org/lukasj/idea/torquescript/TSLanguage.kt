@@ -14,3 +14,10 @@ class TSLanguage : Language("TorqueScript") {
         val INSTANCE = TSLanguage()
     }
 }
+
+class TamlLanguage : XMLLanguage(XMLLanguage.INSTANCE, "TAML", "application/taml") {
+    companion object {
+        @JvmField
+        val INSTANCE = TamlLanguage()
+    }
+}

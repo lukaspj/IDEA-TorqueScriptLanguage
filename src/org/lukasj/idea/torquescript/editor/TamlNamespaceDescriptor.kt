@@ -17,13 +17,13 @@ class TamlNamespaceDescriptor : XmlNSDescriptorImpl() {
         val project = element.project
 
         val rootTag = TSFileUtil.getSchemaFile(project)
-            ?.let {
+            .let {
                 PsiManager.getInstance(project)
-                    .findFile(VfsUtil.findFileByURL(it.toUri().toURL())!!) as XmlFile
-            }?.document?.rootTag
+                    .findFile(VfsUtil.findFileByURL(it.toURL())!!) as XmlFile
+            }.document?.rootTag
         super.init(rootTag)
     }
 
     override fun getDefaultNamespace(): String =
-        TSFileUtil.getSchemaFile(this.tag.project)?.toUri().toString()
+        TSFileUtil.getSchemaFile(this.tag.project).toString()
 }

@@ -1,21 +1,31 @@
 <idea-plugin>
 
     <extensions defaultExtensionNs="com.intellij">
-        <fileType name="TorqueScript File"
+        <fileType name="TorqueScript"
                   implementationClass="org.lukasj.idea.torquescript.TSFileType"
                   fieldName="INSTANCE"
                   language="TorqueScript"
                   extensions="tscript"/>
-        <fileType name="TAML File"
+        <fileType name="TAML"
                   implementationClass="org.lukasj.idea.torquescript.TamlFileType"
                   fieldName="INSTANCE"
-                  language="XML"
+                  language="TAML"
                   extensions="taml"/>
+        <fileType name="Torque3D Module Description"
+                  implementationClass="org.lukasj.idea.torquescript.ModuleFileType"
+                  fieldName="INSTANCE"
+                  language="TAML"
+                  extensions="module"/>
+
+        <lang.parserDefinition language="TAML" implementationClass="org.lukasj.idea.torquescript.parser.TamlParserDefinition"/>
 
         <xml.schemaProvider implementation="org.lukasj.idea.torquescript.editor.TamlXmlSchemaProvider" />
         <metaDataContributor implementation="org.lukasj.idea.torquescript.editor.TamlFileNSInfoProvider"/>
         <xml.fileNSInfoProvider implementation="org.lukasj.idea.torquescript.editor.TamlFileNSInfoProvider" />
-        <xml.namespaceHelper implementation="org.lukasj.idea.torquescript.editor.TamlNamespaceHelper" />
+        <psi.referenceContributor language="XML" implementation="org.lukasj.idea.torquescript.reference.TamlReferenceContributor" />
+        <annotator language="XML"
+                   implementationClass="org.lukasj.idea.torquescript.annotator.TamlPathAnnotator" />
+        <!-- <xml.namespaceHelper implementation="org.lukasj.idea.torquescript.editor.TamlNamespaceHelper" /> -->
 
         <!-- <treeStructureProvider implementation="org.lukasj.idea.torquescript.editor.TSTreeStructureProvider" /> -->
 
@@ -61,6 +71,8 @@
         <typedHandler implementation="org.lukasj.idea.torquescript.completion.TSCompletionAutoPopupHandler" id="ts"/>
         <completion.contributor language="TorqueScript"
                                 implementationClass="org.lukasj.idea.torquescript.completion.TSCompletionContributor"/>
+        <completion.contributor language="TAML"
+                                implementationClass="org.lukasj.idea.torquescript.completion.TamlCompletionContributor"/>
 
         <programRunner implementation="org.lukasj.idea.torquescript.runner.TSRunner"/>
         <configurationType implementation="org.lukasj.idea.torquescript.runner.TSRunConfigurationType"/>
@@ -76,6 +88,13 @@
                 text="Rebuild Exports" description="Rebuild engine exports"
                 icon="TSIcons.FILE">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+        
+        <action class="org.lukasj.idea.torquescript.action.ImportAssetAction"
+                id="org.lukasj.idea.torquescript.action.ImportAssetAction"
+                text="Import Asset" description="Create TAML asset definition from resource file"
+                icon="TSIcons.TAML">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="RestoreDefaultExtensionScripts" />
         </action>
 
         <action id="TS.NewFile"

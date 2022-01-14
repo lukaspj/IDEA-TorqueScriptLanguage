@@ -8,5 +8,7 @@ class TSIcons {
         val FILE = IconLoader.getIcon("/icons/file.png", TSIcons::class.java)
         @JvmField
         val TAML = IconLoader.getIcon("/icons/taml.png", TSIcons::class.java)
+        @JvmField
+        val MODULE = IconLoader.getIcon("/icons/taml.png", TSIcons::class.java)
     }
 }

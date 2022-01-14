@@ -33,6 +33,7 @@ sourceSets {
         java.srcDirs("src", "gen")
         resources.srcDirs("resources")
             .exclude("scripts/**")
+            .exclude("placeholder-schema.xsd")
     }
 }
 
@@ -45,6 +46,7 @@ tasks.runIde {
 
     // Set to true to generate hprof files on unload fails
     systemProperty("ide.plugins.snapshot.on.unload.fail", "false")
+    systemProperty("idea.is.internal", "true")
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
@@ -52,32 +54,6 @@ intellij {
     version.set("2021.3")
     pluginName.set("TorqueScript")
 }
-/*
-val generateTorqueScriptParser = task<GenerateParserTask>("GenerateTorqueScriptParser") {
-    source.set("src/org/lukasj/idea/torquescript/grammar/TorqueScript.bnf")
-
-    targetRoot.set("gen")
-
-    pathToParser.set("/org/lukasj/idea/torquescript/parser/TSParser")
-
-    pathToPsiRoot.set("/org/lukasj/idea/torquescript/psi")
-
-    purgeOldFiles.set(true)
-
-    outputs.file("${targetRoot}${pathToParser}.java")
-    outputs.dir("${targetRoot}${pathToPsiRoot}")
-}
-
-val generateTorqueScriptLexer = task<GenerateLexerTask>("GenerateTorqueScriptLexer") {
-    source.set("src/org/lukasj/idea/torquescript/grammar/TorqueScript.flex")
-
-    targetDir.set("gen/org/lukasj/idea/torquescript/lexer")
-    targetClass.set("TSLexer")
-
-    purgeOldFiles.set(true)
-
-    outputs.file("${targetDir}/${targetClass}.java")
-}*/
 
 changelog {
     version.set(prop("pluginVersion"))
@@ -125,6 +101,9 @@ tasks {
 
     prepareSandbox {
         from(fileTree("resources") { include("scripts/**") }) {
+            into("/${project.name}")
+        }
+        from(fileTree("resources") { include("placeholder-schema.xsd") }) {
             into("/${project.name}")
         }
     }

@@ -12,7 +12,7 @@ abstract class TSLiteralExpressionElementImpl(node: ASTNode) : ASTWrapperPsiElem
         val value = text.trim()
 
         return when {
-            value.contains("/") ->
+            value.contains("/") || value.contains(":") ->
                 TSFileReference(this, TextRange(1, value.length - 1))
             else -> null
         }
