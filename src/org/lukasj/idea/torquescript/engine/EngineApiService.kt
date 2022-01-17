@@ -73,7 +73,7 @@ class EngineApiService(private val project: Project) {
 
     fun getFunctions() = cachedApi?.value?.getAllFunctions() ?: listOf()
     fun getStaticFunctions() = getFunctions().filter { it.isStatic }
-    fun findFunction(name: String) = getFunctions().firstOrNull { it.name.equals(name, ignoreCase = true) }
+    fun findFunction(name: String) = getFunctions().firstOrNull { it.toString().equals(name, ignoreCase = true) }
     fun getEnums() = cachedApi?.value?.getAllEnums() ?: listOf()
     fun findEnum(name: String) = getEnums().firstOrNull { it.name.equals(name, ignoreCase = true) }
     fun getClasses() = cachedApi?.value?.getAllClasses() ?: listOf()

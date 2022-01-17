@@ -41,7 +41,8 @@ class TSGlobalNSCallCompletionContributor : CompletionProvider<CompletionParamet
                     .getStaticFunctions()
                     .filter { it.scopeList.lastOrNull().equals(namespace, true) }
                     .map {
-                        LookupElementBuilder.create(it)
+                        LookupElementBuilder.create(it.name)
+                            .withPresentableText(it.toString())
                             .withIcon(PlatformIcons.FUNCTION_ICON)
                             .withCaseSensitivity(false)
                             .withTypeText(it.returnType)

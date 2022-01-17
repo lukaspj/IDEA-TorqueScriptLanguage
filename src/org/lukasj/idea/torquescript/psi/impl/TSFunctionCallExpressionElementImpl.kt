@@ -21,21 +21,27 @@ abstract class TSFunctionCallExpressionElementImpl(node: ASTNode) : ASTWrapperPs
     override fun getNameIdentifier(): PsiElement? =
         when (functionType) {
             TSFunctionType.METHOD -> {
-                if (getExpression() is TSIdentExpression) {
-                    getExpression()
-                } else {
-                    null
-                }
+                getExpression()
+                    .let {
+                        if (it is TSIdentExpressionImpl) {
+                            it
+                        } else {
+                            null
+                        }
+                    }
             }
             TSFunctionType.GLOBAL -> {
                 firstChild
             }
             TSFunctionType.GLOBAL_NS -> {
-                if (getExpression() is TSIdentExpression) {
-                    getExpression()
-                } else {
-                    null
-                }
+                getExpression()
+                    .let {
+                        if (it is TSIdentExpressionImpl) {
+                            it
+                        } else {
+                            null
+                        }
+                    }
             }
         }
 
@@ -71,24 +77,18 @@ abstract class TSFunctionCallExpressionElementImpl(node: ASTNode) : ASTWrapperPs
         val identifier = nameIdentifier ?: return null
         return when (functionType) {
             TSFunctionType.GLOBAL -> {
-                TSFunctionReference(this, TextRange(0, identifier.textLength))
+                TSFunctionReference(this, identifier.textRangeInParent)
             }
             TSFunctionType.GLOBAL_NS -> {
                 TSFunctionReference(
                     this,
-                    TextRange(
-                        identifier.lastChild.startOffsetInParent,
-                        identifier.lastChild.startOffsetInParent + identifier.lastChild.textLength
-                    )
+                    getExpression().textRangeInParent,
                 )
             }
             TSFunctionType.METHOD -> {
                 TSFunctionReference(
                     this,
-                    TextRange(
-                        identifier.lastChild.startOffsetInParent,
-                        identifier.lastChild.startOffsetInParent + identifier.lastChild.textLength
-                    )
+                    getExpression().textRangeInParent,
                 )
             }
         }
@@ -97,10 +97,7 @@ abstract class TSFunctionCallExpressionElementImpl(node: ASTNode) : ASTWrapperPs
     override fun getReferences(): Array<PsiReference> {
         val identifier = nameIdentifier ?: return arrayOf()
         return if (identifier.firstChild != identifier.lastChild) {
-            arrayOf(
-                reference!!,
-                TSObjectReference(this, TextRange(0, identifier.firstChild.textLength))
-            )
+            getExpression().references
         } else {
             arrayOf(reference!!)
         }

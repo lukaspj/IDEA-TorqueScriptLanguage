@@ -90,14 +90,12 @@
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
 
-        <!--
         <action class="org.lukasj.idea.torquescript.action.ImportAssetAction"
                 id="org.lukasj.idea.torquescript.action.ImportAssetAction"
                 text="Import Asset" description="Create TAML asset definition from resource file"
                 icon="TSIcons.TAML">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="RestoreDefaultExtensionScripts" />
         </action>
-        -->
 
         <action id="TS.NewFile"
                 class="org.lukasj.idea.torquescript.action.TSCreateFileAction"
