@@ -2,6 +2,7 @@ package org.lukasj.idea.torquescript.completion
 
 import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.util.PlatformIcons
 import com.intellij.util.ProcessingContext
 import icons.TSIcons
@@ -56,25 +57,27 @@ class TSPathCompletionContributor : CompletionProvider<CompletionParameters>() {
                 } else {
                     ""
                 }.let { currentDir ->
-                    TSFileUtil.resolveScriptPath(parameters.originalFile, currentDir)?.children
-                        ?.forEach {
-                            // Handle an edge-case on Windows with beginning slash
-                            if (currentDir.startsWith("/")) {
-                                "/${Path.of(currentDir.substring(1), it.name)}"
-                            } else {
-                                Path.of(currentDir, it.name).toString()
-                            }.let { sanitizedPath ->
-                                result.addElement(
-                                    // We have to add the quote since we are inside a quote string
-                                    LookupElementBuilder.create("\"${sanitizedPath.replace('\\', '/')}")
-                                        .withIcon(PlatformIcons.FILE_ICON)
-                                        .withPresentableText(it.name)
-                                        .withCaseSensitivity(false)
-                                        .withTypeText(it.name)
-                                        .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
-                                )
+                    TSFileUtil.resolveScriptPath(parameters.originalFile, currentDir)?.let { path ->
+                        VfsUtil.findFile(path, true)?.children
+                            ?.forEach {
+                                // Handle an edge-case on Windows with beginning slash
+                                if (currentDir.startsWith("/")) {
+                                    "/${Path.of(currentDir.substring(1), it.name)}"
+                                } else {
+                                    Path.of(currentDir, it.name).toString()
+                                }.let { sanitizedPath ->
+                                    result.addElement(
+                                        // We have to add the quote since we are inside a quote string
+                                        LookupElementBuilder.create("\"${sanitizedPath.replace('\\', '/')}")
+                                            .withIcon(PlatformIcons.FILE_ICON)
+                                            .withPresentableText(it.name)
+                                            .withCaseSensitivity(false)
+                                            .withTypeText(it.name)
+                                            .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
+                                    )
+                                }
                             }
-                        }
+                    }
                 }
         }
     }

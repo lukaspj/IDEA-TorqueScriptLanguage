@@ -5,5 +5,6 @@ class EngineApi(rootScope: EngineScope) {
 
     fun getAllFunctions(): List<EngineFunction> = scope.getAllFunctions()
     fun getAllClasses(): List<EngineClass> = scope.getAllClasses()
+    fun getAllEnums(): List<EngineEnum> = scope.getAllEnums()
 }
 

@@ -39,7 +39,7 @@ class TSGlobalNSCallCompletionContributor : CompletionProvider<CompletionParamet
             .plus(
                 project.getService(EngineApiService::class.java)
                     .getStaticFunctions()
-                    .filter { it.name.contains(':') }
+                    .filter { it.scopeList.lastOrNull().equals(namespace, true) }
                     .map {
                         LookupElementBuilder.create(it)
                             .withIcon(PlatformIcons.FUNCTION_ICON)

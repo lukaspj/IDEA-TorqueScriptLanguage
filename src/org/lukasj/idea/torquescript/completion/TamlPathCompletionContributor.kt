@@ -2,6 +2,7 @@ package org.lukasj.idea.torquescript.completion
 
 import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.util.PlatformIcons
 import com.intellij.util.ProcessingContext
 import icons.TSIcons
@@ -56,18 +57,22 @@ class TamlPathCompletionContributor : CompletionProvider<CompletionParameters>()
                 } else {
                     ""
                 }.let { currentDir ->
-                    TSFileUtil.resolveScriptPath(parameters.originalFile, currentDir, true)?.children
-                        ?.forEach {
-                            result.addElement(
-                                // We have to add the quote since we are inside a quote string
-                                LookupElementBuilder.create(Path.of(currentDir, it.name).toString().replace('\\','/'))
-                                    .withIcon(PlatformIcons.FILE_ICON)
-                                    .withPresentableText(it.name)
-                                    .withCaseSensitivity(false)
-                                    .withTypeText(it.name)
-                                    .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
-                            )
-                        }
+                    TSFileUtil.resolveScriptPath(parameters.originalFile, currentDir)?.let { path ->
+                        VfsUtil.findFile(path, true)?.children
+                            ?.forEach {
+                                result.addElement(
+                                    // We have to add the quote since we are inside a quote string
+                                    LookupElementBuilder.create(
+                                        Path.of(currentDir, it.name).toString().replace('\\', '/')
+                                    )
+                                        .withIcon(PlatformIcons.FILE_ICON)
+                                        .withPresentableText(it.name)
+                                        .withCaseSensitivity(false)
+                                        .withTypeText(it.name)
+                                        .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
+                                )
+                            }
+                    }
                 }
         }
     }

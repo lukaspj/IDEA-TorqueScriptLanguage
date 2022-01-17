@@ -13,23 +13,23 @@
 
 ### Security
 
+## [1.10.1]
+### Fixed
+- Handle ugly-formatted identifiers like:
+  ```
+  Foo
+  ::
+  // Some Comment
+  Bar
+  ```
+- Auto-complete of namespace function wasn't working
+
 ## [1.10.0]
 ### Added
 - AutoCompletion of paths in TAML
 - AutoCompletion of paths in TorqueScript
 - Go To File for paths in TAML
 - Support for module-references in paths
-
-
-### Changed
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
 
 ## [1.9.1]
 ### Added
@@ -44,7 +44,6 @@
 ### Added
 - Auto-completion for fields
 
-
 ### Changed
 - Auto-completion will now only show class names when instantiating new objects
 
@@ -57,7 +56,6 @@
 ### Added
 - Support for TorqueScript docstrings (comments starting with three slashes)
   on functions
-
 
 ### Fixed
 - Some Null Pointer Exceptions
@@ -86,7 +84,6 @@
 ### Changed
 - Removed dependency on `com.intellij.java`
 
-
 ### Fixed
 - Improved error handling in Rebuild Exports action
 
@@ -107,10 +104,8 @@
 ### Added
 - Auto-show local variables when breakpoint is hit
 
-
 ### Changed
 - Specify compatibility range of plugin to be anything from 211
-
 
 ### Fixed
 - Parent references in object initializers are now properly resolved and highlighted
@@ -119,12 +114,10 @@
 ### Added
 - Hyperlinks for simple file paths in strings
 
-
 ### Changed
 - Classified find usages results on objects
 - Context-aware completion for method calls on named objects and when type-analysis succeeds
 - Context-aware completion for callbacks
-
 
 ### Fixed
 - Fixed a bug with formatter indenting body on new instance expressions
@@ -134,10 +127,8 @@
 ### Added
 - Experimental formatter support
 
-
 ### Changed
 - Improved documentation for quick-navigation
-
 
 ### Fixed
 - Fixed an issue with folding in switch statements
@@ -152,14 +143,12 @@
 - Documentation support for builtin functions and classes
 - Completion support for builtin functions and classes
 
-
 ### Fixed
 - Namespaced functions had inversed lookup logic
 
 ## [1.3.1]
 ### Added
 - Go to symbol for Objects and Global Variables
-
 
 ### Fixed
 - Rename refactoring now works for:
@@ -209,14 +198,12 @@
 - Go to definition on global variables
 - Syntax highlighting for functions and instances
 
-
 ### Fixed
 - Improvements to grammars to handle more edge-cases
 
 ## [1.0.0]
 ### Added
 - Plugin icon
-
 
 ### Changed
 - Update version to 1.0.0 this is the initial stable release
@@ -225,7 +212,6 @@
 ## [0.2.0]
 ### Added
 - Support for simple completion of functions
-
 
 ### Fixed
 - Parsing of block statements

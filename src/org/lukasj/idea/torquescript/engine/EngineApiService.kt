@@ -7,6 +7,7 @@ import com.intellij.psi.util.CachedValue
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import org.lukasj.idea.torquescript.engine.model.EngineApi
+import org.lukasj.idea.torquescript.engine.model.EngineClass
 import org.lukasj.idea.torquescript.engine.parser.EngineApiParser
 import org.lukasj.idea.torquescript.symbols.TSModificationTracker
 import java.nio.file.Path
@@ -73,8 +74,23 @@ class EngineApiService(private val project: Project) {
     fun getFunctions() = cachedApi?.value?.getAllFunctions() ?: listOf()
     fun getStaticFunctions() = getFunctions().filter { it.isStatic }
     fun findFunction(name: String) = getFunctions().firstOrNull { it.name.equals(name, ignoreCase = true) }
+    fun getEnums() = cachedApi?.value?.getAllEnums() ?: listOf()
+    fun findEnum(name: String) = getEnums().firstOrNull { it.name.equals(name, ignoreCase = true) }
     fun getClasses() = cachedApi?.value?.getAllClasses() ?: listOf()
     fun findClass(className: String) = getClasses().firstOrNull { it.name.equals(className, ignoreCase = true) }
+    fun isSubclassOf(engineClass: EngineClass, superclass: EngineClass): Boolean =
+        engineClass.name == superclass.name
+                || engineClass.superType?.let { superType ->
+                        findClass(superType)?.let { isSubclassOf(it, superclass) }
+                    } ?: false
+
+    fun getSubclasses(baseClass: EngineClass) =
+        cachedApi?.value?.getAllClasses()
+            ?.filter {
+                isSubclassOf(it, baseClass)
+            }
+            ?: listOf()
+
     fun getMethods(className: String) = findClass(className)?.methods ?: listOf()
     fun findMethod(className: String, name: String) = getMethods(className)
         .firstOrNull { it.name == name }

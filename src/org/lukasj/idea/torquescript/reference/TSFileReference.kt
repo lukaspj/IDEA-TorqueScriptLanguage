@@ -19,6 +19,7 @@ class TSFileReference(literal: PsiElement, rangeInElement: TextRange, val isAsse
         val value =
             concatenateSiblings(element.text.substring(rangeInElement.startOffset, rangeInElement.endOffset), element)
         return TSFileUtil.resolveScriptPath(element, value, isAssetPath)
+            ?.let { VfsUtil.findFile(it, true) }
             ?.let {
                 PsiManager.getInstance(element.project).findFile(it)
             }

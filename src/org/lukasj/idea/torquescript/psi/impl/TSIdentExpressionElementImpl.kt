@@ -23,11 +23,11 @@ abstract class TSIdentExpressionElementImpl(node: ASTNode) : ASTWrapperPsiElemen
         }
 
         if (firstChild != lastChild) {
-            return TSObjectReference(this, TextRange(0, firstChild.textOffset))
+            return TSObjectReference(this, firstChild.textRangeInParent)
         }
 
         if (firstChild.elementType == TSTypes.IDENT)
-            return TSObjectReference(this, TextRange(0, textLength))
+            return TSObjectReference(this, firstChild.textRangeInParent)
 
         if (firstChild.elementType == TSTypes.IDENT_EXPRESSION)
             return TSObjectReference(this, TextRange(0, firstChild.firstChild.textLength))
@@ -38,8 +38,8 @@ abstract class TSIdentExpressionElementImpl(node: ASTNode) : ASTWrapperPsiElemen
     override fun getReferences(): Array<PsiReference> {
         if (firstChild != lastChild) {
             return arrayOf(
-                TSObjectReference(this, TextRange(0, firstChild.textLength)),
-                TSFunctionReference(this, TextRange(firstChild.textLength+2, firstChild.textLength+2+lastChild.textLength))
+                TSObjectReference(this, firstChild.textRangeInParent),
+                TSFunctionReference(this, lastChild.textRangeInParent)
             )
         }
         val ref = reference
@@ -50,11 +50,9 @@ abstract class TSIdentExpressionElementImpl(node: ASTNode) : ASTWrapperPsiElemen
         }
     }
 
-    override fun getIdentifyingElement() = this
+    override fun getNameIdentifier() = this.lastChild
 
-    override fun getNameIdentifier() = this
-
-    override fun getName() = this.text
+    override fun getName() = this.nameIdentifier.text
 
     override fun setName(name: String): PsiElement {
         this.lastChild.replace(TSElementFactory.createSimple<TSIdentExpressionImpl>(project, name))

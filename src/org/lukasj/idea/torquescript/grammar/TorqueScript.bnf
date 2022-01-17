@@ -161,6 +161,7 @@ ident_expression ::=
     pin="COLON_COLON"
     mixin="org.lukasj.idea.torquescript.psi.impl.TSIdentExpressionElementImpl"
 }
+
 var_expression ::= (THISVAR | LOCALVAR | GLOBALVAR) {
     mixin="org.lukasj.idea.torquescript.editor.TSVarExpressionElementImpl"
 }

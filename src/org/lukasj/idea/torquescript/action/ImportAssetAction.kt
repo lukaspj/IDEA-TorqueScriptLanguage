@@ -15,7 +15,7 @@ class ImportAssetAction : AnAction() {
             haveSmthToDo = false
         } else {
             // the action should also be available for files which have been auto-detected as text or as a particular language (IDEA-79574)
-            haveSmthToDo = AssetImporter().Accepts(file)
+            haveSmthToDo = AssetImporter().accepts(file)
         }
         presentation.isVisible = haveSmthToDo
         presentation.isEnabled = haveSmthToDo
@@ -23,6 +23,6 @@ class ImportAssetAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val file = e.getRequiredData(CommonDataKeys.VIRTUAL_FILE)
-        AssetImporter().Import(file)
+        AssetImporter().import(e.project, file)
     }
 }

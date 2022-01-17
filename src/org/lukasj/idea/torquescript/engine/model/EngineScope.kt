@@ -24,4 +24,10 @@ class EngineScope(
             .plus(
                 scopes.flatMap { it.getAllClasses() }
             )
+
+    fun getAllEnums(): List<EngineEnum> =
+        enums
+            .plus(
+                scopes.flatMap { it.getAllEnums() }
+            )
 }

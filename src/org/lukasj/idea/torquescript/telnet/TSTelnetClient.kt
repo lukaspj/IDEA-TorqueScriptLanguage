@@ -1,18 +1,10 @@
 package org.lukasj.idea.torquescript.runner
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.retry
-import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.io.PrintWriter
-import java.lang.IllegalArgumentException
-import java.net.InetSocketAddress
 import java.net.Socket
-import java.net.SocketTimeoutException
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.ConcurrentHashMap
@@ -101,6 +93,8 @@ class TSTelnetClient(address: String, port: Int) {
                     subQueue?.add(it[1])
                 }
             }
+            else ->
+                println(trimmed)
         }
     }
 

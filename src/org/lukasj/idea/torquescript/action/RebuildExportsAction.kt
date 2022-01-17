@@ -4,24 +4,20 @@ import com.intellij.execution.RunManager
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessListener
-import com.intellij.execution.process.ProcessOutputTypes
-import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.EmptyProgressIndicator
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.ui.Messages
-import com.intellij.openapi.ui.messages.MessageDialog
 import com.intellij.openapi.util.Key
 import org.lukasj.idea.torquescript.TSFileUtil
-import org.lukasj.idea.torquescript.runner.LogConsoleType
 import org.lukasj.idea.torquescript.runner.TSProcessHandler
 import org.lukasj.idea.torquescript.runner.TSRunConfiguration
 import org.lukasj.idea.torquescript.runner.TSTelnetClient
+import org.lukasj.idea.torquescript.telnet.TelnetConsoleService
 import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
@@ -44,93 +40,43 @@ class RebuildExportsAction : AnAction() {
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        val project = e.project
+        val project = e.project ?: return
         val configuration =
-            RunManager.getInstance(project!!)
+            RunManager.getInstance(project)
                 .allConfigurationsList
                 .filterIsInstance<TSRunConfiguration>()
                 .first { !it.appPath.isNullOrEmpty() }
 
-        val debugMain = TSFileUtil.getPluginVirtualFile("scripts/buildexportsmain.tscript")
-
-        val dir = configuration.workingDir
-        val commandLine = GeneralCommandLine(configuration.appPath)
-        commandLine.workDirectory = File(dir!!)
-        commandLine.addParameters(debugMain)
-        commandLine.addParameters("${dir.replace('\\', '/')}/engineApi.xml")
-
+        val dir = configuration.workingDir?.replace('\\', '/') ?: return
 
         try {
-            val processHandler = TSProcessHandler(commandLine)
-
-            processHandler.addProcessListener(object : ProcessListener {
-                override fun startNotified(processEvent: ProcessEvent) {
-
-                }
-
-                override fun processTerminated(processEvent: ProcessEvent) {
-                }
-
-                override fun processWillTerminate(processEvent: ProcessEvent, b: Boolean) {
-
-                }
-
-                override fun onTextAvailable(processEvent: ProcessEvent, key: Key<*>) {
-                    println(processEvent.text)
-                }
-            })
-            processHandler.startNotify()
-
-            val telnetClient = TSTelnetClient("127.0.0.1", 17433)
-            telnetClient.connect()
-
-            thread {
-                while (!processHandler.isProcessTerminated) {
-                    val line = telnetClient.outputQueue.poll(200, TimeUnit.MILLISECONDS)
-                    if (line != null) {
-                        println(line)
-                    }
-                }
-            }
-
             ProgressManager.getInstance()
                 .runProcessWithProgressAsynchronously(
                     object : Task.Backgroundable(project, "Rebuilding exports", true) {
                         override fun run(indicator: ProgressIndicator) {
                             try {
-                                telnetClient.login("password")
-                                telnetClient.resume()
-                                telnetClient.eval("" +
-                                        "setLogMode(6);" +
-
-                                        // For sanity/compatibility, let's set it for both T2D and T3D.
-                                        // Not a fan of this way of doing things..
-                                        "\$pref::T2D::TAMLSchema = \"${dir.replace('\\', '/')}/engineApiSchema.xsd\";" +
-                                        "\$pref::T3D::TAMLSchema = \"${dir.replace('\\', '/')}/engineApiSchema.xsd\";" +
-
-                                        "exportEngineAPIToXML().saveFile(\"${dir.replace('\\', '/')}/engineApi.xml\");" +
-                                        "GenerateTamlSchema();" +
-                                        "quit();"
-                                )
-
-                                telnetClient.eval("\$pref::T2D::TAMLSchema = \"engineApiSchema.xsd\";")
-                                telnetClient.eval("\$pref::T3D::TAMLSchema = \"engineApiSchema.xsd\";")
-
-                                telnetClient.eval("GenerateTamlSchema();")
-                                telnetClient.eval("quit();")
-                                if (processHandler.waitFor(3000)) {
-                                    ApplicationManager.getApplication()
-                                        .invokeLater {
+                                val success = project.getService(TelnetConsoleService::class.java)
+                                    .runTelnetSession(project) { telnetClient ->
+                                        telnetClient.eval(
+                                            """setLogMode(6);
+                                               ${'$'}pref::T2D::TAMLSchema = "$dir/engineApiSchema.xsd";
+                                               ${'$'}pref::T3D::TAMLSchema = "$dir/engineApiSchema.xsd";
+                                               exportEngineAPIToXML().saveFile("$dir/engineApi.xml");
+                                               GenerateTamlSchema();
+                                            """.split('\n')
+                                                .joinToString(" ") { it.trim() }
+                                        )
+                                    }
+                                ApplicationManager.getApplication()
+                                    .invokeLater {
+                                        if (success) {
                                             Messages.showMessageDialog(
                                                 project,
                                                 "Engine Exports were built",
                                                 "Build Exports Done",
                                                 Messages.getInformationIcon()
                                             )
-                                        }
-                                } else {
-                                    ApplicationManager.getApplication()
-                                        .invokeLater {
+                                        } else {
                                             Messages.showMessageDialog(
                                                 project,
                                                 "Engine failed to terminate, killing it manually.\nPlease check whether engineApi.xml was generated successfully",
@@ -138,7 +84,7 @@ class RebuildExportsAction : AnAction() {
                                                 Messages.getWarningIcon()
                                             )
                                         }
-                                }
+                                    }
                             } catch (ex: Exception) {
                                 ApplicationManager.getApplication()
                                     .invokeLater {
@@ -149,11 +95,8 @@ class RebuildExportsAction : AnAction() {
                                             Messages.getErrorIcon()
                                         )
                                     }
-                            } finally {
-                                processHandler.killProcess()
                             }
                         }
-
                     },
                     EmptyProgressIndicator()
                 )

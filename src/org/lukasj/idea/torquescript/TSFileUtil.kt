@@ -1,6 +1,5 @@
 package org.lukasj.idea.torquescript
 
-import com.intellij.execution.RunManager
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.Project
@@ -8,15 +7,10 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiManager
 import com.intellij.util.io.exists
-import com.intellij.util.io.isDirectory
-import org.lukasj.idea.torquescript.runner.TSRunConfiguration
 import org.lukasj.idea.torquescript.taml.TamlModuleService
 import java.io.File
 import java.net.URI
-import java.net.URL
 import java.nio.file.Path
 
 object TSFileUtil {
@@ -76,41 +70,44 @@ object TSFileUtil {
             emptyList()
         }
 
-    fun resolveScriptPath(context: PsiElement, path: String, isAssetPath: Boolean = false): VirtualFile? {
+    fun resolveScriptPath(context: PsiElement, path: String, isAssetPath: Boolean = false) =
+        resolveScriptPath(
+            Path.of(context.containingFile.virtualFile.parent.path),
+            context.project,
+            path,
+            isAssetPath
+        )
+
+    fun resolveScriptPath(relativeFile: Path, project: Project, path: String, isAssetPath: Boolean = false): Path? {
         return when {
+            path.contains("*") ->
+                null
             // ./ -> relative path
             path.startsWith("./") ->
-                VfsUtil.findRelativeFile(
-                    path,
-                    context.containingFile.virtualFile
-                )
+                relativeFile
+                    .resolve(path)
             // / -> from root
             path.startsWith("/") ->
-                VfsUtil.findRelativeFile(
-                    toRelative(path),
-                    VfsUtil.findFileByIoFile(File(context.project.basePath!!), true)
-                )
+                Path.of(project.basePath!!)
+                    .resolve(toRelative(path))
             // : -> asset reference
             path.contains(":") ->
                 path.split(':')
                     .let { split ->
-                        context.project.getService(TamlModuleService::class.java)
+                        project.getService(TamlModuleService::class.java)
                             .let { moduleService ->
                                 moduleService.getAsset(split[0], split[1])
-                                    ?.file
+                                    ?.assetFile
                             }
                     }
             // If nothing else works, just try to resolve from root.
             else ->
-                VfsUtil.findRelativeFile(
-                    path,
-                    // Handle an inconsistency
-                    if (isAssetPath) {
-                        context.containingFile.virtualFile
-                    } else {
-                        VfsUtil.findFileByIoFile(File(context.project.basePath!!), true)
-                    }
-                )
+                // Handle an inconsistency
+                if (isAssetPath) {
+                    relativeFile
+                } else {
+                    Path.of(project.basePath!!)
+                }.resolve(path)
         }
     }
 

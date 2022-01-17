@@ -1,5 +1,9 @@
 package org.lukasj.idea.torquescript.engine.model
 
-class EngineEnumValue(name: String, docs: String, value: String) {
-
+class EngineEnumValue(
+    val name: String,
+    val docs: String,
+    val value: String
+) {
+    override fun toString() = name
 }
