@@ -13,6 +13,32 @@
 
 ### Security
 
+## [1.10.3]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Docstrings now fix illegal line-endings in attributes
+- "See" docstring now properly renders
+
+### Security
+
+## [1.10.2]
+### Fixed
+- A reference error on TSFunctionCallExpr
+- Improved reference resolution of namespaced functions
+- Fixed a null pointer exception on completion namespaced functions when there are syntax errors
+  
+  For example the following text would cause a NPE
+  ```
+  funtion AIPlayer::
+  ```
+
 ## [1.10.1]
 ### Fixed
 - Handle ugly-formatted identifiers like:

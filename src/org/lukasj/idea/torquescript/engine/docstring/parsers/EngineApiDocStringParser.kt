@@ -38,6 +38,8 @@ class EngineApiDocStringParser {
                                         )
                                     is TextDocElement ->
                                         element.children += nextElement
+                                    is SeeDocElement ->
+                                        element.children += nextElement
                                     is NullDocElement -> {
                                     }
                                     is InternalDocElement -> {

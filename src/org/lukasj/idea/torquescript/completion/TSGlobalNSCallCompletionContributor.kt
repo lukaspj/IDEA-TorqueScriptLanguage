@@ -4,6 +4,7 @@ import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.psi.util.prevLeaf
 import com.intellij.util.PlatformIcons
 import com.intellij.util.ProcessingContext
 import org.lukasj.idea.torquescript.engine.EngineApiService
@@ -18,15 +19,15 @@ class TSGlobalNSCallCompletionContributor : CompletionProvider<CompletionParamet
     ) {
         val namespace = parameters
             .position
-            .prevSibling
-            .prevSibling
-            .text
+            .prevLeaf()
+            ?.prevLeaf()
+            ?.text ?: return
 
         val project = parameters.originalFile.project
 
         ReferenceUtil.getFunctions(project)
             .filter { it.getFunctionType() != TSFunctionType.GLOBAL }
-            .filter { namespace != null && it.getNamespace().equals(namespace, true) }
+            .filter { it.getNamespace().equals(namespace, true) }
             .map { function ->
                 LookupElementBuilder.create(function.name!!)
                     .withIcon(PlatformIcons.FUNCTION_ICON)
@@ -41,7 +42,7 @@ class TSGlobalNSCallCompletionContributor : CompletionProvider<CompletionParamet
                     .getStaticFunctions()
                     .filter { it.scopeList.lastOrNull().equals(namespace, true) }
                     .map {
-                        LookupElementBuilder.create(it.name)
+                        LookupElementBuilder.create("${namespace}::${it.name}")
                             .withPresentableText(it.toString())
                             .withIcon(PlatformIcons.FUNCTION_ICON)
                             .withCaseSensitivity(false)

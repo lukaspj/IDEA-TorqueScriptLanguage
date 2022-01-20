@@ -212,7 +212,7 @@ fun renderSee(project: Project, element: SeeDocElement) =
         .append("see")
         .append(DocumentationMarkup.SECTION_SEPARATOR)
         .append(
-            element.children.joinToString("") { renderDocstring(project, it) }
+            element.seeReference
         )
         .append(DocumentationMarkup.SECTION_END)
         .toString()

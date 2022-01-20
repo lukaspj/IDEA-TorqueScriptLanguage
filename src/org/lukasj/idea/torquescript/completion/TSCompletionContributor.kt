@@ -3,7 +3,7 @@ package org.lukasj.idea.torquescript.completion
 import com.intellij.codeInsight.completion.CompletionContributor
 import com.intellij.codeInsight.completion.CompletionType
 import com.intellij.patterns.ElementPattern
-import com.intellij.patterns.PlatformPatterns.psiElement
+import com.intellij.patterns.PlatformPatterns.*
 import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiElement
 import com.intellij.psi.TokenType
@@ -77,9 +77,7 @@ class TSCompletionContributor : CompletionContributor() {
 
     private fun inGlobalVariable(): ElementPattern<PsiElement> =
         StandardPatterns.or(
-            psiElement(TSTypes.IDENT)
-                .andNot(psiElement().afterLeaf(psiElement(TSTypes.DOT)))
-                .andNot(psiElement().afterLeaf(psiElement(TSTypes.COLON_COLON))),
+            isKeywordable(),
             psiElement(TSTypes.GLOBALVAR)
         )
 

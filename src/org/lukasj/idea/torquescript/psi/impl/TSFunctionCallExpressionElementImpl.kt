@@ -95,12 +95,7 @@ abstract class TSFunctionCallExpressionElementImpl(node: ASTNode) : ASTWrapperPs
     }
 
     override fun getReferences(): Array<PsiReference> {
-        val identifier = nameIdentifier ?: return arrayOf()
-        return if (identifier.firstChild != identifier.lastChild) {
-            getExpression().references
-        } else {
-            arrayOf(reference!!)
-        }
+        return arrayOf()
     }
 }
 

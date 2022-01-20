@@ -39,7 +39,7 @@ abstract class TSIdentExpressionElementImpl(node: ASTNode) : ASTWrapperPsiElemen
         if (firstChild != lastChild) {
             return arrayOf(
                 TSObjectReference(this, firstChild.textRangeInParent),
-                TSFunctionReference(this, lastChild.textRangeInParent)
+                TSFunctionReference(this, textRangeInParent, this.text)
             )
         }
         val ref = reference

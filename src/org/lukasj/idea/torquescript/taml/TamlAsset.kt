@@ -1,9 +1,12 @@
 package org.lukasj.idea.torquescript.taml
 
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.util.io.createDirectories
 import com.intellij.util.io.outputStream
 import org.lukasj.idea.torquescript.engine.EngineApiUtil
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLOutputFactory
 import javax.xml.stream.XMLStreamWriter
@@ -65,7 +68,14 @@ abstract class TamlAsset(
     abstract fun parse(xmlStartElement: StartElement)
     abstract fun writeAttributes(xmlStreamWriter: XMLStreamWriter)
     fun saveToFile() {
-        val xmlStreamWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(assetFile.outputStream(), "UTF-8")
+        // Compatibilty fix for IDEA Ultimate 2021.1.3
+        // For some reason this doesn't work:
+        // val outputStream = assetFile.outputStream()
+        // Probably a JDK version thing or something
+        assetFile.parent?.createDirectories()
+        val outputStream = Files.newOutputStream(assetFile)
+
+        val xmlStreamWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(outputStream, "UTF-8")
         xmlStreamWriter.writeStartElement(assetType)
         xmlStreamWriter.writeAttribute("AssetName", assetName)
         assetDescription?.let {
