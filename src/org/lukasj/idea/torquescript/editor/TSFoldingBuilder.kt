@@ -37,12 +37,12 @@ class TSFoldingBuilder : FoldingBuilderEx() {
         PsiTreeUtil.findChildrenOfType(root, TSSwitchStatement::class.java)
             .forEach { switch ->
                 switch.node.getChildren(TokenSet.create(TSTypes.LBRACE))
-                    .first().let { blockStart ->
+                    .firstOrNull()?.let { blockStart ->
                         switch.node.getChildren(TokenSet.create(TSTypes.RBRACE))
-                            .first().let { blockEnd ->
+                            .firstOrNull()?.let { blockEnd ->
                                 descriptors.add(
                                     object : FoldingDescriptor(
-                                        switch.node.getChildren(TokenSet.create(TSTypes.LBRACE)).first(),
+                                        blockStart,
                                         TextRange(
                                             blockStart.startOffset + 1,
                                             blockEnd.startOffset

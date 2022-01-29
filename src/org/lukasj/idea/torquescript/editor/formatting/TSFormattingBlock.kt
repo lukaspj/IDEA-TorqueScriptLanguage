@@ -145,8 +145,9 @@ class TSFormattingBlock(
                         Indent.getContinuationIndent()
                     }
                 TSParserDefinition.FILE ->
-                    (subBlocks.getOrNull(newChildIndex - 1) as TSFormattingBlock).node
-                        .let { prevNode ->
+                    (subBlocks.getOrNull(newChildIndex - 1) as TSFormattingBlock?)
+                        ?.node
+                        ?.let { prevNode ->
                             if (prevNode.firstChildNode?.firstChildNode?.elementType == TSTypes.IF_STATEMENT && !prevNode.textContains(
                                     '{'
                                 )

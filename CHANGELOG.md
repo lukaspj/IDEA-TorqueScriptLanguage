@@ -13,20 +13,19 @@
 
 ### Security
 
+## [1.10.5]
+### Fixed
+- A NoSuchElementException in TSFoldingBuilder when a switch is being written and a LBRACE exists but no RBRACE
+
+## [1.10.4]
+### Fixed
+- Rendering of see docstring elements after a codeblock
+- NPE for formatting block in empty files
+
 ## [1.10.3]
-### Added
-
-### Changed
-
-### Deprecated
-
-### Removed
-
 ### Fixed
 - Docstrings now fix illegal line-endings in attributes
 - "See" docstring now properly renders
-
-### Security
 
 ## [1.10.2]
 ### Fixed
