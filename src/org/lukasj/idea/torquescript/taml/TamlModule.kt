@@ -32,7 +32,7 @@ class TamlModule(
                         if (nextEvent.isEndElement && nextEvent.asEndElement().name.localPart == "ModuleDefinition") break
                         if (nextEvent.isCharacters) continue
                         if (!nextEvent.isStartElement) {
-                            println("Unexpected Module Definition child ${nextEvent.toString()} ${nextEvent.location.lineNumber}")
+                            println("Unexpected Module Definition child in ${file.name} line number: ${nextEvent.location.lineNumber}")
                             continue
                         }
                         when (nextEvent.asStartElement().name.localPart) {

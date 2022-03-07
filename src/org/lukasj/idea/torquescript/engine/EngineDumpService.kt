@@ -11,7 +11,7 @@ data class ObjectField(
 data class Param(
     val type: String,
     val name: String,
-    val defaultValue: String
+    val defaultValue: String?
 )
 
 data class ObjectMethod(
@@ -31,8 +31,8 @@ data class ObjectDump(
 @Service
 class EngineDumpService {
     fun readObjectDump(dump: String): ObjectDump {
-        val dumpLines = dump.lines()
-        assert(dumpLines.any { it.matches(Regex("^Class:")) })
+        val dumpLines = dump.trim().lines()
+        assert(dumpLines.any { it.matches(Regex("^Class:.*")) })
         return dumpLines.fold(Pair(ObjectDump(), "")) { acc, line ->
             when (line) {
                 "Static Fields:",
@@ -43,7 +43,8 @@ class EngineDumpService {
                 else ->
                     line.trim().split(' ')
                         .map { it.trim() }
-                        .let {
+                        .filter { it != "" }
+                        .let { words ->
                             acc.copy(
                                 first = when (acc.second) {
                                     "Static Fields:" ->
@@ -51,7 +52,7 @@ class EngineDumpService {
                                             staticFields = acc.first.staticFields
                                                 .plus(
                                                     ObjectField(
-                                                        it[0], it[1], it[3]
+                                                        words[0], words[1], words[3].trim('"')
                                                     )
                                                 )
                                         )
@@ -60,46 +61,50 @@ class EngineDumpService {
                                             dynamicFields = acc.first.dynamicFields
                                                 .plus(
                                                     ObjectField(
-                                                        it[0], it[1], it[3]
+                                                        words[0], words[1], words[3].trim('"')
                                                     )
                                                 )
                                         )
                                     "Methods:" ->
-                                        Regex("([^(]+)\\(\\s*([^,]*)*\\)").find(it[1])!!
+                                        Regex("([a-zA-Z0-9_]+)\\s+([a-zA-Z0-9_]+)\\s*\\(([^)]*)\\)\\s*").find(line)!!
                                             .let { match ->
                                                 acc.first.copy(
                                                     methods = acc.first.methods.plus(
                                                         ObjectMethod(
-                                                            returnType = it[0],
-                                                            name = match.groupValues.drop(1).first(),
-                                                            params = match.groupValues.drop(2)
-                                                                .map { paramMatch ->
-                                                                paramMatch
-                                                                    .let { it.trim().split(' ', '=') }
-                                                                    .let {
-                                                                        Param(it[0], it[1], it[2])
-                                                                    }
+                                                            returnType = match.groupValues[1],
+                                                            name = match.groupValues[2],
+                                                            params = match.groupValues[3]
+                                                                .split(',')
+                                                                .map { it.trim() }
+                                                                .filter { it != "" }
+                                                                .map { it.split(' ', '=') }
+                                                                .map { s -> s.map { it.trim() }.filter { it != "" } }
+                                                                .map {
+                                                                    Param(it[0], it[1], it.getOrNull(2))
                                                                 }
                                                         )
                                                     )
                                                 )
                                             }
                                     "Callbacks:" ->
-                                        Regex("([^(]+)\\(\\s*([^,]*)*\\)").find(it[1])!!
+                                        Regex("([a-zA-Z0-9_]+)\\s*\\(([^)]*)\\)\\s*").find(line)!!
                                             .let { match ->
                                                 acc.first.copy(
                                                     callbacks = acc.first.callbacks.plus(
                                                         ObjectMethod(
-                                                            returnType = it[0],
-                                                            name = match.groupValues.drop(1).first(),
-                                                            params = match.groupValues.drop(2)
-                                                                .map { paramMatch ->
-                                                                    paramMatch
-                                                                        .let { it.trim().split(' ', '=') }
-                                                                        .let {
-                                                                            Param(it[0], it[1], it[2])
-                                                                        }
+                                                            returnType = "void",
+                                                            name = match.groupValues[1],
+                                                            params = match.groupValues[2]
+                                                                .split(',')
+                                                                .asSequence()
+                                                                .map { it.trim() }
+                                                                .filter { it != "" }
+                                                                .map { it.split(' ', '=') }
+                                                                .map { s -> s.map { it.trim() }.filter { it != "" } }
+                                                                .map {
+                                                                    Param(it[0], it[1], it.getOrNull(2))
                                                                 }
+                                                                .toList()
                                                         )
                                                     )
                                                 )

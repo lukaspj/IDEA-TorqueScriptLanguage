@@ -1,6 +1,9 @@
 package org.lukasj.idea.torquescript.runner
 
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiDocumentManager
@@ -14,6 +17,7 @@ import com.intellij.xdebugger.frame.XValue
 import com.intellij.xdebugger.frame.XValueNode
 import com.intellij.xdebugger.frame.XValuePlace
 import org.lukasj.idea.torquescript.psi.*
+import org.lukasj.idea.torquescript.telnet.TSTelnetClient
 
 class TSDebuggerEvaluator(private val telnetClient: TSTelnetClient, private val level: Int) : XDebuggerEvaluator() {
     override fun getExpressionRangeAtOffset(
@@ -53,11 +57,16 @@ class TSDebuggerEvaluator(private val telnetClient: TSTelnetClient, private val 
     }
 
     override fun evaluate(expression: String, callback: XEvaluationCallback, expressionPosition: XSourcePosition?) {
-        val result = telnetClient.evalAtLevel(level, expression)
-        callback.evaluated(object : XValue() {
-            override fun computePresentation(node: XValueNode, place: XValuePlace) {
-                node.setPresentation(PlatformIcons.VARIABLE_ICON, "string", result, false)
+        ProgressManager.getInstance()
+        (object: Task.Backgroundable(null, "Evaluating $expression") {
+            override fun run(indicator: ProgressIndicator) {
+                val result = telnetClient.evalAtLevel(level, expression)
+                callback.evaluated(object : XValue() {
+                    override fun computePresentation(node: XValueNode, place: XValuePlace) {
+                        node.setPresentation(PlatformIcons.VARIABLE_ICON, "string", result, true)
+                    }
+                })
             }
-        })
+        }).queue()
     }
 }

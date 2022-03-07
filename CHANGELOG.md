@@ -13,6 +13,27 @@
 
 ### Security
 
+## [1.11.0]
+### Added
+- Report errors directly through IDE
+- Improved variables view, so objects are expandable
+
+### Fixed
+- Fixed viewing of variables with spaces
+
+
+## [1.10.6]
+### Added
+- Experimental Asset Import functionality
+
+### Changed
+- Added a working directory and main script setting to run configuration
+- Added a progress bar during rebuild of exports
+
+### Fixed
+- Debugger socket wouldn't close on Linux
+- Improved Console Dump parsing
+
 ## [1.10.5]
 ### Fixed
 - A NoSuchElementException in TSFoldingBuilder when a switch is being written and a LBRACE exists but no RBRACE

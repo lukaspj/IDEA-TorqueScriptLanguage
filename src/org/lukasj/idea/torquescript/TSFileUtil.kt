@@ -70,6 +70,13 @@ object TSFileUtil {
             emptyList()
         }
 
+    fun relativePathFromRoot(project: Project, virtualFile: VirtualFile) =
+        relativePathFromRoot(project, Path.of(virtualFile.path))
+
+    fun relativePathFromRoot(project: Project, path: Path) =
+        Path.of(project.basePath!!)
+            .relativize(path)
+
     fun resolveScriptPath(context: PsiElement, path: String, isAssetPath: Boolean = false) =
         resolveScriptPath(
             Path.of(context.containingFile.virtualFile.parent.path),
@@ -111,16 +118,23 @@ object TSFileUtil {
         }
     }
 
-        private fun toRelative(value: String) =
-            when {
-                value.startsWith("./") -> {
-                    value
-                }
-                value.startsWith("/") -> {
-                    ".$value"
-                }
-                else -> {
-                    "./$value"
-                }
+    private fun toRelative(value: String) =
+        when {
+            value.startsWith("./") -> {
+                value
             }
+            value.startsWith("/") -> {
+                ".$value"
+            }
+            else -> {
+                "./$value"
+            }
+        }
+
+    fun assetRelativePathFromFile(path: String, file: Path) =
+        if (path.contains(':')) {
+            path
+        } else {
+            "@assetFile=$path"
+        }
 }

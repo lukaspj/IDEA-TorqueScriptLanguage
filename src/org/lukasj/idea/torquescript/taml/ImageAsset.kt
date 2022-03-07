@@ -1,5 +1,6 @@
 package org.lukasj.idea.torquescript.taml
 
+import org.lukasj.idea.torquescript.TSFileUtil
 import org.lukasj.idea.torquescript.engine.EngineApiUtil
 import java.nio.file.Path
 import javax.xml.stream.XMLStreamWriter
@@ -29,7 +30,7 @@ class ImageAsset(assetFile: Path, assetName: String?)
 
     override fun writeAttributes(xmlStreamWriter: XMLStreamWriter) {
         imageFilePath?.let {
-            xmlStreamWriter.writeAttribute("imageFile", it)
+            xmlStreamWriter.writeAttribute("imageFile", TSFileUtil.assetRelativePathFromFile(it, assetFile))
         }
         imageType?.let {
             xmlStreamWriter.writeAttribute("imageType", it)

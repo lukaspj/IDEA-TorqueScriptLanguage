@@ -3,17 +3,19 @@ package org.lukasj.idea.torquescript.asset
 import com.intellij.openapi.project.Project
 import com.intellij.ui.CollectionComboBoxModel
 import com.intellij.ui.layout.LayoutBuilder
+import com.intellij.ui.layout.RowBuilder
+import org.lukasj.idea.torquescript.TSFileUtil
 import org.lukasj.idea.torquescript.engine.EngineApiService
 import org.lukasj.idea.torquescript.taml.ImageAsset
 import java.nio.file.Path
 
-class ImageAssetImportPanel(val project: Project?, val asset: ImageAsset) : AssetImportPanel {
-    override fun insertPanel(panel: LayoutBuilder) =
+class ImageAssetImportPanel(val project: Project, val asset: ImageAsset) : AssetImportPanel {
+    override fun insertPanel(panel: RowBuilder) =
         panel.titledRow("Image") {
             row("Image Type") {
                 comboBox(
                     CollectionComboBoxModel(
-                        project?.getService(EngineApiService::class.java)
+                        project.getService(EngineApiService::class.java)
                             ?.findEnum("ImageAssetType")
                             ?.values
                             ?.map { it.name }
@@ -39,7 +41,7 @@ class ImageAssetImportPanel(val project: Project?, val asset: ImageAsset) : Asse
             row("Image File Path") {
                 textFieldWithBrowseButton(
                     getter = { asset.imageFilePath.toString() },
-                    setter = { asset.imageFilePath = Path.of(it).toString() }
+                    setter = { asset.imageFilePath = asset.assetFile.parent.relativize(Path.of(it)).toString() }
 
                 ) { asset.assetFile.resolve(it.path).toString() }
             }

@@ -1,26 +1,16 @@
 package org.lukasj.idea.torquescript.action
 
 import com.intellij.execution.RunManager
-import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.execution.process.ProcessEvent
-import com.intellij.execution.process.ProcessListener
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.progress.EmptyProgressIndicator
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
+import com.intellij.openapi.progress.util.ProgressWindow
 import com.intellij.openapi.ui.Messages
-import com.intellij.openapi.util.Key
-import org.lukasj.idea.torquescript.TSFileUtil
-import org.lukasj.idea.torquescript.runner.TSProcessHandler
 import org.lukasj.idea.torquescript.runner.TSRunConfiguration
-import org.lukasj.idea.torquescript.runner.TSTelnetClient
 import org.lukasj.idea.torquescript.telnet.TelnetConsoleService
-import java.io.File
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.thread
 
 class RebuildExportsAction : AnAction() {
     override fun update(e: AnActionEvent) {
@@ -47,7 +37,7 @@ class RebuildExportsAction : AnAction() {
                 .filterIsInstance<TSRunConfiguration>()
                 .first { !it.appPath.isNullOrEmpty() }
 
-        val dir = configuration.workingDir?.replace('\\', '/') ?: return
+        val dir = configuration.workingDirectory.replace('\\', '/') ?: return
 
         try {
             ProgressManager.getInstance()
@@ -98,7 +88,8 @@ class RebuildExportsAction : AnAction() {
                             }
                         }
                     },
-                    EmptyProgressIndicator()
+                    ProgressWindow(true, true, project)
+                        .also { it.title = "Rebuilding exports" }
                 )
         } catch (ex: Exception) {
             Messages.showMessageDialog(

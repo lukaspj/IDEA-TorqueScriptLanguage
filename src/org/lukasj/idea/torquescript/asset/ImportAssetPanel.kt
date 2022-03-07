@@ -3,26 +3,15 @@ package org.lukasj.idea.torquescript.asset
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.CollectionComboBoxModel
-import com.intellij.ui.layout.*
+import com.intellij.ui.layout.PropertyBinding
+import com.intellij.ui.layout.panel
 import org.lukasj.idea.torquescript.engine.EngineApiService
 import org.lukasj.idea.torquescript.taml.TamlAsset
-import kotlin.math.ceil
 
-class ImportAssetDialog(val project: Project, val asset: TamlAsset, val children: List<TamlAsset>) :
-    DialogWrapper(project, true) {
-    init {
-        title = "Import Asset"
-        init()
-    }
-
+class ImportAssetPanel(val project: Project, val asset: TamlAsset, val children: List<TamlAsset>) : DialogWrapper(project, true) {
     override fun createCenterPanel() =
         panel {
-            createPanelFor(this, asset, children)
-        }
-
-    fun createPanelFor(rowBuilder: RowBuilder, asset: TamlAsset, children: List<TamlAsset>): Row =
-        rowBuilder
-            .titledRow("General Asset Information") {
+            titledRow("General Asset Information") {
                 row("Asset Name") {
                     textField(PropertyBinding(
                         get = { asset.assetName ?: "" },
@@ -72,7 +61,7 @@ class ImportAssetDialog(val project: Project, val asset: TamlAsset, val children
                     checkBox("AutoUnload",
                         getter = { asset.assetAutoUnload ?: false },
                         setter = { asset.assetAutoUnload = it }
-                    )
+                        )
                     checkBox("Internal",
                         getter = { asset.assetInternal ?: false },
                         setter = { asset.assetInternal = it }
@@ -82,17 +71,14 @@ class ImportAssetDialog(val project: Project, val asset: TamlAsset, val children
                         setter = { asset.assetPrivate = it }
                     )
                 }
-                AssetImportPanel.getPanelFor(project, asset)
-                    ?.insertPanel(this)
-
-                if (children.isNotEmpty()) {
-                    titledRow("Child Assets") {
-                        children.forEach {
-                            hideableRow(it.assetType) {
-                                createPanelFor(this, it, listOf())
-                            }
-                        }
-                    }
+            }
+            AssetImportPanel.getPanelFor(project, asset)
+                ?.insertPanel(this)
+            row("Child Assets") {
+                children.forEach {
+                    AssetImportPanel.getPanelFor(project, it)
+                        ?.insertPanel(this)
                 }
             }
+        }
 }

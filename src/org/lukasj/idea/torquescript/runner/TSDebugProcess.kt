@@ -22,6 +22,7 @@ import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
 import com.intellij.xdebugger.frame.XSuspendContext
 import com.intellij.xdebugger.impl.XSourcePositionImpl
 import org.lukasj.idea.torquescript.TSFileUtil
+import org.lukasj.idea.torquescript.telnet.TSTelnetClient
 import java.io.File
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
@@ -47,7 +48,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
         val commandLine = GeneralCommandLine(configuration.appPath)
         commandLine.addParameters(debugMain)
 
-        val dir = configuration.workingDir!!
+        val dir = configuration.workingDirectory
         commandLine.workDirectory = File(dir)
 
         try {
@@ -180,14 +181,18 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
                 }
             }
 
-            telnetClient!!.login("password")
+            if(!telnetClient!!.login("password")) {
+                error("Debugger was unable to connect to TelNet Server")
+                session.stop()
+                return
+            }
 
             sendAllBreakpoints()
 
             telnetClient!!.eval("setMainDotCsDir(\"${dir.replace('\\', '/')}\");")
             telnetClient!!.eval("setCurrentDirectory(\"${dir.replace('\\', '/')}\");")
             telnetClient!!.eval("echo(\"Hello From IntelliJ!\");")
-            telnetClient!!.eval("exec(\"main.tscript\");")
+            telnetClient!!.eval("exec(\"${configuration.mainScript}\");")
             telnetClient!!.resume()
         } catch (e: Exception) {
             e.message?.let { error("An unexpected error occured in the IntelliJ debugger: $it \n ${e.stackTraceToString()}") }
@@ -196,7 +201,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
     }
 
     private fun findFile(file: String): VirtualFile? = VfsUtil.findFile(
-        Path.of(configuration.workingDir!!)
+        Path.of(configuration.workingDirectory)
             .resolve(Path.of(file)),
         false
     )
@@ -245,7 +250,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
 
     fun registerBreakpoint(sourcePosition: XSourcePosition, condition: String? = null) =
         telnetClient?.setBreakpoint(
-            File(sourcePosition.file.path).relativeTo(File(configuration.workingDir!!)).path.replace('\\', '/'),
+            File(sourcePosition.file.path).relativeTo(File(configuration.workingDirectory)).path.replace('\\', '/'),
             sourcePosition.line,
             false,
             0,
@@ -254,7 +259,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
 
     fun unregisterBreakpoint(sourcePosition: XSourcePosition) =
         telnetClient?.clearBreakpoint(
-            File(sourcePosition.file.path).relativeTo(File(configuration.workingDir!!)).path,
+            File(sourcePosition.file.path).relativeTo(File(configuration.workingDirectory)).path,
             sourcePosition.line
         )
 

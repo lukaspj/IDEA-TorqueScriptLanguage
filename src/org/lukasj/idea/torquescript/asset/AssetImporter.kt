@@ -1,15 +1,18 @@
 package org.lukasj.idea.torquescript.asset
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.progress.EmptyProgressIndicator
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
+import com.intellij.openapi.progress.util.ProgressWindow
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.io.exists
-import org.lukasj.idea.torquescript.taml.ImageAsset
+import org.lukasj.idea.torquescript.TSFileUtil
+import org.lukasj.idea.torquescript.engine.EngineDumpService
+import org.lukasj.idea.torquescript.taml.*
 import org.lukasj.idea.torquescript.telnet.TelnetConsoleService
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
@@ -17,7 +20,7 @@ import java.util.concurrent.TimeUnit
 class AssetImporter {
     fun accepts(file: VirtualFile) =
         when (file.extension) {
-            "png", "jpg" -> true
+            "png", "jpg", "dts" -> true
             else -> false
         }
 
@@ -36,62 +39,95 @@ class AssetImporter {
                                 file.nameWithoutExtension
                             ).also {
                                 it.imageFilePath = file.name
+                            }.let {
+                                Pair<TamlAsset, List<TamlAsset>>(it, listOf())
+                            }
+                            "dts" -> ShapeAsset(
+                                Path.of(file.parent.path).resolve("${file.nameWithoutExtension}.shape.asset.taml"),
+                                file.nameWithoutExtension
+                            ).also {
+                                it.fileName = file.name
+                            }.let {
+                                Pair<TamlAsset, List<TamlAsset>>(
+                                    it,
+                                    extractDataFromEngine(project, file)
+                                )
                             }
                             else -> null
-                        }?.let { asset ->
-                            extractDataFromEngine(project)
+                        }?.let { (asset, children) ->
                             ApplicationManager.getApplication()
                                 .invokeLater {
                                     if (asset.assetFile.exists()) {
                                         JBPopupFactory.getInstance()
                                             .createMessage("Asset file ${asset.assetFile.fileName} already exists")
                                             .showCenteredInCurrentWindow(project)
-                                    } else if (ImportAssetDialog(project, asset).showAndGet()) {
+                                    } else if (ImportAssetDialog(project, asset, children).showAndGet()) {
+                                        children.forEach {
+                                            it.saveToFile()
+                                        }
+
+                                        when (asset) {
+                                            is ShapeAsset ->
+                                                children.forEachIndexed { idx, child ->
+                                                    if (child is MaterialAsset) {
+                                                        project.getService(TamlModuleService::class.java)
+                                                            .getModuleForFile(child.assetFile)
+                                                            ?.let {
+                                                                asset.materialSlots[idx] =
+                                                                    "@asset=${it.moduleId}:${child.assetName}"
+                                                            }
+                                                    }
+                                                }
+                                        }
                                         asset.saveToFile()
                                     }
                                 }
                         }
                     }
                 },
-                EmptyProgressIndicator()
+                ProgressWindow(true, false, project)
+                    .also { it.title = "Building asset data" }
             )
     }
 
-    fun extractDataFromEngine(project: Project): Map<String, String> {
+    fun extractDataFromEngine(project: Project, assetFile: VirtualFile): List<TamlAsset> {
+        var result: List<TamlAsset> = listOf()
         val success = project.getService(TelnetConsoleService::class.java)
             .runTelnetSession(project) { telnetClient ->
                 telnetClient.eval(
                     """
-                                        setLogMode(6);
-                                        ModuleDatabase.setModuleExtension("module");
-                                        ModuleDatabase.scanModules( "core", false );
-                                        ModuleDatabase.LoadExplicit( "CoreModule" );
-                    
-                                        new AssetImporter(myImporter);
-                                        ${'$'}assetImportConfig = new AssetImportConfig();
-                                        if(!isObject(AssetImportSettings))
-                                        {
-                                            new Settings(AssetImportSettings)
-                                            {
-                                                file = "tools/assetBrowser/assetImportConfigs.xml";
-                                            };
-                                        }
-                                        AssetImportSettings.read();
-                                        ${'$'}assetImportConfig.loadImportConfig(AssetImportSettings, "DefaultImportConfig");
-                                        myImporter.setImportConfig(${'$'}assetImportConfig);
-                    
-                                        ${'$'}assetObj = myImporter.addImportingFile("data/CoinCollectionModule/objects/coin/coin.dts");
-                                        myImporter.processImportingAssets();
-                    
-                                        ${'$'}count = myImporter.getAssetItemChildCount(${'$'}assetObj);
-                                        echo("printing out " @ ${'$'}count @ " children");
-                                        for (${'$'}i = 0; ${'$'}i < ${'$'}count; ${'$'}i++) {
-                                            echo("##XX####XX##OBJECT START##XX####XX##");
-                                            ${'$'}assetObjChild = myImporter.getAssetItemChild(${'$'}assetObj, ${'$'}i);
-                                            ${'$'}assetObjChild.dump();
-                                            echo("##XX####XX##OBJECT END##XX####XX##");
-                                        }
-                                    """.split('\n')
+                        setLogMode(6);
+                        ModuleDatabase.setModuleExtension("module");
+                        ModuleDatabase.scanModules( "core", false );
+                        ModuleDatabase.LoadExplicit( "CoreModule" );
+    
+                        new AssetImporter(myImporter);
+                        ${'$'}assetImportConfig = new AssetImportConfig();
+                        if(!isObject(AssetImportSettings))
+                        {
+                            new Settings(AssetImportSettings)
+                            {
+                                file = "tools/assetBrowser/assetImportConfigs.xml";
+                            };
+                        }
+                        AssetImportSettings.read();
+                        ${'$'}assetImportConfig.loadImportConfig(AssetImportSettings, "DefaultImportConfig");
+                        myImporter.setImportConfig(${'$'}assetImportConfig);
+    
+                        ${'$'}assetObj = myImporter.addImportingFile("${TSFileUtil.relativePathFromRoot(project, assetFile).toString().replace('\\', '/')}");
+                        myImporter.processImportingAssets();
+    
+                        ${'$'}count = myImporter.getAssetItemChildCount(${'$'}assetObj);
+                        echo("printing out " @ ${'$'}count @ " children");
+                        for (${'$'}i = 0; ${'$'}i < ${'$'}count; ${'$'}i++) {
+                            echo("##XX####XX##OBJECT START##XX####XX##");
+                            ${'$'}assetObjChild = myImporter.getAssetItemChild(${'$'}assetObj, ${'$'}i);
+                            ${'$'}assetObjChild.dump();
+                            echo("##XX####XX##OBJECT END##XX####XX##");
+                        }
+                        
+                        quit();
+                    """.split('\n')
                         .joinToString(" ") { it.trim() }
                 )
                 fun appendOutput(sb: StringBuilder): StringBuilder =
@@ -106,12 +142,33 @@ class AssetImporter {
                             .find(it.toString())
                             ?.groupValues?.drop(1)
                     }
-                    ?.map {
-                        println("Object dump match:")
-                        println(it)
+                    ?.onEach { println(it) }
+                    ?.mapNotNull { objectDumpLog ->
+                        project.getService(EngineDumpService::class.java)
+                            .readObjectDump(objectDumpLog)
+                            .let { objectDump ->
+                                when (objectDump.staticFields.first { it.name.toLowerCase() == "assettype" }.value) {
+                                    "MaterialAsset" ->
+                                        objectDump.staticFields.first { it.name.toLowerCase() == "assetname" }.value
+                                            .let { assetName ->
+                                                MaterialAsset(
+                                                    Path.of(assetFile.parent.path).resolve("${assetName}.material.asset.taml"),
+                                                    assetName
+                                                )
+                                            }
+                                    else -> {
+                                        logger<AssetImporter>()
+                                            .warn("The asset type ${objectDump.staticFields.first { it.name.toLowerCase() == "assettype" }.value} was not implemented as a child asset type")
+                                        null
+                                    }
+                                }
+                            }
+                    }
+                    ?.let {
+                        result = it
                     }
             }
 
-        return mapOf()
+        return result
     }
 }

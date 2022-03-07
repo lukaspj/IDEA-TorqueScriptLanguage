@@ -20,6 +20,13 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
+
+    implementation("io.sentry:sentry:5.6.2") {
+        exclude(group = "org.slf4j")
+    }
+
+    implementation("io.ktor:ktor-server-netty:1.6.0")
+    implementation("io.ktor:ktor-network:1.6.0")
 }
 
 idea {

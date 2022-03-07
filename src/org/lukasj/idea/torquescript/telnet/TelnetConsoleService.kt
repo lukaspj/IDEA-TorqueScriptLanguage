@@ -4,24 +4,15 @@ import com.intellij.execution.RunManager
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessListener
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.progress.EmptyProgressIndicator
-import com.intellij.openapi.progress.ProgressIndicator
-import com.intellij.openapi.progress.ProgressManager
-import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.Key
 import org.lukasj.idea.torquescript.TSFileUtil
 import org.lukasj.idea.torquescript.runner.TSProcessHandler
 import org.lukasj.idea.torquescript.runner.TSRunConfiguration
-import org.lukasj.idea.torquescript.runner.TSTelnetClient
 import java.io.File
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.thread
 
 @Service
 class TelnetConsoleService {
@@ -34,9 +25,9 @@ class TelnetConsoleService {
 
         val debugMain = TSFileUtil.getPluginVirtualFile("scripts/debuggermain.tscript")
 
-        val dir = configuration.workingDir
+        val dir = configuration.workingDirectory
         val commandLine = GeneralCommandLine(configuration.appPath)
-        commandLine.workDirectory = File(dir!!)
+        commandLine.workDirectory = File(dir)
         commandLine.addParameters(debugMain)
         commandLine.addParameters("${dir.replace('\\', '/')}/engineApi.xml")
 
@@ -69,12 +60,15 @@ class TelnetConsoleService {
             telnetClient.eval("quit();")
             return processHandler.waitFor(timeout)
         } catch (ex: Exception) {
-            Messages.showMessageDialog(
-                project,
-                "Something went wrong while running a T3D session: $ex",
-                "Telnet Session Error",
-                Messages.getErrorIcon()
-            )
+            ApplicationManager.getApplication()
+                .invokeLater {
+                    Messages.showMessageDialog(
+                        project,
+                        "Something went wrong while running a T3D session: $ex",
+                        "Telnet Session Error",
+                        Messages.getErrorIcon()
+                    )
+                }
             return false
         } finally {
             processHandler.killProcess()

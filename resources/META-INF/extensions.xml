@@ -80,6 +80,8 @@
         <xdebugger.breakpointType implementation="org.lukasj.idea.torquescript.runner.TSLineBreakpointType"/>
 
         <projectService serviceImplementation="org.lukasj.idea.torquescript.engine.EngineApiService"/>
+
+        <errorHandler implementation="org.lukasj.idea.torquescript.editor.SentryErrorReporter" />
     </extensions>
 
     <actions>

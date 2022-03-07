@@ -107,4 +107,11 @@ class TamlModuleService(private val project: Project) {
                             }
                     )
             } ?: listOf()
+
+    fun getModuleForFile(file: Path) =
+        getModules()
+            .firstOrNull { module ->
+                getAssets(module.moduleId!!)
+                    .any { it.assetFile == file }
+            }
 }

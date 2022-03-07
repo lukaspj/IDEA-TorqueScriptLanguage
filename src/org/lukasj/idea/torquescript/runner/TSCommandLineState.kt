@@ -11,5 +11,6 @@ class TSCommandLineState(private val configuration: TSRunConfiguration, environm
     override fun startProcess(): ProcessHandler =
         TSProcessHandler(
             GeneralCommandLine(listOf(configuration.appPath))
+                .withWorkDirectory(configuration.workingDirectory)
         )
 }
