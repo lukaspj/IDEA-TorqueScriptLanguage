@@ -13,6 +13,10 @@
 
 ### Security
 
+## [1.11.1]
+### Fixed
+- Object representation in debugger views
+
 ## [1.11.0]
 ### Added
 - Report errors directly through IDE

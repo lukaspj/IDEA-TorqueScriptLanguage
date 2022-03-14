@@ -1,6 +1,5 @@
 package org.lukasj.idea.torquescript.runner
 
-import javax.swing.Icon
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDocumentManager
@@ -13,15 +12,14 @@ import com.intellij.xdebugger.XSourcePosition
 import com.intellij.xdebugger.evaluation.XDebuggerEvaluator
 import com.intellij.xdebugger.frame.*
 import com.intellij.xdebugger.impl.frame.XStackFrameContainerEx
-import org.lukasj.idea.torquescript.engine.EngineDumpService
 import org.lukasj.idea.torquescript.psi.TSFile
 import org.lukasj.idea.torquescript.reference.ReferenceUtil
 import org.lukasj.idea.torquescript.telnet.TSTelnetClient
+import javax.swing.Icon
 
 class TSNamedValue(
     name: String,
     val value: String,
-    val project: Project,
     val telnetClient: TSTelnetClient,
     val level: Int,
     val type: String?
@@ -37,16 +35,20 @@ class TSNamedValue(
 
         fun getRepresentation(telnetClient: TSTelnetClient, level: Int, value: String) =
             if (isObject(telnetClient, level, value)) {
-                telnetClient.evalAtLevel(level, "$value.name").let {
-                        "$it ($value)"
+                if (value.toIntOrNull() == null) {
+                    value
+                } else {
+                    telnetClient.evalAtLevel(level, "$value.name").let {
+                        "$value ($it)"
                     }
+                }
             } else {
                 value
             }
 
         fun getType(telnetClient: TSTelnetClient, level: Int, value: String) =
             if (isObject(telnetClient, level, value)) {
-                telnetClient.evalAtLevel(level, "$value.className")
+                telnetClient.evalAtLevel(level, "$value.getClassName()")
             } else {
                 null
             }
@@ -68,12 +70,12 @@ class TSNamedValue(
                         .map {
                             telnetClient.evalAtLevel(level, "$value.getField($it)")
                         }
+                        .filter { it != "\"\"" }
                         .forEach { fieldName ->
                             valueList.add(
                                 TSNamedValue(
                                     fieldName,
                                     telnetClient.evalAtLevel(level, "$value.$fieldName"),
-                                    project,
                                     telnetClient,
                                     level,
                                     telnetClient.evalAtLevel(level, "$value.getFieldType(\"$fieldName\")")
@@ -87,12 +89,12 @@ class TSNamedValue(
                         .map {
                             telnetClient.evalAtLevel(level, "$value.getDynamicField($it)")
                         }
+                        .filter { it != "\"\"" }
                         .forEach { fieldName ->
                             valueList.add(
                                 TSNamedValue(
                                     fieldName,
                                     telnetClient.evalAtLevel(level, "$value.$fieldName"),
-                                    project,
                                     telnetClient,
                                     level,
                                     "dynamic"
@@ -126,7 +128,6 @@ class TSStackFrame(
                             TSNamedValue(
                                 it.text,
                                 telnetClient.evalAtLevel(level, it.text),
-                                project,
                                 telnetClient,
                                 level,
                                 ReferenceUtil.tryResolveType(it)

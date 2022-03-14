@@ -17,6 +17,7 @@ import com.intellij.xdebugger.frame.XValue
 import com.intellij.xdebugger.frame.XValueNode
 import com.intellij.xdebugger.frame.XValuePlace
 import org.lukasj.idea.torquescript.psi.*
+import org.lukasj.idea.torquescript.reference.ReferenceUtil
 import org.lukasj.idea.torquescript.telnet.TSTelnetClient
 
 class TSDebuggerEvaluator(private val telnetClient: TSTelnetClient, private val level: Int) : XDebuggerEvaluator() {
@@ -31,7 +32,7 @@ class TSDebuggerEvaluator(private val telnetClient: TSTelnetClient, private val 
 
         val element = PsiUtilCore.getElementAtOffset(tsFile, offset)
 
-        currentRange = when(element.elementType) {
+        currentRange = when (element.elementType) {
             TSTypes.LOCALVAR -> element.textRange
             TSTypes.GLOBALVAR -> element.textRange
             TSTypes.FLOAT -> element.textRange
@@ -58,15 +59,17 @@ class TSDebuggerEvaluator(private val telnetClient: TSTelnetClient, private val 
 
     override fun evaluate(expression: String, callback: XEvaluationCallback, expressionPosition: XSourcePosition?) {
         ProgressManager.getInstance()
-        (object: Task.Backgroundable(null, "Evaluating $expression") {
-            override fun run(indicator: ProgressIndicator) {
-                val result = telnetClient.evalAtLevel(level, expression)
-                callback.evaluated(object : XValue() {
-                    override fun computePresentation(node: XValueNode, place: XValuePlace) {
-                        node.setPresentation(PlatformIcons.VARIABLE_ICON, "string", result, true)
-                    }
-                })
-            }
+        (object : Task.Backgroundable(null, "Evaluating $expression") {
+            override fun run(indicator: ProgressIndicator) =
+                callback.evaluated(
+                    TSNamedValue(
+                        expression,
+                        telnetClient.evalAtLevel(level, expression),
+                        telnetClient,
+                        level,
+                        "unknown"
+                    )
+                )
         }).queue()
     }
 }
