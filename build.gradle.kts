@@ -6,7 +6,7 @@ val channel = prop("publishChannel")
 
 plugins {
     id("org.jetbrains.intellij") version "1.3.0"
-    kotlin("jvm") version "1.4.32"
+    kotlin("jvm") version "1.6.10"
 
     id("org.jetbrains.grammarkit") version "2021.2.1"
     id("org.jetbrains.changelog") version "1.3.1"
@@ -21,12 +21,12 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
 
-    implementation("io.sentry:sentry:5.6.2") {
+    implementation("io.sentry:sentry:5.7.0") {
         exclude(group = "org.slf4j")
     }
 
-    implementation("io.ktor:ktor-server-netty:1.6.0")
-    implementation("io.ktor:ktor-network:1.6.0")
+    implementation("io.ktor:ktor-server-netty:1.6.8")
+    implementation("io.ktor:ktor-network:1.6.8")
 }
 
 idea {

@@ -12,14 +12,14 @@ class DeclaredAssets(
         fun parse(eventReader: StartElement): DeclaredAssets {
             return DeclaredAssets(
                 eventReader.attributes.asSequence()
-                    .firstOrNull { it.name.localPart.toLowerCase() == "extension" }
+                    .firstOrNull { it.name.localPart.lowercase() == "extension" }
                     ?.value,
                 eventReader.attributes.asSequence()
-                    .firstOrNull { it.name.localPart.toLowerCase() == "path" }
+                    .firstOrNull { it.name.localPart.lowercase() == "path" }
                     ?.value,
                 EngineApiUtil.stringToBool(
                     eventReader.attributes.asSequence()
-                        .firstOrNull { it.name.localPart.toLowerCase() == "recurse" }
+                        .firstOrNull { it.name.localPart.lowercase() == "recurse" }
                         ?.value ?: "")
             )
         }

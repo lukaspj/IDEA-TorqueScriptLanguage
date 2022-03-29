@@ -12,10 +12,10 @@ class MaterialAsset(assetFile: Path, assetName: String?)
 
     override fun parse( xmlStartElement: StartElement) {
         xmlStartElement.attributes.asSequence()
-            .firstOrNull { it.name.localPart.toLowerCase() == "scriptfile" }
+            .firstOrNull { it.name.localPart.lowercase() == "scriptfile" }
             ?.let { scriptFile = it.value}
         xmlStartElement.attributes.asSequence()
-            .firstOrNull { it.name.localPart.toLowerCase() == "materialdefinitionname" }
+            .firstOrNull { it.name.localPart.lowercase() == "materialdefinitionname" }
             ?.let { materialDefinitionName = it.value }
     }
 

@@ -15,20 +15,20 @@ class ShapeAsset(assetFile: Path, assetName: String?)
 
     override fun parse( xmlStartElement: StartElement) {
         xmlStartElement.attributes.asSequence()
-            .firstOrNull { it.name.localPart.toLowerCase() == "filename" }
+            .firstOrNull { it.name.localPart.lowercase() == "filename" }
             ?.let { fileName = it.value}
         xmlStartElement.attributes.asSequence()
-            .firstOrNull { it.name.localPart.toLowerCase() == "constuctorFileName" }
+            .firstOrNull { it.name.localPart.lowercase() == "constuctorFileName" }
             ?.let { constructorFileName = it.value }
         xmlStartElement.attributes.asSequence()
-            .firstOrNull { it.name.localPart.toLowerCase() == "diffuseimposterfilename" }
+            .firstOrNull { it.name.localPart.lowercase() == "diffuseimposterfilename" }
             ?.let { diffuseImposterFileName = it.value }
         xmlStartElement.attributes.asSequence()
-            .firstOrNull { it.name.localPart.toLowerCase() == "normalimposterfilename" }
+            .firstOrNull { it.name.localPart.lowercase() == "normalimposterfilename" }
             ?.let { normalImposterFileName = it.value }
 
         xmlStartElement.attributes.asSequence()
-            .map { Pair(it, Regex("materialslot([0-9]+)").find(it.name.localPart.toLowerCase())) }
+            .map { Pair(it, Regex("materialslot([0-9]+)").find(it.name.localPart.lowercase())) }
             .filter { it.second != null }
             .forEach {
                 materialSlots[it.second!!.groupValues[1].toInt()] = it.first.value

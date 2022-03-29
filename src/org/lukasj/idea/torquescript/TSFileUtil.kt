@@ -78,12 +78,15 @@ object TSFileUtil {
             .relativize(path)
 
     fun resolveScriptPath(context: PsiElement, path: String, isAssetPath: Boolean = false) =
-        resolveScriptPath(
-            Path.of(context.containingFile.virtualFile.parent.path),
-            context.project,
-            path,
-            isAssetPath
-        )
+        context.containingFile.virtualFile
+            ?.let {
+                resolveScriptPath(
+                    Path.of(context.containingFile.virtualFile.parent.path),
+                    context.project,
+                    path,
+                    isAssetPath
+                )
+            }
 
     fun resolveScriptPath(relativeFile: Path, project: Project, path: String, isAssetPath: Boolean = false): Path? {
         return when {

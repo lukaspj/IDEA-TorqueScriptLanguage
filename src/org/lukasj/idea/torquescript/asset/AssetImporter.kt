@@ -147,9 +147,9 @@ class AssetImporter {
                         project.getService(EngineDumpService::class.java)
                             .readObjectDump(objectDumpLog)
                             .let { objectDump ->
-                                when (objectDump.staticFields.first { it.name.toLowerCase() == "assettype" }.value) {
+                                when (objectDump.staticFields.first { it.name.lowercase() == "assettype" }.value) {
                                     "MaterialAsset" ->
-                                        objectDump.staticFields.first { it.name.toLowerCase() == "assetname" }.value
+                                        objectDump.staticFields.first { it.name.lowercase() == "assetname" }.value
                                             .let { assetName ->
                                                 MaterialAsset(
                                                     Path.of(assetFile.parent.path).resolve("${assetName}.material.asset.taml"),
@@ -158,7 +158,7 @@ class AssetImporter {
                                             }
                                     else -> {
                                         logger<AssetImporter>()
-                                            .warn("The asset type ${objectDump.staticFields.first { it.name.toLowerCase() == "assettype" }.value} was not implemented as a child asset type")
+                                            .warn("The asset type ${objectDump.staticFields.first { it.name.lowercase() == "assettype" }.value} was not implemented as a child asset type")
                                         null
                                     }
                                 }

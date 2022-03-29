@@ -44,22 +44,22 @@ class TamlModule(
                     return TamlModule(
                         file,
                         startElement.attributes.asSequence()
-                            .firstOrNull { it.name.localPart.toLowerCase() == "moduleid" }
+                            .firstOrNull { it.name.localPart.lowercase() == "moduleid" }
                             ?.value,
                         startElement.attributes.asSequence()
-                            .firstOrNull { it.name.localPart.toLowerCase() == "versionid" }
+                            .firstOrNull { it.name.localPart.lowercase() == "versionid" }
                             ?.value,
                         startElement.attributes.asSequence()
-                            .firstOrNull { it.name.localPart.toLowerCase() == "group" }
+                            .firstOrNull { it.name.localPart.lowercase() == "group" }
                             ?.value,
                         startElement.attributes.asSequence()
-                            .firstOrNull { it.name.localPart.toLowerCase() == "scriptfile" }
+                            .firstOrNull { it.name.localPart.lowercase() == "scriptfile" }
                             ?.value,
                         startElement.attributes.asSequence()
-                            .firstOrNull { it.name.localPart.toLowerCase() == "createfunction" }
+                            .firstOrNull { it.name.localPart.lowercase() == "createfunction" }
                             ?.value,
                         startElement.attributes.asSequence()
-                            .firstOrNull { it.name.localPart.toLowerCase() == "destroyfunction" }
+                            .firstOrNull { it.name.localPart.lowercase() == "destroyfunction" }
                             ?.value,
                         declaredAssets,
                         autoloadAssets

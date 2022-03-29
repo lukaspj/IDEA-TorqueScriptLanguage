@@ -15,16 +15,16 @@ class ImageAsset(assetFile: Path, assetName: String?)
 
     override fun parse( xmlStartElement: StartElement) {
         xmlStartElement.attributes.asSequence()
-            .firstOrNull { it.name.localPart.toLowerCase() == "imagefile" }
+            .firstOrNull { it.name.localPart.lowercase() == "imagefile" }
             ?.let { imageFilePath = it.value}
         xmlStartElement.attributes.asSequence()
-            .firstOrNull { it.name.localPart.toLowerCase() == "imagetype" }
+            .firstOrNull { it.name.localPart.lowercase() == "imagetype" }
             ?.let { imageType = it.value }
         xmlStartElement.attributes.asSequence()
-            .firstOrNull { it.name.localPart.toLowerCase() == "ishdrimage" }
+            .firstOrNull { it.name.localPart.lowercase() == "ishdrimage" }
             ?.let { isHdrImage = EngineApiUtil.stringToBool(it.value) }
         xmlStartElement.attributes.asSequence()
-            .firstOrNull { it.name.localPart.toLowerCase() == "usemips" }
+            .firstOrNull { it.name.localPart.lowercase() == "usemips" }
             ?.let { useMips = EngineApiUtil.stringToBool(it.value) }
     }
 

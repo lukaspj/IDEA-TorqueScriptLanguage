@@ -13,6 +13,11 @@
 
 ### Security
 
+## [1.11.2]
+### Fixed
+- Updated dependencies
+- Handle NPE
+
 ## [1.11.1]
 ### Fixed
 - Object representation in debugger views
@@ -24,7 +29,6 @@
 
 ### Fixed
 - Fixed viewing of variables with spaces
-
 
 ## [1.10.6]
 ### Added

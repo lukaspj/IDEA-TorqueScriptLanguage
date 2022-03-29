@@ -49,23 +49,23 @@ abstract class TamlAsset(
                             startElement.name.localPart,
                             file,
                             startElement.attributes.asSequence()
-                                .firstOrNull { it.name.localPart.toLowerCase() == "assetname" }
+                                .firstOrNull { it.name.localPart.lowercase() == "assetname" }
                                 ?.value)
                             ?.also { asset ->
                                 startElement.attributes.asSequence()
-                                    .firstOrNull { it.name.localPart.toLowerCase() == "assetdescription" }
+                                    .firstOrNull { it.name.localPart.lowercase() == "assetdescription" }
                                     ?.let { asset.assetDescription = it.value }
                                 startElement.attributes.asSequence()
-                                    .firstOrNull { it.name.localPart.toLowerCase() == "assetcategory" }
+                                    .firstOrNull { it.name.localPart.lowercase() == "assetcategory" }
                                     ?.let { asset.assetCategory = it.value }
                                 startElement.attributes.asSequence()
-                                    .firstOrNull { it.name.localPart.toLowerCase() == "autounload" }
+                                    .firstOrNull { it.name.localPart.lowercase() == "autounload" }
                                     ?.let { asset.assetAutoUnload = EngineApiUtil.stringToBool(it.value) }
                                 startElement.attributes.asSequence()
-                                    .firstOrNull { it.name.localPart.toLowerCase() == "assetinternal" }
+                                    .firstOrNull { it.name.localPart.lowercase() == "assetinternal" }
                                     ?.let { asset.assetInternal = EngineApiUtil.stringToBool(it.value) }
                                 startElement.attributes.asSequence()
-                                    .firstOrNull { it.name.localPart.toLowerCase() == "assetprivate" }
+                                    .firstOrNull { it.name.localPart.lowercase() == "assetprivate" }
                                     ?.let { asset.assetPrivate = EngineApiUtil.stringToBool(it.value) }
                             }
                             ?.also { it.parse(startElement) }

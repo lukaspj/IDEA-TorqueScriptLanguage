@@ -2,7 +2,7 @@ package org.lukasj.idea.torquescript.engine
 
 object EngineApiUtil {
     fun stringToBool(s: String) =
-        when (s.toLowerCase()) {
+        when (s.lowercase()) {
             "1" -> true
             "0" -> false
             "true" -> true

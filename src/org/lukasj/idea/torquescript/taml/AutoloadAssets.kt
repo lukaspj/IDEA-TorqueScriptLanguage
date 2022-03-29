@@ -12,14 +12,14 @@ class AutoloadAssets(
         fun parse(eventReader: StartElement): AutoloadAssets {
             return AutoloadAssets(
                 eventReader.attributes.asSequence()
-                    .firstOrNull { it.name.localPart.toLowerCase() == "assettype" }
+                    .firstOrNull { it.name.localPart.lowercase() == "assettype" }
                     ?.value,
                 eventReader.attributes.asSequence()
-                    .firstOrNull { it.name.localPart.toLowerCase() == "path" }
+                    .firstOrNull { it.name.localPart.lowercase() == "path" }
                     ?.value,
                 EngineApiUtil.stringToBool(
                     eventReader.attributes.asSequence()
-                        .firstOrNull { it.name.localPart.toLowerCase() == "recurse" }
+                        .firstOrNull { it.name.localPart.lowercase() == "recurse" }
                         ?.value ?: "")
             )
         }
