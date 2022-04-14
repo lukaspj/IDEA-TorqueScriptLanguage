@@ -21,7 +21,7 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
 
-    implementation("io.sentry:sentry:5.7.0") {
+    implementation("io.sentry:sentry:5.7.2") {
         exclude(group = "org.slf4j")
     }
 
@@ -71,7 +71,7 @@ tasks {
         if (!prop("pluginVersion").contains("beta")) {
             changeNotes.set(provider { changelog.get(prop("pluginVersion")).toHTML() })
         }
-        sinceBuild.set("211")
+        sinceBuild.set("213")
     }
 
     generateLexer {

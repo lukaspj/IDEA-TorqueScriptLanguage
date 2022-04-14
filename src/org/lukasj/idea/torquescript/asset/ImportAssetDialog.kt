@@ -2,11 +2,9 @@ package org.lukasj.idea.torquescript.asset
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
-import com.intellij.ui.CollectionComboBoxModel
-import com.intellij.ui.layout.*
+import com.intellij.ui.dsl.builder.*
 import org.lukasj.idea.torquescript.engine.EngineApiService
 import org.lukasj.idea.torquescript.taml.TamlAsset
-import kotlin.math.ceil
 
 class ImportAssetDialog(val project: Project, val asset: TamlAsset, val children: List<TamlAsset>) :
     DialogWrapper(project, true) {
@@ -20,21 +18,22 @@ class ImportAssetDialog(val project: Project, val asset: TamlAsset, val children
             createPanelFor(this, asset, children)
         }
 
-    fun createPanelFor(rowBuilder: RowBuilder, asset: TamlAsset, children: List<TamlAsset>): Row =
+    fun createPanelFor(rowBuilder: Panel, asset: TamlAsset, children: List<TamlAsset>): Panel =
         rowBuilder
-            .titledRow("General Asset Information") {
-                row("Asset Name") {
-                    textField(PropertyBinding(
-                        get = { asset.assetName ?: "" },
-                        set = { asset.assetName = it }
-                    ));
-                    comment("The name of the asset")
-                }
-                row("Asset Type") {
-                    comboBox(
-                        CollectionComboBoxModel(
+            .panel {
+                group("General Asset Information") {
+                    row("Asset Name") {
+                        textField()
+                            .bindText(
+                                { asset.assetName ?: "" },
+                                { asset.assetName = it }
+                            )
+                        comment("The name of the asset")
+                    }
+                    row("Asset Type") {
+                        comboBox(
                             project
-                                ?.getService(EngineApiService::class.java)
+                                .getService(EngineApiService::class.java)
                                 ?.let { engineApi ->
                                     engineApi.findClass("AssetBase")
                                         ?.let {
@@ -42,53 +41,61 @@ class ImportAssetDialog(val project: Project, val asset: TamlAsset, val children
                                         }
                                         ?.map { it.name }
                                 } ?: listOf()
-                        ),
-                        getter = { asset.assetType },
-                        setter = {},
-                        null
-                    )
-                        .enabled(false)
+                        )
+                            .bindItem({ asset.assetType }, {})
+                            .enabled(false)
+                    }
+                    row("Asset Target File Path") {
+                        textFieldWithBrowseButton(
+                            "Choose Asset Target File Path",
+                            project,
+                        ) { asset.assetFile.resolve(it.path).toString() }
+                            .bindText(
+                                { asset.assetFile.fileName.toString() },
+                                { }
+                            )
+                            .enabled(false)
+                    }
+                    row("Description") {
+                        textField()
+                            .bindText(
+                                { asset.assetDescription ?: "" },
+                                { asset.assetDescription = it }
+                            )
+                    }
+                    row("Category") {
+                        textField()
+                            .bindText(
+                                { asset.assetCategory ?: "" },
+                                { asset.assetCategory = it }
+                            )
+                    }
+                    row {
+                        checkBox("AutoUnload")
+                            .bindSelected(
+                                { asset.assetAutoUnload ?: false },
+                                { asset.assetAutoUnload = it }
+                            )
+                        checkBox("Internal")
+                            .bindSelected(
+                                getter = { asset.assetInternal ?: false },
+                                setter = { asset.assetInternal = it }
+                            )
+                        checkBox("Private")
+                            .bindSelected(
+                                getter = { asset.assetPrivate ?: false },
+                                setter = { asset.assetPrivate = it }
+                            )
+                    }
                 }
-                row("Asset Target File Path") {
-                    textFieldWithBrowseButton(
-                        getter = { asset.assetFile.fileName.toString() },
-                        setter = { }
-                    ) { asset.assetFile.resolve(it.path).toString() }
-                        .enabled(false)
-                }
-                row("Description") {
-                    textField(
-                        getter = { asset.assetDescription ?: "" },
-                        setter = { asset.assetDescription = it }
-                    )
-                }
-                row("Category") {
-                    textField(
-                        getter = { asset.assetCategory ?: "" },
-                        setter = { asset.assetCategory = it }
-                    )
-                }
-                row {
-                    checkBox("AutoUnload",
-                        getter = { asset.assetAutoUnload ?: false },
-                        setter = { asset.assetAutoUnload = it }
-                    )
-                    checkBox("Internal",
-                        getter = { asset.assetInternal ?: false },
-                        setter = { asset.assetInternal = it }
-                    )
-                    checkBox("Private",
-                        getter = { asset.assetPrivate ?: false },
-                        setter = { asset.assetPrivate = it }
-                    )
-                }
+
                 AssetImportPanel.getPanelFor(project, asset)
                     ?.insertPanel(this)
 
                 if (children.isNotEmpty()) {
-                    titledRow("Child Assets") {
+                    group("Child Assets") {
                         children.forEach {
-                            hideableRow(it.assetType) {
+                            collapsibleGroup(it.assetType) {
                                 createPanelFor(this, it, listOf())
                             }
                         }

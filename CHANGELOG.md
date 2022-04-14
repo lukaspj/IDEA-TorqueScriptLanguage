@@ -6,6 +6,7 @@
 ### Changed
 
 ### Deprecated
+- Upgraded to new UI DSL, breaking compatibility with IDEs before version 2021.3
 
 ### Removed
 

@@ -3,63 +3,70 @@ package org.lukasj.idea.torquescript.runner
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.TextFieldWithBrowseButton
-import com.intellij.ui.layout.panel
+import com.intellij.ui.dsl.builder.RowLayout
+import com.intellij.ui.dsl.builder.bindText
+import com.intellij.ui.dsl.builder.panel
+import com.intellij.ui.dsl.gridLayout.HorizontalAlign
 import javax.swing.JComponent
 
 class TSRunConfigurationSettingsEditor(project: Project) : SettingsEditor<TSRunConfiguration>() {
-    private val appPathComponent = TextFieldWithBrowseButton()
-    private val workingDirectoryComponent = TextFieldWithBrowseButton()
-    private val mainScriptComponent = TextFieldWithBrowseButton()
+    private val model = TSRunConfigurationEditorModel()
     private val mainPanel =
-        panel() {
-            row("Executable:") { appPathComponent() }
-            row("Working Directory:") { workingDirectoryComponent() }
-            row("Main Script") { mainScriptComponent() }
+        panel {
+            row("Executable:") {
+                textFieldWithBrowseButton (
+                    "App Path",
+                        project,
+                        FileChooserDescriptorFactory.createSingleFileDescriptor()
+                    )
+                    .bindText(model::appPath)
+                    .comment("Specify path to Torque App executable")
+                    .horizontalAlign(HorizontalAlign.FILL)
+            }
+            row("Working Directory:") {
+                textFieldWithBrowseButton (
+                    "Working Directory",
+                        project,
+                        FileChooserDescriptorFactory.createSingleFileDescriptor()
+                    )
+                    .bindText(model::workingDirectory)
+                    .comment("Specify path to the working directory")
+                    .horizontalAlign(HorizontalAlign.FILL)
+            }
+            row("Main Script:") {
+                textFieldWithBrowseButton (
+                    "Main Script",
+                        project,
+                        FileChooserDescriptorFactory.createSingleFileDescriptor()
+                    )
+                    .bindText(model::mainScript)
+                    .comment("Specify path to the main script file")
+                    .horizontalAlign(HorizontalAlign.FILL)
+            }
         }
-
-    init {
-        appPathComponent.addBrowseFolderListener(
-            "App Path",
-            "Specify path to Torque App executable",
-            project,
-            FileChooserDescriptorFactory.createSingleFileDescriptor()
-        )
-        workingDirectoryComponent.addBrowseFolderListener(
-            "Working Directory",
-            "Specify path to the working directory",
-            project,
-            FileChooserDescriptorFactory.createSingleFolderDescriptor()
-        )
-        mainScriptComponent.addBrowseFolderListener(
-            "Main Script",
-            "Specify path to the main script file",
-            project,
-            FileChooserDescriptorFactory.createSingleFileDescriptor()
-        )
-    }
 
     override fun resetEditorFrom(s: TSRunConfiguration) {
         val appPath = s.appPath
         if (appPath != null) {
-            appPathComponent.text = appPath
+            model.appPath = appPath
         }
-        val workingDirectory = s.workingDirectory
-        if (workingDirectory != null) {
-            workingDirectoryComponent.text = workingDirectory
-        }
-        val mainScript = s.mainScript
-        if (mainScript != null) {
-            mainScriptComponent.text = mainScript
-        }
+        model.workingDirectory = s.workingDirectory
+        model.mainScript = s.mainScript
+        mainPanel.reset()
     }
 
     override fun applyEditorTo(s: TSRunConfiguration) {
-        s.appPath = appPathComponent.text.trim()
-        s.workingDirectory = workingDirectoryComponent.text.trim()
-        s.mainScript = mainScriptComponent.text.trim()
+        s.appPath = model.appPath.trim()
+        s.workingDirectory = model.workingDirectory.trim()
+        s.mainScript = model.mainScript.trim()
     }
 
     override fun createEditor(): JComponent =
         mainPanel
 }
+
+internal data class TSRunConfigurationEditorModel(
+    var appPath: String = "",
+    var workingDirectory: String = "",
+    var mainScript: String = "",
+)
