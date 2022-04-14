@@ -5,10 +5,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val channel = prop("publishChannel")
 
 plugins {
-    id("org.jetbrains.intellij") version "1.3.0"
-    kotlin("jvm") version "1.6.10"
+    id("org.jetbrains.intellij") version "1.5.2"
+    kotlin("jvm") version "1.6.20"
 
-    id("org.jetbrains.grammarkit") version "2021.2.1"
+    id("org.jetbrains.grammarkit") version "2021.2.2"
     id("org.jetbrains.changelog") version "1.3.1"
 }
 
@@ -58,7 +58,7 @@ tasks.runIde {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version.set("2021.3")
+    version.set("2022.1")
     pluginName.set("TorqueScript")
 }
 
@@ -72,7 +72,6 @@ tasks {
             changeNotes.set(provider { changelog.get(prop("pluginVersion")).toHTML() })
         }
         sinceBuild.set("211")
-        untilBuild.set(null as String?)
     }
 
     generateLexer {

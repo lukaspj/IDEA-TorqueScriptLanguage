@@ -13,9 +13,14 @@
 
 ### Security
 
-## [1.11.2]
+## [1.11.3]
 ### Fixed
 - Updated dependencies
+- Build for Jetbrains 2022.1
+
+## [1.11.2]
+### Fixed
+- Updated security
 - Handle NPE
 
 ## [1.11.1]
