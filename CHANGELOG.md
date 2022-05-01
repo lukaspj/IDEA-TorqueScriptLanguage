@@ -10,6 +10,7 @@
 ### Removed
 
 ### Fixed
+- Fixed NPE with the message "The parent of ... was null" and changed it to an invisible warning
 
 ### Security
 

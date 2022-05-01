@@ -8,6 +8,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiElement
 import com.intellij.util.io.exists
+import io.sentry.SentryLevel
 import org.lukasj.idea.torquescript.taml.TamlModuleService
 import java.io.File
 import java.net.URI
@@ -88,7 +89,11 @@ object TSFileUtil {
                         isAssetPath
                     )
                 } else {
-                    throw NullPointerException("The parent of ${it.path} was null, couldn't resolve path $path")
+                    SentryService.getHub()
+                        .captureMessage(
+                            "The parent of ${it.path} was null, couldn't resolve path $path",
+                            SentryLevel.WARNING
+                        )
                 }
             }
 
