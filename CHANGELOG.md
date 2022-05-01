@@ -6,13 +6,22 @@
 ### Changed
 
 ### Deprecated
-- Upgraded to new UI DSL, breaking compatibility with IDEs before version 2021.3
 
 ### Removed
 
 ### Fixed
 
 ### Security
+
+## [1.11.4]
+### Deprecated
+- Upgraded to new UI DSL, breaking compatibility with IDEs before version 2021.3
+
+### Fixed
+- Use local Sentry instance to avoid error reports from other plugins
+- An InvalidPathException
+- Added more debug information to a NPE
+- Made ShapeAsset Import work for newer versions of Torque3D 4.0
 
 ## [1.11.3]
 ### Fixed

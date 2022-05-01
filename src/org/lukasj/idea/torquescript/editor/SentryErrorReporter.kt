@@ -17,13 +17,17 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.util.Consumer
+import io.sentry.Hub
 import io.sentry.Sentry
 import io.sentry.SentryLevel
+import io.sentry.SentryOptions
 import java.awt.Component
 import java.util.*
 
 
 class SentryErrorReporter : ErrorReportSubmitter() {
+    private val hub: Hub
+
     override fun getPrivacyNoticeText() =
         "The error report will be shared with Lukas Peter Aldershaab through the SaaS Sentry."
 
@@ -43,21 +47,21 @@ class SentryErrorReporter : ErrorReportSubmitter() {
 
         object : Task.Backgroundable(project, "Sending error report") {
             override fun run(indicator: ProgressIndicator) {
-                Sentry.setLevel(SentryLevel.ERROR)
+                hub.setLevel(SentryLevel.ERROR)
                 val descriptor = pluginDescriptor
                 if (descriptor is IdeaPluginDescriptor) {
-                    Sentry.setExtra("version", "${descriptor.name}@${descriptor.version}")
+                    hub.setExtra("version", "${descriptor.name}@${descriptor.version}")
                 }
 
                 val correlationId = UUID.randomUUID()
-                Sentry.setExtra("correlation-id", correlationId.toString())
+                hub.setExtra("correlation-id", correlationId.toString())
                 // might be useful to debug the exception
-                Sentry.setExtra("last_action", IdeaLogger.ourLastActionId)
+                hub.setExtra("last_action", IdeaLogger.ourLastActionId)
 
                 events
                     .filterIsInstance<IdeaReportingEvent>()
                     .forEach {
-                        Sentry.captureException(it.data.throwable)
+                        hub.captureException(it.data.throwable)
                     }
 
                 ApplicationManager.getApplication().invokeLater {
@@ -74,14 +78,12 @@ class SentryErrorReporter : ErrorReportSubmitter() {
     }
 
     init {
-        Sentry.init {
-            it.dsn = "https://4758406b81314cfd81e0dbc6f6582b5a@o1161252.ingest.sentry.io/6247137"
-            it.tracesSampleRate = 1.0
-            it.setDebug(true)
-
-            it.release = "org.lukasj.idea.torquescript@" + (PluginManagerCore.getPlugin(PluginId.getId("org.lukasj.idea.torquescript"))?.version ?: "unknown")
-
-            it.environment = System.getProperty("os.name")
-        }
+        val options = SentryOptions()
+        options.dsn = "https://4758406b81314cfd81e0dbc6f6582b5a@o1161252.ingest.sentry.io/6247137"
+        options .tracesSampleRate = 1.0
+        options.setDebug(true)
+        options.release = "org.lukasj.idea.torquescript@" + (PluginManagerCore.getPlugin(PluginId.getId("org.lukasj.idea.torquescript"))?.version ?: "unknown")
+        options.environment = System.getProperty("os.name")
+        hub = Hub(options)
     }
 }

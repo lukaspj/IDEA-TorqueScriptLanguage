@@ -13,6 +13,11 @@ import javax.xml.stream.XMLOutputFactory
 import javax.xml.stream.XMLStreamWriter
 import javax.xml.stream.events.StartElement
 
+class TamlParseException(file: VirtualFile, cause: Throwable): Exception(
+    "TAML parsing of ${file.name} failed",
+    cause
+)
+
 abstract class TamlAsset(
     val assetFile: Path,
     var assetName: String?,
@@ -32,7 +37,7 @@ abstract class TamlAsset(
                 "ShapeAsset" -> ShapeAsset(Path.of(file.path), assetName)
                 else -> {
                     logger<TamlAsset>()
-                        .info("No parser for asset type $type was not implemented")
+                        .info("No parser for asset type $type was implemented")
                     null
                 }
             }
@@ -70,11 +75,21 @@ abstract class TamlAsset(
                             }
                             ?.also { it.parse(startElement) }
                     }
+                    ?.also {
+                        while (eventReader.hasNext()) {
+                            val nextEvent = eventReader.nextEvent()
+                            if (nextEvent.isStartElement) {
+                                it.parseChild(nextEvent.asStartElement())
+                            }
+                        }
+                    }
             } catch (ex: Exception) {
-                throw Exception("Parsing of ${file.name} failed", ex)
+                throw TamlParseException(file, ex)
             }
         }
     }
+
+    abstract fun parseChild(element: StartElement)
 
     abstract fun parse(xmlStartElement: StartElement)
     abstract fun writeAttributes(xmlStreamWriter: XMLStreamWriter)

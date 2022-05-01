@@ -42,17 +42,25 @@ class AssetImporter {
                             }.let {
                                 Pair<TamlAsset, List<TamlAsset>>(it, listOf())
                             }
-                            "dts" -> ShapeAsset(
-                                Path.of(file.parent.path).resolve("${file.nameWithoutExtension}.shape.asset.taml"),
-                                file.nameWithoutExtension
-                            ).also {
-                                it.fileName = file.name
-                            }.let {
-                                Pair<TamlAsset, List<TamlAsset>>(
-                                    it,
-                                    extractDataFromEngine(project, file)
-                                )
-                            }
+                            "dts" ->
+                                extractDataFromEngine(project, file)
+                                    .let {
+                                        Pair(
+                                            it.first(),
+                                            it.drop(1)
+                                        )
+                                    }
+                            /*ShapeAsset(
+                            Path.of(file.parent.path).resolve("${file.nameWithoutExtension}.shape.asset.taml"),
+                            file.nameWithoutExtension
+                        ).also {
+                            it.fileName = file.name
+                        }.let {
+                            Pair<TamlAsset, List<TamlAsset>>(
+                                it,
+                                extractDataFromEngine(project, file)
+                            )
+                        }*/
                             else -> null
                         }?.let { (asset, children) ->
                             ApplicationManager.getApplication()
@@ -114,8 +122,17 @@ class AssetImporter {
                         ${'$'}assetImportConfig.loadImportConfig(AssetImportSettings, "DefaultImportConfig");
                         myImporter.setImportConfig(${'$'}assetImportConfig);
     
-                        ${'$'}assetObj = myImporter.addImportingFile("${TSFileUtil.relativePathFromRoot(project, assetFile).toString().replace('\\', '/')}");
+                        ${'$'}assetObj = myImporter.addImportingFile("${
+                        TSFileUtil.relativePathFromRoot(
+                            project,
+                            assetFile
+                        ).toString().replace('\\', '/')
+                    }");
                         myImporter.processImportingAssets();
+                        
+                        echo("##XX####XX##OBJECT START##XX####XX##");
+                        ${'$'}assetObj.dump();
+                        echo("##XX####XX##OBJECT END##XX####XX##");
     
                         ${'$'}count = myImporter.getAssetItemChildCount(${'$'}assetObj);
                         echo("printing out " @ ${'$'}count @ " children");
@@ -136,14 +153,15 @@ class AssetImporter {
                         ?.let { appendOutput(it) }
                         ?: sb
                 appendOutput(StringBuilder())
-                    .also { println(it) }
                     .let {
-                        Regex("##XX####XX##OBJECT START##XX####XX##([\\s\\S]+)##XX####XX##OBJECT END##XX####XX##")
-                            .find(it.toString())
-                            ?.groupValues?.drop(1)
+                        Regex("##XX####XX##OBJECT START##XX####XX##([\\s\\S]+?)##XX####XX##OBJECT END##XX####XX##")
+                            .findAll(it.toString())
+                            .map { matchResult ->
+                                matchResult.groupValues.drop(1).first()
+                            }
                     }
-                    ?.onEach { println(it) }
-                    ?.mapNotNull { objectDumpLog ->
+                    .onEach { println(it) }
+                    .mapNotNull { objectDumpLog ->
                         project.getService(EngineDumpService::class.java)
                             .readObjectDump(objectDumpLog)
                             .let { objectDump ->
@@ -152,20 +170,40 @@ class AssetImporter {
                                         objectDump.staticFields.first { it.name.lowercase() == "assetname" }.value
                                             .let { assetName ->
                                                 MaterialAsset(
-                                                    Path.of(assetFile.parent.path).resolve("${assetName}.material.asset.taml"),
+                                                    Path.of(assetFile.parent.path)
+                                                        .resolve("${assetName}.material.asset.taml"),
                                                     assetName
-                                                )
+                                                ).also {
+                                                    it.materialDefinitionName = assetName
+                                                }
+                                            }
+                                            .also {
+                                                objectDump.staticFields.first { it.name.lowercase() == "cleanassetname" }.value
+                                                    .let { cleanAssetName ->
+                                                        it.mapTo = cleanAssetName
+                                                    }
+                                            }
+                                    "ShapeAsset" ->
+                                        objectDump.staticFields.first { it.name.lowercase() == "assetname" }.value
+                                            .let { assetName ->
+                                                ShapeAsset(
+                                                    Path.of(assetFile.parent.path)
+                                                        .resolve("${assetName}.shape.asset.taml"),
+                                                    assetName
+                                                ).also {
+                                                    it.fileName = assetFile.name
+                                                }
                                             }
                                     else -> {
                                         logger<AssetImporter>()
-                                            .warn("The asset type ${objectDump.staticFields.first { it.name.lowercase() == "assettype" }.value} was not implemented as a child asset type")
+                                            .warn("The asset type ${objectDump.staticFields.first { it.name.lowercase() == "assettype" }.value} was not implemented as an engine dump asset type")
                                         null
                                     }
                                 }
                             }
                     }
-                    ?.let {
-                        result = it
+                    .let {
+                        result = it.toList()
                     }
             }
 

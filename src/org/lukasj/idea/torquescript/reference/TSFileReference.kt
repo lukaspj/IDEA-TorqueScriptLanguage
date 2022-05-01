@@ -12,17 +12,22 @@ import org.lukasj.idea.torquescript.psi.impl.TSAssignmentExpressionImpl
 import org.lukasj.idea.torquescript.psi.impl.TSLiteralExpressionElementImpl
 import org.lukasj.idea.torquescript.taml.TamlModuleService
 import java.io.File
+import java.nio.file.InvalidPathException
 
 class TSFileReference(literal: PsiElement, rangeInElement: TextRange, val isAssetPath: Boolean = false) :
     PsiReferenceBase<PsiElement>(literal, rangeInElement) {
     override fun resolve(): PsiElement? {
         val value =
             concatenateSiblings(element.text.substring(rangeInElement.startOffset, rangeInElement.endOffset), element)
-        return TSFileUtil.resolveScriptPath(element, value, isAssetPath)
-            ?.let { VfsUtil.findFile(it, true) }
-            ?.let {
-                PsiManager.getInstance(element.project).findFile(it)
-            }
+        return try {
+            TSFileUtil.resolveScriptPath(element, value, isAssetPath)
+                ?.let { VfsUtil.findFile(it, true) }
+                ?.let {
+                    PsiManager.getInstance(element.project).findFile(it)
+                }
+        } catch (ex: InvalidPathException) {
+            return null
+        }
     }
 
     private fun concatenateSiblings(path: String, element: PsiElement): String {

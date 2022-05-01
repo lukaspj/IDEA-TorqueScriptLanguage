@@ -28,6 +28,8 @@ class ImageAsset(assetFile: Path, assetName: String?)
             ?.let { useMips = EngineApiUtil.stringToBool(it.value) }
     }
 
+    override fun parseChild(element: StartElement) {}
+
     override fun writeAttributes(xmlStreamWriter: XMLStreamWriter) {
         imageFilePath?.let {
             xmlStreamWriter.writeAttribute("imageFile", TSFileUtil.assetRelativePathFromFile(it, assetFile))

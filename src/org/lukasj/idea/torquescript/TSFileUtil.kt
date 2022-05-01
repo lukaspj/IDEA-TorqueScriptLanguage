@@ -73,19 +73,23 @@ object TSFileUtil {
     fun relativePathFromRoot(project: Project, virtualFile: VirtualFile) =
         relativePathFromRoot(project, Path.of(virtualFile.path))
 
-    fun relativePathFromRoot(project: Project, path: Path) =
+    fun relativePathFromRoot(project: Project, path: Path): Path =
         Path.of(project.basePath!!)
             .relativize(path)
 
     fun resolveScriptPath(context: PsiElement, path: String, isAssetPath: Boolean = false) =
         context.containingFile.virtualFile
             ?.let {
-                resolveScriptPath(
-                    Path.of(context.containingFile.virtualFile.parent.path),
-                    context.project,
-                    path,
-                    isAssetPath
-                )
+                if (it.parent != null) {
+                    resolveScriptPath(
+                        Path.of(it.parent.path),
+                        context.project,
+                        path,
+                        isAssetPath
+                    )
+                } else {
+                    throw NullPointerException("The parent of ${it.path} was null, couldn't resolve path $path")
+                }
             }
 
     fun resolveScriptPath(relativeFile: Path, project: Project, path: String, isAssetPath: Boolean = false): Path? {

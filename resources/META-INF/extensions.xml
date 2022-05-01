@@ -82,6 +82,9 @@
         <projectService serviceImplementation="org.lukasj.idea.torquescript.engine.EngineApiService"/>
 
         <errorHandler implementation="org.lukasj.idea.torquescript.editor.SentryErrorReporter" />
+
+        <notificationGroup displayType="STICKY_BALLOON"
+                           id="TAML Parser Errors" />
     </extensions>
 
     <actions>

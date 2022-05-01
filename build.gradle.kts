@@ -25,8 +25,8 @@ dependencies {
         exclude(group = "org.slf4j")
     }
 
-    implementation("io.ktor:ktor-server-netty:1.6.8")
-    implementation("io.ktor:ktor-network:1.6.8")
+    implementation("io.ktor:ktor-server-netty-jvm:2.0.0")
+    implementation("io.ktor:ktor-network-jvm:2.0.0")
 }
 
 idea {
@@ -71,7 +71,7 @@ tasks {
         if (!prop("pluginVersion").contains("beta")) {
             changeNotes.set(provider { changelog.get(prop("pluginVersion")).toHTML() })
         }
-        sinceBuild.set("213")
+        sinceBuild.set("221")
     }
 
     generateLexer {

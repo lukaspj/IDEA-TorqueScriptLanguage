@@ -1,5 +1,7 @@
 package org.lukasj.idea.torquescript.taml
 
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
@@ -87,7 +89,15 @@ class TamlModuleService(private val project: Project) {
                                 }
                                     .filter { it.name.endsWith(declaredAssets.extension!!) }
                             }.mapNotNull {
-                                TamlAsset.parse(it)
+                                try {
+                                    TamlAsset.parse(it)
+                                } catch (ex: TamlParseException) {
+                                    NotificationGroupManager.getInstance()
+                                        .getNotificationGroup("TAML Parser Errors")
+                                        .createNotification(ex.message!!, NotificationType.ERROR)
+                                        .notify(project)
+                                    null
+                                }
                             }
                     )
                     .plus(
@@ -101,7 +111,15 @@ class TamlModuleService(private val project: Project) {
                                 } else {
                                     module.file.parent.children.toList()
                                 }.mapNotNull {
-                                    TamlAsset.parse(it)
+                                    try {
+                                        TamlAsset.parse(it)
+                                    } catch (ex: TamlParseException) {
+                                        NotificationGroupManager.getInstance()
+                                            .getNotificationGroup("TAML Parser Errors")
+                                            .createNotification(ex.message!!, NotificationType.ERROR)
+                                            .notify(project)
+                                        null
+                                    }
                                 }
                                     .filter { autoloadAssets.assetType == null || it.assetType == autoloadAssets.assetType }
                             }

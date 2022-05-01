@@ -35,6 +35,8 @@ class ShapeAsset(assetFile: Path, assetName: String?)
             }
     }
 
+    override fun parseChild(element: StartElement) { }
+
     override fun writeAttributes(xmlStreamWriter: XMLStreamWriter) {
         fileName?.let {
             xmlStreamWriter.writeAttribute("fileName", TSFileUtil.assetRelativePathFromFile(it, assetFile))
