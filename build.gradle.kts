@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val channel = prop("publishChannel")
 
 plugins {
-    id("org.jetbrains.intellij") version "1.5.2"
+    id("org.jetbrains.intellij") version "1.6.0"
     kotlin("jvm") version "1.6.20"
 
     id("org.jetbrains.grammarkit") version "2021.2.2"
@@ -21,12 +21,12 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
 
-    implementation("io.sentry:sentry:5.7.2") {
+    implementation("io.sentry:sentry:6.0.0") {
         exclude(group = "org.slf4j")
     }
 
-    implementation("io.ktor:ktor-server-netty-jvm:2.0.0")
-    implementation("io.ktor:ktor-network-jvm:2.0.0")
+    implementation("io.ktor:ktor-server-netty-jvm:2.0.2")
+    implementation("io.ktor:ktor-network-jvm:2.0.2")
 }
 
 idea {

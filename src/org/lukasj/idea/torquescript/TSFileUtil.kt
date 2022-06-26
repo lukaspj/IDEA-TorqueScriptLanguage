@@ -75,10 +75,26 @@ object TSFileUtil {
         relativePathFromRoot(project, Path.of(virtualFile.path))
 
     fun relativePathFromRoot(project: Project, path: Path): Path =
-        Path.of(project.basePath!!)
-            .relativize(path)
+        if (path.isAbsolute) {
+            Path.of(project.basePath!!)
+                .relativize(path)
+        } else {
+            path
+        }
 
-    fun resolveScriptPath(context: PsiElement, path: String, isAssetPath: Boolean = false) =
+    fun absolutePathFromRoot(project: Project, virtualFile: VirtualFile) =
+        absolutePathFromRoot(project, Path.of(virtualFile.path))
+
+    fun absolutePathFromRoot(project: Project, path: Path): Path =
+        if (!path.isAbsolute) {
+            Path.of(project.basePath!!)
+                .resolve(path)
+                .toRealPath()
+        } else {
+            path
+        }
+
+    fun resolveScriptPath(context: PsiElement, path: String, isAssetPath: Boolean = false): Path? =
         context.containingFile.virtualFile
             ?.let {
                 if (it.parent != null) {
@@ -94,6 +110,7 @@ object TSFileUtil {
                             "The parent of ${it.path} was null, couldn't resolve path $path",
                             SentryLevel.WARNING
                         )
+                    return@let null
                 }
             }
 

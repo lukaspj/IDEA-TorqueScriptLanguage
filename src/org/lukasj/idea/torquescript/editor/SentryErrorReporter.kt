@@ -37,7 +37,7 @@ class SentryErrorReporter : ErrorReportSubmitter() {
 
         object : Task.Backgroundable(project, "Sending error report") {
             override fun run(indicator: ProgressIndicator) {
-                val hub = project.getService(SentryService::class.java).getHub()
+                val hub = project.getService(SentryService::class.java).hub
 
                 events
                     .filterIsInstance<IdeaReportingEvent>()

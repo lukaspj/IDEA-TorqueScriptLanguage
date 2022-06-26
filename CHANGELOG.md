@@ -10,9 +10,16 @@
 ### Removed
 
 ### Fixed
-- Fixed NPE with the message "The parent of ... was null" and changed it to an invisible warning
 
 ### Security
+
+## [1.11.5]
+### Changed
+- Now using relative paths in run configuration
+
+### Fixed
+- Fixed NPE with the message "The parent of ... was null" and changed it to an invisible warning
+- A bug in run-configuration made it impossible to change it
 
 ## [1.11.4]
 ### Deprecated
