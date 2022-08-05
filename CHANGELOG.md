@@ -13,6 +13,20 @@
 
 ### Security
 
+## [1.12.0]
+### Added
+- Added "Attach to existing process" debug functionality
+- Support for legacy version of IDEA, supporting 2021.1 and above
+
+### Fixed
+- Improved auto-detection of script root
+
+## [1.11.6]
+### Fixed
+- Normalize run configuration paths to eliminate back-slashes on Windows-based systems in some IDE's.
+- Added a separate release-track for legacy versions of IDEA to extend support for 2021 versions of IDEA
+- Fixed an issue with back-slashes in paths in Rider
+
 ## [1.11.5]
 ### Changed
 - Now using relative paths in run configuration

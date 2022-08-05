@@ -1,8 +1,12 @@
 package org.lukasj.idea.torquescript
 
 import com.intellij.ide.plugins.PluginManagerCore
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.extensions.PluginId
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -29,6 +33,39 @@ object TSFileUtil {
             return null
         }
 
+    fun getRootDirectory(project: Project): String =
+        getPossibleRootDirectories(project)
+            .let {
+                if (it.size == 1) {
+                    it.first().path
+                } else {
+                    NotificationGroupManager.getInstance()
+                        .getNotificationGroup("TorqueScript")
+                        .createNotification(
+                            "Automatically detected ${it.size} possible Torque3D content roots, " +
+                                    "don't have any logic for choosing between them so selected ${it.first().path}",
+                            NotificationType.WARNING
+                        )
+                        .notify(project)
+                    SentryService.getHub()
+                        .captureMessage(
+                            "Automatically detected ${it.size} possible Torque3D content roots, " +
+                                    "don't have any logic for choosing between them so selected ${it.first().path}",
+                            SentryLevel.WARNING
+                        )
+                    it.first().path
+                }
+            }
+
+    fun getPossibleRootDirectories(project: Project) =
+        ModuleManager.getInstance(project)
+            .modules
+            .flatMap { module ->
+                module.rootManager.contentRoots.filter { contentRoot ->
+                    contentRoot.children.any { it.name in listOf("main.cs", "main.tscript") }
+                }
+            }
+
     fun getPluginVirtualFile(path: String): String? {
         val directory = pluginVirtualDirectory
         if (directory != null) {
@@ -43,8 +80,8 @@ object TSFileUtil {
     }
 
     fun getSchemaFile(project: Project): URI =
-        project.basePath
-            ?.let { pwd ->
+        getRootDirectory(project)
+            .let { pwd ->
                 Path.of(pwd, "engineApiSchema.xsd")
                     .let { schemaFilePath ->
                         if (schemaFilePath.exists()) {
@@ -76,7 +113,7 @@ object TSFileUtil {
 
     fun relativePathFromRoot(project: Project, path: Path): Path =
         if (path.isAbsolute) {
-            Path.of(project.basePath!!)
+            Path.of(getRootDirectory(project))
                 .relativize(path)
         } else {
             path
@@ -87,9 +124,9 @@ object TSFileUtil {
 
     fun absolutePathFromRoot(project: Project, path: Path): Path =
         if (!path.isAbsolute) {
-            Path.of(project.basePath!!)
+            Path.of(getRootDirectory(project))
                 .resolve(path)
-                .toRealPath()
+                .toAbsolutePath()
         } else {
             path
         }
@@ -124,7 +161,7 @@ object TSFileUtil {
                     .resolve(path)
             // / -> from root
             path.startsWith("/") ->
-                Path.of(project.basePath!!)
+                Path.of(getRootDirectory(project))
                     .resolve(toRelative(path))
             // : -> asset reference
             path.contains(":") ->
@@ -142,7 +179,7 @@ object TSFileUtil {
                 if (isAssetPath) {
                     relativeFile
                 } else {
-                    Path.of(project.basePath!!)
+                    Path.of(getRootDirectory(project))
                 }.resolve(path)
         }
     }
@@ -152,9 +189,11 @@ object TSFileUtil {
             value.startsWith("./") -> {
                 value
             }
+
             value.startsWith("/") -> {
                 ".$value"
             }
+
             else -> {
                 "./$value"
             }

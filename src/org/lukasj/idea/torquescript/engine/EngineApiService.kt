@@ -6,6 +6,7 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.util.CachedValue
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
+import org.lukasj.idea.torquescript.TSFileUtil
 import org.lukasj.idea.torquescript.engine.model.EngineApi
 import org.lukasj.idea.torquescript.engine.model.EngineClass
 import org.lukasj.idea.torquescript.engine.parser.EngineApiParser
@@ -37,7 +38,7 @@ class EngineApiService(private val project: Project) {
         cachedApi =
             manager.createCachedValue(
                 {
-                    val engineApiFile = VfsUtil.findFile(Path.of(project.basePath!!, "engineApi.xml"), false)
+                    val engineApiFile = VfsUtil.findFile(Path.of(TSFileUtil.getRootDirectory(project), "engineApi.xml"), false)
                         ?: VfsUtil.findFileByURL(this::class.java.getResource("/samples/engineApi.xml")!!)
                         ?: return@createCachedValue null
 

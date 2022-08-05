@@ -1,18 +1,20 @@
 package org.lukasj.idea.torquescript.telnet
 
 
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
+import com.intellij.openapi.diagnostic.logger
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.*
 import java.io.BufferedReader
 import java.io.IOException
-import java.io.InputStreamReader
 import java.io.PrintWriter
 import java.net.Socket
+import java.rmi.UnexpectedException
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
-import kotlin.concurrent.thread
+import java.util.concurrent.TimeoutException
 
 class TSBreakPointStackLine(val file: String, val line: Int, val function: String)
 
@@ -27,100 +29,113 @@ class TSBreakpointMovedEvent(val file: String, val line: Int, val newLine: Int?)
 
 class TSTelnetClient(private val address: String, private val port: Int) {
     private var socket: Socket? = null
-    private var input: BufferedReader? = null
-    private var output: PrintWriter? = null
-    private val loginQueue = ArrayBlockingQueue<Boolean>(1)
-    val evalSubscribers = ConcurrentHashMap<String, ArrayBlockingQueue<String>>()
-    val outputQueue = ArrayBlockingQueue<String>(100)
-    val breakpointQueue = ArrayBlockingQueue<TSExecutionStackLines>(100)
-    val movedBreakpointQueue = ArrayBlockingQueue<TSBreakpointMovedEvent>(100)
-    private var thread: Thread? = null
+    private var inputStream: BufferedReader? = null
+    private var outputStream: PrintWriter? = null
+    private var telnetOutputChannel = Channel<String>(100)
+    private val loginChannel = Channel<Boolean>(1)
+    val output = Channel<String>(100)
+    val breakpoints = Channel<TSExecutionStackLines>(100)
+    val movedBreakpoints = Channel<TSBreakpointMovedEvent>(100)
+    private val evalResults: MutableSharedFlow<Pair<String, String>> = MutableSharedFlow(100)
+    private val outputFlow: MutableSharedFlow<String> = MutableSharedFlow()
     private var isStopped = false
+    private val scope = CoroutineScope(Job() + Dispatchers.Default)
 
-    private fun retry(retries: Int, fn: () -> Unit) {
+    private suspend fun <T> retry(retries: Int, fn: suspend () -> Result<T>): Result<T> {
         for (i in 1..retries) {
-            try {
-                fn()
-                break
-            } catch (ex: Exception) {
-                if (i == retries) {
-                    throw ex
-                }
+            val result = fn()
 
-                Thread.sleep(1000)
-                continue
+            if (result.isSuccess || i >= retries) {
+                return result
+            } else {
+                delay(1000)
             }
         }
+        return Result.failure(TimeoutException("Failed to complete task after $retries retries"))
     }
 
-    private fun processOutput(line: String) {
-        val trimmed = line.trim()
-        when {
-            trimmed.startsWith("PASS") -> {
-                loginQueue.add(trimmed == "PASS Connected.")
-            }
-            trimmed.startsWith("COUT") -> {
-                outputQueue.add(trimmed.substring(4).trim())
-            }
-            trimmed.startsWith("BREAK") -> {
-                breakpointQueue.add(TSExecutionStackLines(trimmed.substring(5).trim()))
-            }
-            trimmed.startsWith("BRKMOV") -> {
-                trimmed.substring(7)
-                    .trim()
-                    .split(' ')
-                    .let {
-                        movedBreakpointQueue.add(TSBreakpointMovedEvent(it[0], it[1].toInt() - 1, it[2].toInt() - 1))
-                    }
-            }
-            trimmed.startsWith("BRKCLR") -> {
-                trimmed.substring(7)
-                    .trim()
-                    .split(' ')
-                    .let {
-                        movedBreakpointQueue.add(TSBreakpointMovedEvent(it[0], it[1].toInt() - 1, null))
-                    }
-            }
-            trimmed.startsWith("EVALOUT") -> {
-                line.substring(8).split(' ').let {
-                    val subQueue = evalSubscribers[it[0]]
-                    evalSubscribers.remove(it[0])
-                    subQueue?.add(it.drop(1).joinToString(" "))
+    private fun processOutput() {
+        scope.launch {
+            outputFlow.map(String::trim)
+                .filter { it.startsWith("PASS") }
+                .collect { loginChannel.send(it == "PASS Connected.") }
+        }
+        scope.launch {
+            outputFlow.map(String::trim)
+                .filter { it.startsWith("COUT") }
+                .collect { output.send(it.substring(4).trim()) }
+        }
+        scope.launch {
+            outputFlow.map(String::trim)
+                .filter { it.startsWith("BREAK") }
+                .collect { breakpoints.send(TSExecutionStackLines(it.substring(5).trim())) }
+        }
+        scope.launch {
+            outputFlow.map(String::trim)
+                .filter { it.startsWith("BRKMOV") }
+                .map { it.substring(7).trim().split(' ') }
+                .collect {
+                    movedBreakpoints.send(
+                        TSBreakpointMovedEvent(
+                            it[0],
+                            it[1].toInt() - 1,
+                            it[2].toInt() - 1
+                        )
+                    )
                 }
-            }
-            else ->
-                println(trimmed)
+        }
+        scope.launch {
+            outputFlow.map(String::trim)
+                .filter { it.startsWith("BRKCLR") }
+                .map { it.substring(7).trim().split(' ') }
+                .collect { movedBreakpoints.send(TSBreakpointMovedEvent(it[0], it[1].toInt() - 1, null)) }
+        }
+        scope.launch {
+            outputFlow.filter { it.startsWith("EVALOUT") }
+                .map { it.substring(8).split(' ') }
+                .collect {
+                    evalResults.emit(Pair(it[0], it.drop(1).joinToString(" ")))
+                }
         }
     }
-
-    fun subscribeForEval(key: String): ArrayBlockingQueue<String> =
-        ArrayBlockingQueue<String>(1).let { queue ->
-            evalSubscribers[key] = queue
-            queue
-        }
 
     fun connect() {
-        if (thread != null) {
-            return
+        processOutput()
+
+        scope.launch(CoroutineExceptionHandler { _, t -> logger<TSTelnetClient>().warn("Ignored ${t.message}") }) {
+            while (scope.isActive) {
+                val result = runCatching {
+                    withContext(Dispatchers.IO) {
+                        socket = Socket(address, port)
+                        inputStream = socket!!.getInputStream().bufferedReader()
+                        outputStream = PrintWriter(socket!!.getOutputStream(), true)
+                        telnetOutputChannel.consumeAsFlow()
+                            .collect {
+                                outputStream!!.println(it)
+                            }
+                    }
+                }
+                if (result.isSuccess) {
+                    break
+                }
+            }
         }
 
-        retry(3) {
-            socket = Socket(address, port)
-            input = BufferedReader(InputStreamReader(socket!!.getInputStream()))
-            output = PrintWriter(socket!!.getOutputStream(), true)
-        }
-
-        thread = thread {
+        scope.launch {
             try {
                 while (!isStopped) {
-                    val input = this.input
-                    if (input != null && input.ready()) {
-                        processOutput(input.readLine())
+                    val input = inputStream
+                    withContext(Dispatchers.IO) {
+                        if (input != null && input.ready()) {
+                            val line = input.readLine()
+                            outputFlow.emit(line)
+                        }
                     }
-                    Thread.sleep(10)
+                    delay(10)
                 }
             } catch (ioe: IOException) {
                 // Do nothing
+                disconnect()
             }
         }
     }
@@ -128,52 +143,64 @@ class TSTelnetClient(private val address: String, private val port: Int) {
     fun disconnect() {
         runBlocking {
             isStopped = true
-            thread?.join()
-            thread = null
+            scope.cancel("Disconnect requested")
+            output.close()
+            breakpoints.close()
+            movedBreakpoints.close()
             withTimeout(5000) {
-                socket?.close()
+                withContext(Dispatchers.IO) {
+                    socket?.close()
+                }
             }
         }
     }
 
-    private fun writeString(string: String) =
-        output!!.println(string)
+    private suspend fun writeString(string: String) =
+        telnetOutputChannel.send(string)
 
-    fun login(password: String): Boolean {
+    suspend fun login(password: String): Result<Unit> {
         writeString(password)
-        return loginQueue.poll(3, TimeUnit.SECONDS) ?: false
+        return if (loginChannel.receive()) {
+            Result.success(Unit)
+        } else {
+            Result.failure(Exception("Login failed, password rejected"))
+        }
     }
 
-    fun pause() =
+    suspend fun pause() =
         writeString("BRKNEXT")
 
-    fun resume() =
+    suspend fun resume() =
         writeString("CONTINUE")
 
-    fun eval(cmd: String) =
+    suspend fun eval(cmd: String) =
         writeString("CEVAL $cmd")
 
-    fun setBreakpoint(file: String, line: Int, clear: Boolean, passCount: Int, condition: String) =
+    suspend fun setBreakpoint(file: String, line: Int, clear: Boolean, passCount: Int, condition: String) =
         // TorqueScript has 1-index line numbers, IntelliJ uses 0-indexed
         writeString("BRKSET $file ${line + 1} ${if (clear) 1 else 0} $passCount $condition")
 
-    fun clearBreakpoint(file: String, line: Int) =
+    suspend fun clearBreakpoint(file: String, line: Int) =
         // TorqueScript has 1-index line numbers, IntelliJ uses 0-indexed
         writeString("BRKCLR $file ${line + 1}")
 
-    fun stepOver() =
+    suspend fun stepOver() =
         writeString("STEPOVER")
 
-    fun stepIn() =
+    suspend fun stepIn() =
         writeString("STEPIN")
 
-    fun stepOut() =
+    suspend fun stepOut() =
         writeString("STEPOUT")
 
-    fun evalAtLevel(level: Int, expression: String): String {
+    suspend fun evalAtLevel(level: Int, expression: String): String {
         val tag = UUID.randomUUID().toString()
-        val queue = subscribeForEval(tag)
         writeString("EVAL $tag $level $expression")
-        return queue.poll(5, TimeUnit.SECONDS) ?: "<Timeout in eval>"
+        return withTimeoutOrNull(10000) {
+            evalResults
+                .filter { it.first == tag }
+                .map { it.second }
+                .first()
+        } ?: "<Timeout in eval>"
     }
 }

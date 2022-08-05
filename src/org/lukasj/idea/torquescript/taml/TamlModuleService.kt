@@ -51,8 +51,8 @@ class TamlModuleService(private val project: Project) {
     }
 
     private fun findModules(): List<VirtualFile> =
-        project.basePath
-            ?.let { VfsUtil.findFile(Path.of(it), false) }
+        TSFileUtil.getRootDirectory(project)
+            .let { VfsUtil.findFile(Path.of(it), false) }
             ?.let { TSFileUtil.findFilesWithSuffix(it, ".module") }
             ?: emptyList()
 

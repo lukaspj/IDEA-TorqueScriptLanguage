@@ -1,32 +1,36 @@
 import org.jetbrains.grammarkit.tasks.*
 import org.jetbrains.intellij.tasks.PublishPluginTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.resolve.compatibility
 
 val channel = prop("publishChannel")
 
 plugins {
-    id("org.jetbrains.intellij") version "1.6.0"
-    kotlin("jvm") version "1.6.20"
+    kotlin("jvm") version "1.7.10"
 
+    id("org.jetbrains.intellij") version "1.8.0"
     id("org.jetbrains.grammarkit") version "2021.2.2"
     id("org.jetbrains.changelog") version "1.3.1"
 }
 
 group = "org.lukasj"
-version = prop("pluginVersion")
+val isLegacyBuild = prop("legacyBuild") == "true"
+version = if (isLegacyBuild) {
+    "${prop("pluginVersion")}-legacy"
+} else {
+    prop("pluginVersion")
+}
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
-
-    implementation("io.sentry:sentry:6.0.0") {
+    implementation("io.sentry:sentry:6.3.0") {
         exclude(group = "org.slf4j")
     }
 
-    implementation("io.ktor:ktor-server-netty-jvm:2.0.2")
-    implementation("io.ktor:ktor-network-jvm:2.0.2")
+    implementation(kotlin("reflect"))
 }
 
 idea {
@@ -37,28 +41,36 @@ idea {
 
 sourceSets {
     main {
-        java.srcDirs("src", "gen")
-        resources.srcDirs("resources")
-            .exclude("scripts/**")
-            .exclude("placeholder-schema.xsd")
+        java {
+            if (isLegacyBuild) {
+                srcDirs("src", "gen")
+                    .exclude(
+                        "org/lukasj/idea/torquescript/runner/TSRunConfigurationSettingsEditor.kt",
+                        "org/lukasj/idea/torquescript/runner/TSAttachConfigurationSettingsEditor.kt",
+                        "org/lukasj/idea/torquescript/asset/**",
+                        "org/lukasj/idea/torquescript/action/ImportAsset*"
+                    )
+            } else {
+                srcDirs("src", "gen")
+                    .exclude("org/lukasj/idea/torquescript/**/*legacy*")
+            }
+        }
+        resources {
+            srcDirs("resources")
+                .exclude("scripts/**")
+                .exclude("placeholder-schema.xsd")
+        }
     }
 }
 
 // Java target version
 java.sourceCompatibility = JavaVersion.VERSION_11
 
-// https://plugins.jetbrains.com/docs/intellij/dynamic-plugins.html#diagnosing-leaks
-tasks.runIde {
-    jvmArgs = mutableListOf("-XX:+UnlockDiagnosticVMOptions")
-
-    // Set to true to generate hprof files on unload fails
-    systemProperty("ide.plugins.snapshot.on.unload.fail", "false")
-    systemProperty("idea.is.internal", "true")
-}
-
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version.set("2022.1")
+    version.set("2022.2")
+    //version.set("2021.2")
+    type.set("RD")
     pluginName.set("TorqueScript")
 }
 
@@ -71,7 +83,13 @@ tasks {
         if (!prop("pluginVersion").contains("beta")) {
             changeNotes.set(provider { changelog.get(prop("pluginVersion")).toHTML() })
         }
-        sinceBuild.set("221")
+        if (isLegacyBuild) {
+            sinceBuild.set("211")
+            untilBuild.set("221")
+        } else {
+            sinceBuild.set("221")
+            untilBuild.set("225")
+        }
     }
 
     generateLexer {
@@ -100,7 +118,16 @@ tasks {
         outputs.dir("${targetRoot.get()}${pathToPsiRoot.get()}")
     }
 
-    withType<PublishPluginTask> {
+    // https://plugins.jetbrains.com/docs/intellij/dynamic-plugins.html#diagnosing-leaks
+    runIde {
+        jvmArgs = mutableListOf("-XX:+UnlockDiagnosticVMOptions")
+
+        // Set to true to generate hprof files on unload fails
+        systemProperty("ide.plugins.snapshot.on.unload.fail", "false")
+        systemProperty("idea.is.internal", "true")
+    }
+
+    withType<PublishPluginTask>().configureEach {
         token.set(prop("publishToken"))
         channels.set(listOf(channel))
     }
@@ -118,12 +145,9 @@ tasks {
     withType<KotlinCompile>().configureEach {
         dependsOn("generateLexer", "generateParser")
 
-        sourceCompatibility = JavaVersion.VERSION_11.toString()
-        targetCompatibility = JavaVersion.VERSION_11.toString()
-
         kotlinOptions {
             jvmTarget = "11"
-            freeCompilerArgs = listOf("-Xjvm-default=enable")
+            freeCompilerArgs = listOf("-Xjvm-default=all")
         }
     }
 }

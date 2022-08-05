@@ -3,8 +3,6 @@ package org.lukasj.idea.torquescript.runner
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
-import com.intellij.ui.dsl.builder.MutableProperty
-import com.intellij.ui.dsl.builder.RowLayout
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.gridLayout.HorizontalAlign
@@ -52,17 +50,17 @@ class TSRunConfigurationSettingsEditor(val project: Project) : SettingsEditor<TS
     override fun resetEditorFrom(s: TSRunConfiguration) {
         val appPath = s.appPath
         if (appPath != null) {
-            model.appPath = TSFileUtil.relativePathFromRoot(project, Path.of(appPath)).toString()
+            model.appPath = TSFileUtil.relativePathFromRoot(project, Path.of(appPath)).toString().replace('\\', '/')
         }
-        model.workingDirectory = TSFileUtil.relativePathFromRoot(project, Path.of(s.workingDirectory)).toString()
-        model.mainScript = TSFileUtil.relativePathFromRoot(project, Path.of(s.mainScript)).toString()
+        model.workingDirectory = TSFileUtil.relativePathFromRoot(project, Path.of(s.workingDirectory)).toString().replace('\\', '/')
+        model.mainScript = TSFileUtil.relativePathFromRoot(project, Path.of(s.mainScript)).toString().replace('\\', '/')
         mainPanel.reset()
     }
 
     override fun applyEditorTo(s: TSRunConfiguration) {
-        s.appPath = TSFileUtil.absolutePathFromRoot(project, Path.of(model.appPath.trim())).toString()
-        s.workingDirectory = TSFileUtil.absolutePathFromRoot(project, Path.of(model.workingDirectory.trim())).toString()
-        s.mainScript = TSFileUtil.absolutePathFromRoot(project, Path.of(model.mainScript.trim())).toString()
+        s.appPath = TSFileUtil.absolutePathFromRoot(project, Path.of(model.appPath.trim())).toString().replace('\\', '/')
+        s.workingDirectory = TSFileUtil.absolutePathFromRoot(project, Path.of(model.workingDirectory.trim())).toString().replace('\\', '/')
+        s.mainScript = TSFileUtil.absolutePathFromRoot(project, Path.of(model.mainScript.trim())).toString().replace("\\", "/")
         mainPanel.apply()
     }
 

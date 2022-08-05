@@ -9,6 +9,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.util.ProgressWindow
 import com.intellij.openapi.ui.Messages
+import kotlinx.coroutines.runBlocking
 import org.lukasj.idea.torquescript.runner.TSRunConfiguration
 import org.lukasj.idea.torquescript.telnet.TelnetConsoleService
 
@@ -37,7 +38,7 @@ class RebuildExportsAction : AnAction() {
                 .filterIsInstance<TSRunConfiguration>()
                 .first { !it.appPath.isNullOrEmpty() }
 
-        val dir = configuration.workingDirectory.replace('\\', '/') ?: return
+        val dir = configuration.workingDirectory.replace('\\', '/')
 
         try {
             ProgressManager.getInstance()
@@ -47,15 +48,17 @@ class RebuildExportsAction : AnAction() {
                             try {
                                 val success = project.getService(TelnetConsoleService::class.java)
                                     .runTelnetSession(project) { telnetClient ->
-                                        telnetClient.eval(
-                                            """setLogMode(6);
+                                        runBlocking {
+                                            telnetClient.eval(
+                                                """setLogMode(6);
                                                ${'$'}pref::T2D::TAMLSchema = "$dir/engineApiSchema.xsd";
                                                ${'$'}pref::T3D::TAMLSchema = "$dir/engineApiSchema.xsd";
                                                exportEngineAPIToXML().saveFile("$dir/engineApi.xml");
                                                GenerateTamlSchema();
                                             """.split('\n')
-                                                .joinToString(" ") { it.trim() }
-                                        )
+                                                    .joinToString(" ") { it.trim() }
+                                            )
+                                        }
                                     }
                                 ApplicationManager.getApplication()
                                     .invokeLater {

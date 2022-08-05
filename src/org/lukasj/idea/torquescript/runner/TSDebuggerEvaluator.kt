@@ -10,14 +10,13 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiUtilCore
 import com.intellij.psi.util.elementType
-import com.intellij.util.PlatformIcons
 import com.intellij.xdebugger.XSourcePosition
 import com.intellij.xdebugger.evaluation.XDebuggerEvaluator
-import com.intellij.xdebugger.frame.XValue
-import com.intellij.xdebugger.frame.XValueNode
-import com.intellij.xdebugger.frame.XValuePlace
-import org.lukasj.idea.torquescript.psi.*
-import org.lukasj.idea.torquescript.reference.ReferenceUtil
+import kotlinx.coroutines.runBlocking
+import org.lukasj.idea.torquescript.psi.TSIdentExpression
+import org.lukasj.idea.torquescript.psi.TSLiteralExpression
+import org.lukasj.idea.torquescript.psi.TSTypes
+import org.lukasj.idea.torquescript.psi.TSVarExpression
 import org.lukasj.idea.torquescript.telnet.TSTelnetClient
 
 class TSDebuggerEvaluator(private val telnetClient: TSTelnetClient, private val level: Int) : XDebuggerEvaluator() {
@@ -61,15 +60,19 @@ class TSDebuggerEvaluator(private val telnetClient: TSTelnetClient, private val 
         ProgressManager.getInstance()
         (object : Task.Backgroundable(null, "Evaluating $expression") {
             override fun run(indicator: ProgressIndicator) =
-                callback.evaluated(
-                    TSNamedValue(
-                        expression,
-                        telnetClient.evalAtLevel(level, expression),
-                        telnetClient,
-                        level,
-                        "unknown"
+                runBlocking {
+                    telnetClient.evalAtLevel(level, expression)
+                }.let {
+                    callback.evaluated(
+                        TSNamedValue(
+                            expression,
+                            it,
+                            telnetClient,
+                            level,
+                            "unknown"
+                        )
                     )
-                )
+                }
         }).queue()
     }
 }

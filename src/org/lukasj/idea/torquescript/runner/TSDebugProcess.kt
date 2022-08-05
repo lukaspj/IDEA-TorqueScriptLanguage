@@ -1,14 +1,9 @@
 package org.lukasj.idea.torquescript.runner
 
-import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.execution.process.ProcessEvent
-import com.intellij.execution.process.ProcessListener
-import com.intellij.execution.process.ProcessOutputTypes
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.Processor
@@ -17,121 +12,86 @@ import com.intellij.xdebugger.XDebugProcess
 import com.intellij.xdebugger.XDebugSession
 import com.intellij.xdebugger.XDebuggerManager
 import com.intellij.xdebugger.XSourcePosition
-import com.intellij.xdebugger.breakpoints.*
+import com.intellij.xdebugger.breakpoints.XBreakpointHandler
+import com.intellij.xdebugger.breakpoints.XBreakpointProperties
+import com.intellij.xdebugger.breakpoints.XLineBreakpoint
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
 import com.intellij.xdebugger.frame.XSuspendContext
 import com.intellij.xdebugger.impl.XSourcePositionImpl
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.map
 import org.lukasj.idea.torquescript.TSFileUtil
 import org.lukasj.idea.torquescript.telnet.TSTelnetClient
 import java.io.File
 import java.nio.file.Path
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.thread
 
-class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession), DebugLogger {
-    private val configuration: TSRunConfiguration = session.runProfile as TSRunConfiguration
-    private var processHandler: TSProcessHandler? = null
+class TSDebugProcess(
+    val host: String,
+    val port: Int,
+    val password: String,
+    debugSession: XDebugSession,
+    val initFn: ((TSTelnetClient) -> Unit)? = null
+) :
+    XDebugProcess(debugSession), DebugLogger {
     private var isStopped: Boolean = false
     private var outputThread: Thread? = null
-    private var breakpointThread: Thread? = null
-    private var movedBreakpointThread: Thread? = null
+    private val scope = CoroutineScope(Job() + Dispatchers.Default)
     private var telnetClient: TSTelnetClient? = null
-    private var targetBp: XLineBreakpoint<*>? = null
     private var targetPosition: XSourcePosition? = null
+    private var workingDirectory: String = TSFileUtil.getRootDirectory(debugSession.project)
 
     override fun getEditorsProvider(): XDebuggerEditorsProvider =
         TSDebuggerEditorsProvider()
 
     override fun sessionInitialized() {
-        val debugMain = TSFileUtil.getPluginVirtualFile("scripts/debuggermain.tscript")
-
-        val commandLine = GeneralCommandLine(configuration.appPath)
-        commandLine.addParameters(debugMain)
-
-        val dir = configuration.workingDirectory
-        commandLine.workDirectory = File(dir)
-
         try {
-            processHandler = TSProcessHandler(commandLine)
-
-            val debugLogger = this
-            processHandler!!.addProcessListener(object : ProcessListener {
-                override fun startNotified(processEvent: ProcessEvent) {
-
-                }
-
-                override fun processTerminated(processEvent: ProcessEvent) {
-                    if (!isStopped)
-                        session.stop()
-                }
-
-                override fun processWillTerminate(processEvent: ProcessEvent, b: Boolean) {
-
-                }
-
-                override fun onTextAvailable(processEvent: ProcessEvent, key: Key<*>) {
-                    if (key === ProcessOutputTypes.STDOUT) {
-                        debugLogger.print(
-                            processEvent.text,
-                            LogConsoleType.NORMAL,
-                            ConsoleViewContentType.NORMAL_OUTPUT
-                        )
-                    } else if (key === ProcessOutputTypes.STDERR) {
-                        debugLogger.error(processEvent.text)
-                    }
-                }
-            })
-            processHandler!!.startNotify()
-
-            telnetClient = TSTelnetClient("127.0.0.1", 17432)
+            telnetClient = TSTelnetClient(host, port)
             telnetClient!!.connect()
 
-            outputThread = thread {
-                while (!isStopped) {
-                    val line = telnetClient!!.outputQueue.poll(200, TimeUnit.MILLISECONDS)
-                    if (line != null) {
-                        println(line, LogConsoleType.NORMAL, ConsoleViewContentType.LOG_INFO_OUTPUT)
+            scope.launch {
+                telnetClient!!.output.consumeAsFlow()
+                    .collect {
+                        println(it, LogConsoleType.NORMAL, ConsoleViewContentType.LOG_INFO_OUTPUT)
                     }
-                }
             }
 
-            movedBreakpointThread = thread {
-                while (!isStopped) {
-                    val movedBreakpointEvent = telnetClient!!.movedBreakpointQueue.poll(200, TimeUnit.MILLISECONDS)
-                    if (movedBreakpointEvent != null) {
-                        val file = findFile(movedBreakpointEvent.file)
-                        val resolvedBp = file?.let { getBreakpoint(it, movedBreakpointEvent.line) }
+            scope.launch {
+                telnetClient!!.movedBreakpoints.consumeAsFlow()
+                    .collect { bpEvent ->
+                        val file = findFile(bpEvent.file)
+                        val resolvedBp = file?.let { getBreakpoint(it, bpEvent.line) }
                         if (resolvedBp != null) {
                             val breakpointManager = XDebuggerManager.getInstance(session.project).breakpointManager
                             WriteCommandAction.runWriteCommandAction(session.project) {
                                 breakpointManager.removeBreakpoint(resolvedBp)
-                                if (movedBreakpointEvent.newLine != null) {
+                                if (bpEvent.newLine != null) {
                                     breakpointManager.addLineBreakpoint(
                                         TSLineBreakpointType(),
                                         file.url,
-                                        movedBreakpointEvent.newLine,
+                                        bpEvent.newLine,
                                         (resolvedBp.type as TSLineBreakpointType).createBreakpointProperties(
                                             file,
-                                            movedBreakpointEvent.newLine
+                                            bpEvent.newLine
                                         )
                                     )
                                 }
                             }
                         } else {
                             print(
-                                "Debugger error, failed to resolve moved BP (${movedBreakpointEvent.file}:${movedBreakpointEvent.line})",
+                                "Debugger error, failed to resolve moved BP (${bpEvent.file}:${bpEvent.line})",
                                 LogConsoleType.DEBUGGER,
                                 ConsoleViewContentType.LOG_WARNING_OUTPUT
                             )
                         }
                     }
-                }
             }
 
-            breakpointThread = thread {
-                while (!isStopped) {
-                    val stackLines = telnetClient!!.breakpointQueue.poll(200, TimeUnit.MILLISECONDS)?.stackLines
-                    if (stackLines != null) {
+            scope.launch {
+                telnetClient!!.breakpoints.consumeAsFlow()
+                    .map { it.stackLines }
+                    .collect { stackLines ->
                         val sourcePosition = findSourcePosition(stackLines[0].file, stackLines[0].line)
                         val file = findFile(stackLines[0].file)
                         val resolvedBp = file?.let { getBreakpoint(it, stackLines[0].line) }
@@ -178,22 +138,23 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
                                 session.showExecutionPoint()
                             }
                     }
+            }
+
+            scope.launch {
+                val loginResult = telnetClient!!.login(password)
+                if (loginResult.isFailure) {
+                    error("Debugger was unable to login to TelNet Server - ${loginResult.exceptionOrNull()?.message}")
+                    session.stop()
+                    return@launch
                 }
+
+                initFn?.invoke(telnetClient!!)
+
+                workingDirectory = telnetClient!!.evalAtLevel(0, "getMainDotCsDir()")
+
+                sendAllBreakpoints()
+                telnetClient!!.resume()
             }
-
-            if(!telnetClient!!.login("password")) {
-                error("Debugger was unable to connect to TelNet Server")
-                session.stop()
-                return
-            }
-
-            sendAllBreakpoints()
-
-            telnetClient!!.eval("setMainDotCsDir(\"${dir.replace('\\', '/')}\");")
-            telnetClient!!.eval("setCurrentDirectory(\"${dir.replace('\\', '/')}\");")
-            telnetClient!!.eval("echo(\"Hello From IntelliJ!\");")
-            telnetClient!!.eval("exec(\"${configuration.mainScript}\");")
-            telnetClient!!.resume()
         } catch (e: Exception) {
             e.message?.let { error("An unexpected error occured in the IntelliJ debugger: $it \n ${e.stackTraceToString()}") }
             session.stop()
@@ -201,7 +162,7 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
     }
 
     private fun findFile(file: String): VirtualFile? = VfsUtil.findFile(
-        Path.of(configuration.workingDirectory)
+        Path.of(workingDirectory)
             .resolve(Path.of(file)),
         false
     )
@@ -217,9 +178,6 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
 
     override fun stop() {
         isStopped = true
-        if (processHandler != null && processHandler!!.canKillProcess()) {
-            processHandler!!.killProcess()
-        }
         if (outputThread != null) {
             outputThread!!.join()
         }
@@ -249,19 +207,23 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
         )
 
     fun registerBreakpoint(sourcePosition: XSourcePosition, condition: String? = null) =
-        telnetClient?.setBreakpoint(
-            File(sourcePosition.file.path).relativeTo(File(configuration.workingDirectory)).path.replace('\\', '/'),
-            sourcePosition.line,
-            false,
-            0,
-            condition ?: "true"
-        )
+        runBlocking {
+            telnetClient?.setBreakpoint(
+                File(sourcePosition.file.path).relativeTo(File(workingDirectory)).path.replace('\\', '/'),
+                sourcePosition.line,
+                false,
+                0,
+                condition ?: "true"
+            )
+        }
 
     fun unregisterBreakpoint(sourcePosition: XSourcePosition) =
-        telnetClient?.clearBreakpoint(
-            File(sourcePosition.file.path).relativeTo(File(configuration.workingDirectory)).path,
-            sourcePosition.line
-        )
+        runBlocking {
+            telnetClient?.clearBreakpoint(
+                File(sourcePosition.file.path).relativeTo(File(workingDirectory)).path,
+                sourcePosition.line
+            )
+        }
 
     fun sendAllBreakpoints() {
         if (telnetClient != null) {
@@ -311,19 +273,29 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
         print("\n$text\n", consoleType, ConsoleViewContentType.ERROR_OUTPUT)
 
     override fun startPausing() =
-        telnetClient!!.pause()
+        runBlocking {
+            telnetClient!!.pause()
+        }
 
     override fun resume(context: XSuspendContext?) =
-        telnetClient!!.resume()
+        runBlocking {
+            telnetClient!!.resume()
+        }
 
     override fun startStepOver(context: XSuspendContext?) =
-        telnetClient!!.stepOver()
+        runBlocking {
+            telnetClient!!.stepOver()
+        }
 
     override fun startStepInto(context: XSuspendContext?) =
-        telnetClient!!.stepIn()
+        runBlocking {
+            telnetClient!!.stepIn()
+        }
 
     override fun startStepOut(context: XSuspendContext?) =
-        telnetClient!!.stepOut()
+        runBlocking {
+            telnetClient!!.stepOut()
+        }
 
     override fun runToPosition(position: XSourcePosition, context: XSuspendContext?) {
         targetPosition = position
@@ -335,3 +307,4 @@ class TSDebugProcess(debugSession: XDebugSession) : XDebugProcess(debugSession),
         session.resume()
     }
 }
+

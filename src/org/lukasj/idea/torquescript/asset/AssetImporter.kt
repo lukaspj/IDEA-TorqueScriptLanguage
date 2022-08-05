@@ -10,6 +10,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.io.exists
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.lukasj.idea.torquescript.TSFileUtil
 import org.lukasj.idea.torquescript.engine.EngineDumpService
 import org.lukasj.idea.torquescript.taml.*
@@ -28,7 +31,6 @@ class AssetImporter {
         if (project == null) {
             return
         }
-        val outputBuilder = StringBuilder()
         ProgressManager.getInstance()
             .runProcessWithProgressAsynchronously(
                 object : Task.Backgroundable(project, "Rebuilding exports", true) {
@@ -42,6 +44,7 @@ class AssetImporter {
                             }.let {
                                 Pair<TamlAsset, List<TamlAsset>>(it, listOf())
                             }
+
                             "dts" ->
                                 extractDataFromEngine(project, file)
                                     .let {
@@ -102,8 +105,9 @@ class AssetImporter {
         var result: List<TamlAsset> = listOf()
         val success = project.getService(TelnetConsoleService::class.java)
             .runTelnetSession(project) { telnetClient ->
-                telnetClient.eval(
-                    """
+                runBlocking {
+                    telnetClient.eval(
+                        """
                         setLogMode(6);
                         ModuleDatabase.setModuleExtension("module");
                         ModuleDatabase.scanModules( "core", false );
@@ -123,11 +127,11 @@ class AssetImporter {
                         myImporter.setImportConfig(${'$'}assetImportConfig);
     
                         ${'$'}assetObj = myImporter.addImportingFile("${
-                        TSFileUtil.relativePathFromRoot(
-                            project,
-                            assetFile
-                        ).toString().replace('\\', '/')
-                    }");
+                            TSFileUtil.relativePathFromRoot(
+                                project,
+                                assetFile
+                            ).toString().replace('\\', '/')
+                        }");
                         myImporter.processImportingAssets();
                         
                         echo("##XX####XX##OBJECT START##XX####XX##");
@@ -145,14 +149,19 @@ class AssetImporter {
                         
                         quit();
                     """.split('\n')
-                        .joinToString(" ") { it.trim() }
-                )
-                fun appendOutput(sb: StringBuilder): StringBuilder =
-                    telnetClient.outputQueue.poll(5, TimeUnit.SECONDS)
-                        ?.let { sb.appendLine(it) }
-                        ?.let { appendOutput(it) }
-                        ?: sb
-                appendOutput(StringBuilder())
+                            .joinToString(" ") { it.trim() }
+                    )
+                }
+                suspend fun appendOutput(sb: StringBuilder): StringBuilder =
+                    try {
+                        withTimeout(5000) {
+                            telnetClient.output.receive()
+                                .let { sb.appendLine(it) }
+                                .let { appendOutput(it) }
+                        }
+                    } catch (e: Exception) { sb }
+
+                runBlocking { appendOutput(StringBuilder() ) }
                     .let {
                         Regex("##XX####XX##OBJECT START##XX####XX##([\\s\\S]+?)##XX####XX##OBJECT END##XX####XX##")
                             .findAll(it.toString())
@@ -183,6 +192,7 @@ class AssetImporter {
                                                         it.mapTo = cleanAssetName
                                                     }
                                             }
+
                                     "ShapeAsset" ->
                                         objectDump.staticFields.first { it.name.lowercase() == "assetname" }.value
                                             .let { assetName ->
@@ -194,6 +204,7 @@ class AssetImporter {
                                                     it.fileName = assetFile.name
                                                 }
                                             }
+
                                     else -> {
                                         logger<AssetImporter>()
                                             .warn("The asset type ${objectDump.staticFields.first { it.name.lowercase() == "assettype" }.value} was not implemented as an engine dump asset type")

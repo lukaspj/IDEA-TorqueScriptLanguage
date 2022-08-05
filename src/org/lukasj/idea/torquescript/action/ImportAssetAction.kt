@@ -1,28 +1,35 @@
 package org.lukasj.idea.torquescript.action
 
+import com.intellij.execution.configurations.RunConfiguration
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.options.SettingsEditor
 import org.lukasj.idea.torquescript.asset.AssetImporter
+import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.primaryConstructor
+
+interface ImportAssetHandler {
+    fun update(e: AnActionEvent)
+    fun actionPerformed(e: AnActionEvent)
+}
 
 class ImportAssetAction : AnAction() {
     override fun update(e: AnActionEvent) {
-        val presentation = e.presentation
-        val file = e.getData(CommonDataKeys.VIRTUAL_FILE)
-        val project = e.project
-        val haveSmthToDo: Boolean
-        if (project == null || file == null || file.isDirectory) {
-            haveSmthToDo = false
-        } else {
-            // the action should also be available for files which have been auto-detected as text or as a particular language (IDEA-79574)
-            haveSmthToDo = AssetImporter().accepts(file)
-        }
-        presentation.isVisible = haveSmthToDo
-        presentation.isEnabled = haveSmthToDo
+        // Hacky-workaround for legacy code
+        (try {
+            Class.forName("org.lukasj.idea.torquescript.action.LegacyImportAsset")
+        } catch (ex: ClassNotFoundException) {
+            Class.forName("org.lukasj.idea.torquescript.action.ImportAsset")
+        }.kotlin.createInstance() as ImportAssetHandler).update(e)
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        val file = e.getRequiredData(CommonDataKeys.VIRTUAL_FILE)
-        AssetImporter().import(e.project, file)
+        // Hacky-workaround for legacy code
+        (try {
+            Class.forName("org.lukasj.idea.torquescript.action.LegacyImportAsset")
+        } catch (ex: ClassNotFoundException) {
+            Class.forName("org.lukasj.idea.torquescript.action.ImportAsset")
+        }.kotlin.createInstance() as ImportAssetHandler).actionPerformed(e)
     }
 }
