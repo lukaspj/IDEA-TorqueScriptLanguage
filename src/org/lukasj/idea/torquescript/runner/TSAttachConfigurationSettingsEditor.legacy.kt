@@ -12,13 +12,13 @@ class TSLegacyAttachConfigurationSettingsEditor(val project: Project) : Settings
     private val mainPanel =
         panel {
             row("Host:") { textField(model::host) }
-            row("Port:") { intTextField(model::port) }
+            row("Port:") { textField(model::port) }
             row("Password:") { textField(model::password) }
         }
 
     override fun resetEditorFrom(s: TSAttachConfiguration) {
         model.host = s.host
-        model.port = s.port
+        model.port = s.port.toString()
         model.password = s.password
 
         mainPanel.reset()
@@ -26,7 +26,7 @@ class TSLegacyAttachConfigurationSettingsEditor(val project: Project) : Settings
 
     override fun applyEditorTo(s: TSAttachConfiguration) {
         s.host = model.host
-        s.port = model.port
+        s.port = model.port.toInt()
         s.password = model.password
 
         mainPanel.apply()
@@ -39,6 +39,6 @@ class TSLegacyAttachConfigurationSettingsEditor(val project: Project) : Settings
 @ApiStatus.Internal
 internal data class TSLegacyAttachConfigurationEditorModel(
     var host: String = "",
-    var port: Int = 0,
+    var port: String = "",
     var password: String = "",
 )

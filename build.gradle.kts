@@ -48,7 +48,7 @@ sourceSets {
                         "org/lukasj/idea/torquescript/runner/TSRunConfigurationSettingsEditor.kt",
                         "org/lukasj/idea/torquescript/runner/TSAttachConfigurationSettingsEditor.kt",
                         "org/lukasj/idea/torquescript/asset/**",
-                        "org/lukasj/idea/torquescript/action/ImportAsset*"
+                        "org/lukasj/idea/torquescript/action/ImportAsset.kt"
                     )
             } else {
                 srcDirs("src", "gen")

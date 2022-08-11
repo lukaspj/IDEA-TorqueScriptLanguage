@@ -33,12 +33,12 @@ object TSFileUtil {
             return null
         }
 
-    fun getRootDirectory(project: Project): String =
+    fun getRootDirectory(project: Project): String? =
         getPossibleRootDirectories(project)
             .let {
                 if (it.size == 1) {
                     it.first().path
-                } else {
+                } else if (it.size > 1) {
                     NotificationGroupManager.getInstance()
                         .getNotificationGroup("TorqueScript")
                         .createNotification(
@@ -54,6 +54,8 @@ object TSFileUtil {
                             SentryLevel.WARNING
                         )
                     it.first().path
+                } else {
+                    null
                 }
             }
 
@@ -81,7 +83,7 @@ object TSFileUtil {
 
     fun getSchemaFile(project: Project): URI =
         getRootDirectory(project)
-            .let { pwd ->
+            ?.let { pwd ->
                 Path.of(pwd, "engineApiSchema.xsd")
                     .let { schemaFilePath ->
                         if (schemaFilePath.exists()) {
@@ -113,8 +115,11 @@ object TSFileUtil {
 
     fun relativePathFromRoot(project: Project, path: Path): Path =
         if (path.isAbsolute) {
-            Path.of(getRootDirectory(project))
-                .relativize(path)
+            getRootDirectory(project)
+                ?.let {
+                    Path.of(it)
+                        .relativize(path)
+                } ?: path
         } else {
             path
         }
@@ -124,9 +129,12 @@ object TSFileUtil {
 
     fun absolutePathFromRoot(project: Project, path: Path): Path =
         if (!path.isAbsolute) {
-            Path.of(getRootDirectory(project))
-                .resolve(path)
-                .toAbsolutePath()
+            getRootDirectory(project)
+                ?.let {
+                    Path.of(it)
+                        .resolve(path)
+                        .toAbsolutePath()
+                } ?: path
         } else {
             path
         }
@@ -161,8 +169,11 @@ object TSFileUtil {
                     .resolve(path)
             // / -> from root
             path.startsWith("/") ->
-                Path.of(getRootDirectory(project))
-                    .resolve(toRelative(path))
+                getRootDirectory(project)
+                    ?.let {
+                        Path.of(it)
+                            .resolve(toRelative(path))
+                    }
             // : -> asset reference
             path.contains(":") ->
                 path.split(':')
@@ -179,8 +190,9 @@ object TSFileUtil {
                 if (isAssetPath) {
                     relativeFile
                 } else {
-                    Path.of(getRootDirectory(project))
-                }.resolve(path)
+                    getRootDirectory(project)
+                        ?.let(Path::of)
+                }?.resolve(path)
         }
     }
 

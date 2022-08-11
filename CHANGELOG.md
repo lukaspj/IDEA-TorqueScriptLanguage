@@ -13,6 +13,11 @@
 
 ### Security
 
+## [1.12.1]
+### Fixed
+- Fixed a NoSuchElementException in getRootDir
+- Fixed ClassNotFound for ImportAssetAction in legacy builds
+
 ## [1.12.0]
 ### Added
 - Added "Attach to existing process" debug functionality

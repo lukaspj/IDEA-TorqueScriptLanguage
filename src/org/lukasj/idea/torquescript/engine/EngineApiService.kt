@@ -38,7 +38,8 @@ class EngineApiService(private val project: Project) {
         cachedApi =
             manager.createCachedValue(
                 {
-                    val engineApiFile = VfsUtil.findFile(Path.of(TSFileUtil.getRootDirectory(project), "engineApi.xml"), false)
+                    val engineApiFile = TSFileUtil.getRootDirectory(project)
+                        ?.let { VfsUtil.findFile(Path.of(it, "engineApi.xml"), false) }
                         ?: VfsUtil.findFileByURL(this::class.java.getResource("/samples/engineApi.xml")!!)
                         ?: return@createCachedValue null
 

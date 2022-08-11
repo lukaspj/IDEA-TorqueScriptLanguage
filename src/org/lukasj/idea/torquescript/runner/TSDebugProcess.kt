@@ -40,7 +40,7 @@ class TSDebugProcess(
     private val scope = CoroutineScope(Job() + Dispatchers.Default)
     private var telnetClient: TSTelnetClient? = null
     private var targetPosition: XSourcePosition? = null
-    private var workingDirectory: String = TSFileUtil.getRootDirectory(debugSession.project)
+    private var workingDirectory: String? = TSFileUtil.getRootDirectory(debugSession.project)
 
     override fun getEditorsProvider(): XDebuggerEditorsProvider =
         TSDebuggerEditorsProvider()
@@ -161,11 +161,14 @@ class TSDebugProcess(
         }
     }
 
-    private fun findFile(file: String): VirtualFile? = VfsUtil.findFile(
-        Path.of(workingDirectory)
-            .resolve(Path.of(file)),
-        false
-    )
+    private fun findFile(file: String): VirtualFile? =
+        workingDirectory?.let {
+                VfsUtil.findFile(
+                Path.of(it)
+                    .resolve(Path.of(file)),
+                false
+            )
+        }
 
     private fun findSourcePosition(file: String, line: Int): XSourcePosition? {
         val virtualFile = findFile(file)
