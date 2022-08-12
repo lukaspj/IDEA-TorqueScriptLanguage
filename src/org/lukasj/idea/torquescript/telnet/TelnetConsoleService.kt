@@ -26,7 +26,7 @@ class TelnetConsoleService {
 
         val debugMain = TSFileUtil.getPluginVirtualFile("scripts/debuggermain.tscript")
 
-        val dir = configuration.workingDirectory
+        val dir = configuration.workingDirectory ?: "./"
         val commandLine = GeneralCommandLine(configuration.appPath)
         commandLine.workDirectory = File(dir)
         commandLine.addParameters(debugMain)

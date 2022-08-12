@@ -13,6 +13,10 @@
 
 ### Security
 
+## [1.12.2]
+### Fixed
+- Fixed ClassNotFound for ImportAssetAction in legacy builds
+
 ## [1.12.1]
 ### Fixed
 - Fixed a NoSuchElementException in getRootDir

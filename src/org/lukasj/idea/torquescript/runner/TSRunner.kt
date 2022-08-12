@@ -66,8 +66,8 @@ class TSRunner : GenericProgramRunner<RunnerSettings>() {
                     TSDebugProcess("127.0.0.1", 17432, "password", xDebugSession) {
                         runBlocking {
                             val dir = configuration.workingDirectory
-                            it.eval("setMainDotCsDir(\"${dir.replace('\\', '/')}\");")
-                            it.eval("setCurrentDirectory(\"${dir.replace('\\', '/')}\");")
+                            it.eval("setMainDotCsDir(\"${dir?.replace('\\', '/')}\");")
+                            it.eval("setCurrentDirectory(\"${dir?.replace('\\', '/')}\");")
                             it.eval("echo(\"Hello From IntelliJ!\");")
                             it.eval("exec(\"${configuration.mainScript}\");")
                         }

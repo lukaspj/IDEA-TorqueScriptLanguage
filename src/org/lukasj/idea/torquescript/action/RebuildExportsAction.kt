@@ -38,7 +38,7 @@ class RebuildExportsAction : AnAction() {
                 .filterIsInstance<TSRunConfiguration>()
                 .first { !it.appPath.isNullOrEmpty() }
 
-        val dir = configuration.workingDirectory.replace('\\', '/')
+        val dir = configuration.workingDirectory?.replace('\\', '/')
 
         try {
             ProgressManager.getInstance()

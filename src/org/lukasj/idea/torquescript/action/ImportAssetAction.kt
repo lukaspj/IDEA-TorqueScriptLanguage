@@ -1,13 +1,8 @@
 package org.lukasj.idea.torquescript.action
 
-import com.intellij.execution.configurations.RunConfiguration
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.options.SettingsEditor
-import org.lukasj.idea.torquescript.asset.AssetImporter
 import kotlin.reflect.full.createInstance
-import kotlin.reflect.full.primaryConstructor
 
 interface ImportAssetHandler {
     fun update(e: AnActionEvent)
