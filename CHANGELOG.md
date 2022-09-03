@@ -13,6 +13,10 @@
 
 ### Security
 
+## [1.12.3]
+### Fixed
+- Improved parsing of nested SimObject declarations
+
 ## [1.12.2]
 ### Fixed
 - Fixed ClassNotFound for ImportAssetAction in legacy builds

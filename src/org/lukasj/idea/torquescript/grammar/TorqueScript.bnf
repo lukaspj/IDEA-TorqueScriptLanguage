@@ -205,18 +205,12 @@ new_instance_block ::= LBRACE new_instance_stmt* RBRACE {
     pin=1
 }
 
-new_instance_stmt ::= property_stmt STMT_SEPARATOR {
+new_instance_stmt ::= (new_instance_expression | singleton_statement | field_assignment) STMT_SEPARATOR {
     pin=1
     recoverWhile="new_instance_stmt_recover"
 }
 
-property_stmt ::= (new_instance_expression | singleton_statement | field_assignment) {
-    pin=1
-    recoverWhile="property_stmt_recover"
-}
-
-private new_instance_stmt_recover  ::= !(RBRACE|IDENT)
-private property_stmt_recover  ::= !(RBRACE|STMT_SEPARATOR)
+private new_instance_stmt_recover  ::= !(RBRACE|IDENT|NEW)
 
 object_name ::= expression
 parent_block ::= COLON IDENT {

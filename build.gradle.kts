@@ -70,7 +70,7 @@ java.sourceCompatibility = JavaVersion.VERSION_11
 intellij {
     version.set("2022.2")
     //version.set("2021.2")
-    type.set("RD")
+    //type.set("RD")
     pluginName.set("TorqueScript")
 }
 
