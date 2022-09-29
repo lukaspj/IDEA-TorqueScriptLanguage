@@ -5,7 +5,7 @@
                   implementationClass="org.lukasj.idea.torquescript.TSFileType"
                   fieldName="INSTANCE"
                   language="TorqueScript"
-                  extensions="tscript"/>
+                  extensions="tscript;gui;mis"/>
         <fileType name="TAML"
                   implementationClass="org.lukasj.idea.torquescript.TamlFileType"
                   fieldName="INSTANCE"

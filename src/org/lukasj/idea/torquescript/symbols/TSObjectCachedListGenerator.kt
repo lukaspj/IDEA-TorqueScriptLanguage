@@ -2,6 +2,8 @@ package org.lukasj.idea.torquescript.symbols
 
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
@@ -9,6 +11,9 @@ import com.intellij.psi.util.PsiTreeUtil
 import org.lukasj.idea.torquescript.TSFileType
 import org.lukasj.idea.torquescript.psi.TSFile
 import org.lukasj.idea.torquescript.psi.TSObjectDeclaration
+import org.lukasj.idea.torquescript.taml.TamlModule
+import org.lukasj.idea.torquescript.taml.TamlModuleService
+
 
 class TSObjectCachedListGenerator : TSCachedListGenerator<TSObjectDeclaration>() {
     override fun generate(project: Project): Collection<TSObjectDeclaration> {

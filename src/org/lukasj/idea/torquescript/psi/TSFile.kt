@@ -9,7 +9,7 @@ import com.intellij.psi.util.PsiTreeUtil
 import org.lukasj.idea.torquescript.TSFileType
 import org.lukasj.idea.torquescript.TSLanguage
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
-import org.lukasj.idea.torquescript.editor.TSVarExpressionElementImpl
+import org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl
 import org.lukasj.idea.torquescript.symbols.TSFileCache
 
 open class TSFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TSLanguage.INSTANCE) {

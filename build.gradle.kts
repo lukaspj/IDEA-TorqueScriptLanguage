@@ -8,7 +8,7 @@ val channel = prop("publishChannel")
 plugins {
     kotlin("jvm") version "1.7.10"
 
-    id("org.jetbrains.intellij") version "1.8.0"
+    id("org.jetbrains.intellij") version "1.9.0"
     id("org.jetbrains.grammarkit") version "2021.2.2"
     id("org.jetbrains.changelog") version "1.3.1"
 }
@@ -26,7 +26,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.sentry:sentry:6.3.0") {
+    implementation("io.sentry:sentry:6.4.2") {
         exclude(group = "org.slf4j")
     }
 
@@ -64,7 +64,11 @@ sourceSets {
 }
 
 // Java target version
-java.sourceCompatibility = JavaVersion.VERSION_11
+if (isLegacyBuild) {
+    java.sourceCompatibility = JavaVersion.VERSION_11
+} else {
+    java.sourceCompatibility = JavaVersion.VERSION_17
+}
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
@@ -144,9 +148,12 @@ tasks {
     // Specify the right jvm target for Kotlin
     withType<KotlinCompile>().configureEach {
         dependsOn("generateLexer", "generateParser")
-
         kotlinOptions {
-            jvmTarget = "11"
+            if (isLegacyBuild) {
+                jvmTarget = "11"
+            } else {
+                jvmTarget = "17"
+            }
             freeCompilerArgs = listOf("-Xjvm-default=all")
         }
     }

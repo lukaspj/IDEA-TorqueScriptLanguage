@@ -4,13 +4,24 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 import icons.TSIcons
+import org.lukasj.idea.torquescript.util.TSTypeLookupService
 
-class TSFunctionReference(element: PsiNamedElement, textRange: TextRange, private val functionName: String? = null)
-    : PsiReferenceBase<PsiNamedElement>(element, textRange), PsiPolyVariantReference {
+class TSFunctionReference(
+    element: PsiNamedElement,
+    textRange: TextRange,
+    val namespace: String? = null,
+    val functionName: String? = null
+) : PsiReferenceBase<PsiNamedElement>(element, textRange), PsiPolyVariantReference {
 
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
         val project = myElement.project
-        val functions = ReferenceUtil.findFunction(project, functionName ?: element.name!!)
+        val functions = if (namespace != null) {
+            project.getService(TSTypeLookupService::class.java)
+                .getNamespaces(namespace, project)
+                .flatMap { ReferenceUtil.findFunction(project, "${it}::${functionName ?: element.name}") }
+        } else {
+            ReferenceUtil.findFunction(project, functionName ?: element.name!!)
+        }
 
         return functions
             .map { PsiElementResolveResult(it) }

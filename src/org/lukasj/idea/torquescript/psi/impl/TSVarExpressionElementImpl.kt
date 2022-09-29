@@ -1,4 +1,4 @@
-package org.lukasj.idea.torquescript.editor
+package org.lukasj.idea.torquescript.psi.impl
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode

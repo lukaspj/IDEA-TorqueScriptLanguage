@@ -43,10 +43,10 @@ namespace_declaration ::= NAMESPACE IDENT LBRACE function_declaration* RBRACE {p
 params ::= ((this_var_expression | local_var_expression) (COMMA local_var_expression)*)?
 
 this_var_expression ::= THISVAR {
-    mixin="org.lukasj.idea.torquescript.editor.TSVarExpressionElementImpl"
+    mixin="org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl"
 }
 local_var_expression ::= LOCALVAR {
-    mixin="org.lukasj.idea.torquescript.editor.TSVarExpressionElementImpl"
+    mixin="org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl"
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -163,7 +163,7 @@ ident_expression ::=
 }
 
 var_expression ::= (THISVAR | LOCALVAR | GLOBALVAR) {
-    mixin="org.lukasj.idea.torquescript.editor.TSVarExpressionElementImpl"
+    mixin="org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl"
 }
 paren_expression ::= LPAREN expression RPAREN {pin=1}
 

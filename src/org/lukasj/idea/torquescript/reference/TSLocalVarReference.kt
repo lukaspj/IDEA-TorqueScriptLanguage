@@ -10,16 +10,23 @@ import com.intellij.psi.util.parentOfTypes
 import com.intellij.util.PlatformIcons
 import org.lukasj.idea.torquescript.psi.*
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
-import org.lukasj.idea.torquescript.editor.TSVarExpressionElementImpl
+import org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl
 
 class TSLocalVarReference(element: PsiElement, textRange: TextRange) : PsiReferenceBase<PsiElement>(element, textRange),
     PsiPolyVariantReference {
 
     override fun multiResolve(incompleteCode: Boolean) =
         ReferenceUtil.findLocalVariablesForContext(element)
-            .filter { it.parent is TSAssignmentExpression }
-            .filterNot { it.textRange.contains(element.textRange) }
-            .filter { it.text.equals(element.text, true) }
+            .let { localVariableExpression ->
+                localVariableExpression
+                    .filter { it.parent is TSAssignmentExpression }
+                    .filterNot { it.textRange.contains(element.textRange) }
+                    .filter { it.text.equals(element.text, true) }
+                    .plus(
+                        localVariableExpression
+                            .filter { it.parent.elementType == TSTypes.PARAMS }
+                    )
+            }
             .map { PsiElementResolveResult(it) }
             .toTypedArray()
 

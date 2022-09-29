@@ -150,11 +150,6 @@ object TSFileUtil {
                         isAssetPath
                     )
                 } else {
-                    SentryService.getHub()
-                        .captureMessage(
-                            "The parent of ${it.path} was null, couldn't resolve path $path",
-                            SentryLevel.WARNING
-                        )
                     return@let null
                 }
             }

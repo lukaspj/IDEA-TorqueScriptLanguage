@@ -31,7 +31,7 @@ abstract class TSFunctionIdentifierElementImpl(node: ASTNode) : ASTWrapperPsiEle
         if (firstChild != lastChild) {
             arrayOf(
                 TSObjectReference(this, TextRange(0, firstChild.textLength)),
-                TSFunctionReference(this, TextRange(0, lastChild.textLength))
+                TSFunctionReference(this, lastChild.textRangeInParent, firstChild.text)
             )
         } else {
             arrayOf(

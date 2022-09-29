@@ -13,6 +13,7 @@ import org.lukasj.idea.torquescript.psi.TSTypes
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionType
 import org.lukasj.idea.torquescript.reference.ReferenceUtil
+import org.lukasj.idea.torquescript.util.TSTypeLookupService
 
 class TSMethodCallCompletionContributor : CompletionProvider<CompletionParameters>() {
     override fun addCompletions(
@@ -30,7 +31,7 @@ class TSMethodCallCompletionContributor : CompletionProvider<CompletionParameter
         val project = parameters.originalFile.project
         val namespaces =
             if (namespace != null)
-                ReferenceUtil.getNamespaces(namespace, project)
+                project.getService(TSTypeLookupService::class.java).getNamespaces(namespace, project)
             else
                 listOf()
 

@@ -1,23 +1,19 @@
 package org.lukasj.idea.torquescript.reference
 
-import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.TokenSet
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.elementType
-import com.intellij.psi.util.elementsAtOffsetUp
 import com.intellij.psi.util.parentOfTypes
-import org.jetbrains.annotations.Nullable
-import org.lukasj.idea.torquescript.completion.TSMethodCallCompletionContributor
+import org.lukasj.idea.torquescript.psi.TSElementType
+import org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl
+import org.lukasj.idea.torquescript.psi.TSFile
 import org.lukasj.idea.torquescript.psi.TSObjectDeclaration
+import org.lukasj.idea.torquescript.psi.TSTypes
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionType
-import org.lukasj.idea.torquescript.editor.TSVarExpressionElementImpl
-import org.lukasj.idea.torquescript.engine.EngineApiService
-import org.lukasj.idea.torquescript.psi.TSFile
-import org.lukasj.idea.torquescript.psi.TSTypes
 import org.lukasj.idea.torquescript.symbols.TSFunctionCachedListGenerator
 import org.lukasj.idea.torquescript.symbols.TSGlobalVarCachedListGenerator
 import org.lukasj.idea.torquescript.symbols.TSObjectCachedListGenerator
@@ -50,35 +46,6 @@ object ReferenceUtil {
         getGlobals(project)
             .filter { it.name.equals(key, true) }
 
-
-    fun getNamespaces(rootNs: String, project: Project): List<String> {
-        val obj = findObject(project, rootNs)
-
-        if (obj.size > 1) {
-            logger<TSMethodCallCompletionContributor>()
-                .warn("Too many instances of obj $rootNs")
-        }
-        if (obj.isEmpty()) {
-            val superType = project.getService(EngineApiService::class.java)
-                .findClass(rootNs)
-                ?.superType
-            return if (superType != null) {
-                getNamespaces(superType, project)
-                    .plus(rootNs)
-            } else {
-                logger<TSMethodCallCompletionContributor>()
-                    .warn("No instances of $rootNs found")
-                listOf(rootNs)
-            }
-        }
-
-        return if (obj[0].getParentBlock() != null) {
-            getNamespaces(obj[0].getParentBlock()!!.lastChild.text, project)
-        } else {
-            getNamespaces(obj[0].getTypeName(), project)
-        }.plus(rootNs)
-    }
-
     private fun findPreviousElement(element: PsiElement, skipSet: TokenSet): PsiElement? {
         var leaf = PsiTreeUtil.prevLeaf(element)
         while (leaf != null && skipSet.contains(leaf.elementType)) {
@@ -93,6 +60,7 @@ object ReferenceUtil {
 
         return when (element.elementType) {
             TSTypes.IDENT -> element.text
+            TSTypes.IDENT_EXPRESSION -> element.text
             TSTypes.LOCALVAR ->
                 findPreviousElement(element, TokenSet.create(TokenType.WHITE_SPACE, TokenType.ERROR_ELEMENT))
                     .let { prevElement ->
@@ -110,6 +78,10 @@ object ReferenceUtil {
                 findGlobal(element.project, element.text)
                     .mapNotNull { tryResolveType(it) }
                     .firstOrNull()
+            TSTypes.THISVAR ->
+                element.parentOfTypes(TSFunctionStatementElementImpl::class)?.getNamespace()
+            TSTypes.THIS_VAR_EXPRESSION ->
+                tryResolveType(element.firstChild)
             TSTypes.VAR_EXPRESSION ->
                 when (element.parent.elementType) {
                     TSTypes.ASSIGNMENT_EXPRESSION ->
@@ -141,6 +113,8 @@ object ReferenceUtil {
                                         tryResolveType(element.parent)
                                     }
                                 }
+                        } else if (element.firstChild.elementType == TSTypes.THISVAR) {
+                            tryResolveType(element.firstChild)
                         } else {
                             null
                         }

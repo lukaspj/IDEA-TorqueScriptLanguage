@@ -13,8 +13,10 @@ import org.lukasj.idea.torquescript.psi.TSElementFactory
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionCallExpressionElementImpl
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionIdentifierElementImpl
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
+import org.lukasj.idea.torquescript.psi.impl.TSPropertyElementImpl
 import org.lukasj.idea.torquescript.reference.ReferenceUtil
 import org.lukasj.idea.torquescript.reference.TSFunctionReference
+import org.lukasj.idea.torquescript.util.TSTypeLookupService
 
 
 fun renderClassDoc(project: Project, className: String): String {
@@ -34,19 +36,33 @@ fun renderClassDoc(project: Project, className: String): String {
 fun renderFunctionCall(element: TSFunctionCallExpressionElementImpl) =
     element.reference?.let { renderFunctionReference(it as TSFunctionReference) }
 
+fun renderFunctionCall(element: TSPropertyElementImpl) =
+    element.reference?.let { renderFunctionReference(it as TSFunctionReference) }
+
 fun renderFunctionReference(funcRef: TSFunctionReference) =
     funcRef.resolve()
-        .let {
-            if (it == null) {
-                if (funcRef.element.name != null) {
-                    renderBuiltinFunction(funcRef.element.project, funcRef.element.name!!)
+        .let { element ->
+            if (element == null) {
+                val functionName = funcRef.functionName ?: funcRef.element.name
+                if (functionName != null) {
+                    if (funcRef.namespace == null) {
+                        renderBuiltinFunction(funcRef.element.project, functionName)
+                    } else {
+                        funcRef.element.project.getService(TSTypeLookupService::class.java)
+                            .getNamespaces(funcRef.namespace, funcRef.element.project)
+                            .reversed().firstOrNull {
+                                funcRef.element.project.getService(EngineApiService::class.java)
+                                    .findMethod(it, functionName) != null
+                            }
+                            ?.let { renderBuiltinFunction(funcRef.element.project, "${it}::${functionName}") }
+                    }
                 } else {
                     null
                 }
             } else {
-                when (it) {
-                    is TSFunctionStatementElementImpl -> renderFunctionStatement(it)
-                    is TSFunctionIdentifierElementImpl -> renderFunctionIdentifier(it)
+                when (element) {
+                    is TSFunctionStatementElementImpl -> renderFunctionStatement(element)
+                    is TSFunctionIdentifierElementImpl -> renderFunctionIdentifier(element)
                     else -> null
                 }
             }
@@ -168,6 +184,7 @@ fun renderDocstring(project: Project, element: IDocElement): String =
         is InternalDocElement -> ""
         is RemarkDocElement -> StringBuilder().append("<b>")
             .append(element.children.joinToString { renderDocstring(project, it) }).append("</b>").toString()
+
         is InGroupDocElement -> renderInGroup(project, element)
         is NullDocElement -> ""
         else -> "(${element.javaClass.name} not handled in docstring)"

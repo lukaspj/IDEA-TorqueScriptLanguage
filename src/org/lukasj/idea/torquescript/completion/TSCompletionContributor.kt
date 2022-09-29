@@ -86,11 +86,17 @@ class TSCompletionContributor : CompletionContributor() {
 
     private fun inMethod(): ElementPattern<PsiElement> =
         psiElement(TSTypes.IDENT)
-            .afterLeaf(psiElement(TSTypes.COLON_COLON))
-            .afterLeafSkipping(
+            .and(
                 psiElement()
-                    .withElementType(TokenSet.create(TokenType.WHITE_SPACE, TSTypes.IDENT, TSTypes.COLON_COLON)),
-                psiElement(TSTypes.FUNCTION)
+                    .afterLeaf(psiElement(TSTypes.COLON_COLON))
+            )
+            .and(
+                psiElement()
+                    .afterLeafSkipping(
+                        psiElement()
+                            .withElementType(TokenSet.create(TokenType.WHITE_SPACE, TSTypes.IDENT, TSTypes.COLON_COLON)),
+                        psiElement(TSTypes.FUNCTION)
+                    )
             )
 
     private fun inDatablock(): ElementPattern<PsiElement> =

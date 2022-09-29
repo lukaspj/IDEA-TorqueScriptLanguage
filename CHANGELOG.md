@@ -2,7 +2,6 @@
 
 ## [Unreleased]
 ### Added
-
 ### Changed
 
 ### Deprecated
@@ -10,8 +9,22 @@
 ### Removed
 
 ### Fixed
+- Removed logging of noisy warning
 
 ### Security
+
+## [1.13.0]
+### Added
+- .mis and .gui file type association
+### Fixed
+- Find Objects defined in TAML when auto-completing
+- Do not show other function declarations in auto-complete for new function declarations
+- Fix auto-complete for functions on variables
+- Fix highlight and documentation of built-in methods
+
+## [1.12.4]
+### Fixed
+- Updated Java version to 17
 
 ## [1.12.3]
 ### Fixed

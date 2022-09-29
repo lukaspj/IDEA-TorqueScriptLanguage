@@ -8,6 +8,7 @@ import com.intellij.util.PlatformIcons
 import com.intellij.util.ProcessingContext
 import org.lukasj.idea.torquescript.engine.EngineApiService
 import org.lukasj.idea.torquescript.reference.ReferenceUtil
+import org.lukasj.idea.torquescript.util.TSTypeLookupService
 
 class TSMethodCompletionContributor : CompletionProvider<CompletionParameters>() {
     override fun addCompletions(
@@ -24,7 +25,7 @@ class TSMethodCompletionContributor : CompletionProvider<CompletionParameters>()
         val project = parameters.originalFile.project
         val namespaces =
             if (namespace != null)
-                ReferenceUtil.getNamespaces(namespace, project)
+                project.getService(TSTypeLookupService::class.java).getNamespaces(namespace, project)
             else
                 listOf()
 
@@ -49,7 +50,7 @@ class TSMethodCompletionContributor : CompletionProvider<CompletionParameters>()
                     .withTailText(method.arguments.joinToString(", ", "(", ")") { a -> a.toArgString() })
                     .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
             }
-            .forEach { result.addElement(it) }
+            .let { result.addAllElements(it) }
+        result.stopHere()
     }
-
 }

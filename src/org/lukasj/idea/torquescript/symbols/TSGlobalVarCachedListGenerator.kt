@@ -6,7 +6,7 @@ import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import org.lukasj.idea.torquescript.TSFileType
 import org.lukasj.idea.torquescript.psi.TSFile
-import org.lukasj.idea.torquescript.editor.TSVarExpressionElementImpl
+import org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl
 
 class TSGlobalVarCachedListGenerator : TSCachedListGenerator<TSVarExpressionElementImpl>() {
     override fun generate(project: Project): Set<TSVarExpressionElementImpl> {

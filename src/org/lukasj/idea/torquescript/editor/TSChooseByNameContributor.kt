@@ -4,6 +4,7 @@ import com.intellij.navigation.ChooseByNameContributor
 import com.intellij.navigation.NavigationItem
 import com.intellij.openapi.project.Project
 import org.lukasj.idea.torquescript.reference.ReferenceUtil
+import org.lukasj.idea.torquescript.util.TSTypeLookupService
 
 class TSChooseByNameContributor : ChooseByNameContributor {
     override fun getNames(project: Project, includeNonProjectItems: Boolean): Array<String> =
@@ -11,9 +12,8 @@ class TSChooseByNameContributor : ChooseByNameContributor {
             .filter { it.name != null && it.name!!.isNotEmpty() }
             .map { it.name!! }
             .plus (
-                ReferenceUtil.getObjects(project)
-                    .filter { it.name != null && it.name!!.isNotEmpty() }
-                    .map { it.name!! }
+                project.getService(TSTypeLookupService::class.java).getObjects(project)
+                    .map { it.name }
             )
             .plus (
                 ReferenceUtil.getGlobals(project)
@@ -30,7 +30,7 @@ class TSChooseByNameContributor : ChooseByNameContributor {
     ): Array<NavigationItem> =
         ReferenceUtil.findFunction(project, name)
             .plus (
-                ReferenceUtil.findObject(project, name)
+                project.getService(TSTypeLookupService::class.java).findObject(project, name)
             )
             .plus (
                 ReferenceUtil.findGlobal(project, name)

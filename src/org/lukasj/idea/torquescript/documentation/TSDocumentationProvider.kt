@@ -48,6 +48,8 @@ class TSDocumentationProvider : AbstractDocumentationProvider() {
                 renderFunctionIdentifier(element)
             is TSFunctionCallExpressionElementImpl ->
                 renderFunctionCall(element)
+            is TSPropertyImpl ->
+                renderFunctionCall(element)
             is TSDatablockDeclarationElementImpl ->
                 renderClassDoc(element.project, element.getClassName()!!)
             else -> {

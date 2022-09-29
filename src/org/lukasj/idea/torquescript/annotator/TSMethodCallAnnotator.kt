@@ -6,14 +6,19 @@ import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.psi.PsiElement
 import org.lukasj.idea.torquescript.editor.TSSyntaxHighlightingColors
 import org.lukasj.idea.torquescript.engine.EngineApiService
+import org.lukasj.idea.torquescript.psi.impl.TSAccessorChainImpl
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionCallExpressionElementImpl
 import org.lukasj.idea.torquescript.reference.ReferenceUtil
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionType
+import org.lukasj.idea.torquescript.psi.impl.TSPropertyElementImpl
+import org.lukasj.idea.torquescript.reference.TSFunctionReference
+import org.lukasj.idea.torquescript.util.TSTypeLookupService
 
 class TSMethodCallAnnotator : TSAnnotator() {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         val engineApiService = element.project.getService(EngineApiService::class.java)
+        val typeLookupService = element.project.getService(TSTypeLookupService::class.java)
         if (element is TSFunctionStatementElementImpl) {
             val identifier = element.getFunctionIdentifier() ?: return
 
@@ -23,7 +28,7 @@ class TSMethodCallAnnotator : TSAnnotator() {
             if (lastElement.prevSibling?.prevSibling != null) {
                 val namespace = identifier.firstChild
 
-                if (ReferenceUtil.findObject(element.project, element.text).isNotEmpty()) {
+                if (typeLookupService.findObject(element.project, element.text).isNotEmpty()) {
                     createSuccessAnnotation(namespace, holder, TSSyntaxHighlightingColors.OBJECT_NAME)
                 } else if (engineApiService.findClass(namespace.text) != null) {
                     createSuccessAnnotation(namespace, holder, TSSyntaxHighlightingColors.BUILTIN_CLASS_NAME)
@@ -37,7 +42,7 @@ class TSMethodCallAnnotator : TSAnnotator() {
                     val namespace = element.getExpression().firstChild
                     val functionName = element.getExpression().lastChild
 
-                    if (ReferenceUtil.findObject(element.project, namespace.text).isNotEmpty()) {
+                    if (typeLookupService.findObject(element.project, namespace.text).isNotEmpty()) {
                         createSuccessAnnotation(namespace, holder, TSSyntaxHighlightingColors.OBJECT_NAME)
                     } else if (engineApiService.findClass(namespace.text) != null) {
                         createSuccessAnnotation(namespace, holder, TSSyntaxHighlightingColors.BUILTIN_CLASS_NAME)
@@ -60,6 +65,26 @@ class TSMethodCallAnnotator : TSAnnotator() {
                     }
                 }
                 else -> return
+            }
+        } else if (element is TSPropertyElementImpl) {
+            if (element.nextSibling is TSAccessorChainImpl) {
+                val namespace = ReferenceUtil.tryResolveType(element.parent.prevSibling)
+                val functionName = element
+
+                if (namespace != null) {
+                    if (
+                        typeLookupService.getNamespaces(namespace, element.project)
+                            .any {
+                                engineApiService.findMethod(it, functionName.text) != null
+                            }
+                    ) {
+                        createSuccessAnnotation(functionName, holder, TSSyntaxHighlightingColors.BUILTIN_FUNCTION_CALL)
+                    } else {
+                        createSuccessAnnotation(functionName, holder, TSSyntaxHighlightingColors.FUNCTION_CALL)
+                    }
+                } else {
+                    createSuccessAnnotation(functionName, holder, TSSyntaxHighlightingColors.FUNCTION_CALL)
+                }
             }
         }
     }

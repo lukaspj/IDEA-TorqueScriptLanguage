@@ -4,6 +4,7 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 import icons.TSIcons
+import org.lukasj.idea.torquescript.util.TSTypeLookupService
 
 class TSObjectReference(element: PsiNamedElement, textRange: TextRange) : PsiReferenceBase<PsiNamedElement>(element, textRange),
     PsiPolyVariantReference {
@@ -22,10 +23,8 @@ class TSObjectReference(element: PsiNamedElement, textRange: TextRange) : PsiRef
 
     override fun getVariants(): Array<Any> {
         val project = myElement.project
-        val objects = ReferenceUtil.getObjects(project)
-        return objects.filter {
-            it.name != null && it.name!!.isNotEmpty()
-        }.map { obj ->
+        val objects = project.getService(TSTypeLookupService::class.java).getObjects(project)
+        return objects.map { obj ->
             LookupElementBuilder
                 .create(obj)
                 .withIcon(TSIcons.FILE)
