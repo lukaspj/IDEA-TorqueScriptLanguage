@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+
 ### Changed
 
 ### Deprecated
@@ -9,9 +10,22 @@
 ### Removed
 
 ### Fixed
-- Removed logging of noisy warning
 
 ### Security
+
+## [1.14.0]
+### Added
+- Autocomplete for ModuleDatabase built-in object
+
+### Changed
+- Cleaned up AST a little
+- Add parentheses when auto-completing method calls
+
+### Fixed
+- Removed logging of noisy warning
+- Autocomplete of objects
+- Updated dependencies
+- ModuleDatabase warning
 
 ## [1.13.0]
 ### Added

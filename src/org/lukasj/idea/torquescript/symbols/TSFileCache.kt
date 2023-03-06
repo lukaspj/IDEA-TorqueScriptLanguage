@@ -4,9 +4,10 @@ import com.intellij.openapi.util.ModificationTracker
 import com.intellij.psi.util.*
 import org.lukasj.idea.torquescript.psi.TSAssignmentExpression
 import org.lukasj.idea.torquescript.psi.TSFile
+import org.lukasj.idea.torquescript.psi.TSFunctionDeclaration
 import org.lukasj.idea.torquescript.psi.TSObjectDeclaration
+import org.lukasj.idea.torquescript.psi.TSPackageDeclaration
 import org.lukasj.idea.torquescript.psi.TSTypes
-import org.lukasj.idea.torquescript.psi.impl.TSDeclarationImpl
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
 import org.lukasj.idea.torquescript.psi.impl.TSVarExpressionElementImpl
 
@@ -17,14 +18,12 @@ class TSModificationTracker : ModificationTracker {
 
 object TSFileCacheGenerator {
     fun getFunctions(file: TSFile) =
-        (PsiTreeUtil.getChildrenOfType(file, TSDeclarationImpl::class.java)
-            ?.filter { it.functionDeclaration != null }
-            ?.map { it.functionDeclaration as TSFunctionStatementElementImpl }
+        (PsiTreeUtil.getChildrenOfType(file, TSFunctionDeclaration::class.java)
+            ?.map { it as TSFunctionStatementElementImpl }
             ?: setOf())
             .plus(
-                PsiTreeUtil.getChildrenOfType(file, TSDeclarationImpl::class.java)
-                    ?.filter { it.packageDeclaration != null }
-                    ?.flatMap { it.packageDeclaration?.functionDeclarationList!! }
+                PsiTreeUtil.getChildrenOfType(file, TSPackageDeclaration::class.java)
+                    ?.flatMap { it.functionDeclarationList }
                     ?.map { it as TSFunctionStatementElementImpl }
                     ?: setOf()
             )

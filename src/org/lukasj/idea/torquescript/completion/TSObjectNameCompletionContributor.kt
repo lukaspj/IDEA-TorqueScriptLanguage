@@ -6,7 +6,6 @@ import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.util.PlatformIcons
 import com.intellij.util.ProcessingContext
-import org.lukasj.idea.torquescript.reference.ReferenceUtil
 import org.lukasj.idea.torquescript.util.TSTypeLookupService
 
 class TSObjectNameCompletionContributor : CompletionProvider<CompletionParameters>() {
@@ -22,7 +21,7 @@ class TSObjectNameCompletionContributor : CompletionProvider<CompletionParameter
                 .withIcon(PlatformIcons.CLASS_INITIALIZER)
                 .withPresentableText(obj.name)
                 .withCaseSensitivity(false)
-                .withTypeText(obj.containingFile.name)
+                .withTypeText(obj.containingFile?.name)
                 .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
         }
         .forEach { result.addElement(it) }

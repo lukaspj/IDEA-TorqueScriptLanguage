@@ -14,18 +14,17 @@
     tokenTypeClass="org.lukasj.idea.torquescript.psi.TSTokenType"
 }
 
-torquescriptFile ::= declaration*
+torquescriptFile ::= (declaration | statement)*
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Declarations
 
-declaration ::=
+private declaration ::=
     function_declaration
-    | package_declaration STMT_SEPARATOR
+    | package_declaration
     | namespace_declaration
-    | statement {pin=1}
 
-package_declaration ::= PACKAGE IDENT LBRACE function_declaration* RBRACE {pin=1}
+package_declaration ::= PACKAGE IDENT LBRACE function_declaration* RBRACE STMT_SEPARATOR {pin=1}
 
 function_declaration ::= FUNCTION function_identifier LPAREN params RPAREN statement_block {
     pin=1
@@ -62,13 +61,13 @@ statement ::=
             | str_foreach_statement
             | do_while_statement
             | while_statement
-            | break_statement STMT_SEPARATOR
-            | continue_statement STMT_SEPARATOR
-            | return_statement STMT_SEPARATOR
-            | assert_statement STMT_SEPARATOR
-            | singleton_statement STMT_SEPARATOR
-            | datablock_statement STMT_SEPARATOR
-            | expression_statement STMT_SEPARATOR {pin=1}
+            | break_statement
+            | continue_statement
+            | return_statement
+            | assert_statement
+            | singleton_statement
+            | datablock_statement
+            | expression_statement {pin=1}
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Logical statements
@@ -85,22 +84,22 @@ foreach_statement ::= FOREACH LPAREN expression IN expression RPAREN (statement_
 str_foreach_statement ::= STR_FOREACH LPAREN expression IN expression RPAREN (statement_block | statement) {pin=1}
 do_while_statement ::= DO (statement_block | statement) WHILE LPAREN expression RPAREN {pin=1}
 while_statement ::= WHILE LPAREN expression RPAREN (statement_block | statement) {pin=1}
-break_statement ::= BREAK
-continue_statement ::= CONTINUE
-return_statement ::= RETURN expression? {pin=1}
+break_statement ::= BREAK STMT_SEPARATOR
+continue_statement ::= CONTINUE STMT_SEPARATOR
+return_statement ::= RETURN expression? STMT_SEPARATOR {pin=1}
 
 statement_block ::= LBRACE statement* RBRACE {pin=1}
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Type statements
 
-singleton_statement ::= SINGLETON IDENT LPAREN (object_name parent_block?)? RPAREN new_instance_block? {
+singleton_statement ::= SINGLETON IDENT LPAREN (object_name parent_block?)? RPAREN new_instance_block? STMT_SEPARATOR {
     pin=1
     implements="org.lukasj.idea.torquescript.psi.TSObjectDeclaration"
     mixin="org.lukasj.idea.torquescript.psi.impl.TSObjectDeclarationElementImpl"
 }
 
-datablock_statement ::= DATABLOCK IDENT LPAREN object_name parent_block? RPAREN new_instance_block? {
+datablock_statement ::= DATABLOCK IDENT LPAREN object_name parent_block? RPAREN new_instance_block? STMT_SEPARATOR {
     pin=1
     implements="org.lukasj.idea.torquescript.psi.TSObjectDeclaration"
     mixin="org.lukasj.idea.torquescript.psi.impl.TSObjectDeclarationElementImpl"
@@ -121,9 +120,9 @@ comment_statement ::= LINE_COMMENT
           | DOC_COMMENT_BLOCK
           | BLOCK_COMMENT
 
-assert_statement ::= ASSERT LPAREN expression (COMMA QUOTED_STRING)? RPAREN {pin=1}
+assert_statement ::= ASSERT LPAREN expression (COMMA QUOTED_STRING)? RPAREN STMT_SEPARATOR {pin=1}
 
-expression_statement ::= expression
+expression_statement ::= expression STMT_SEPARATOR
 
 expression ::= assignment_expression
              | ternary_expression

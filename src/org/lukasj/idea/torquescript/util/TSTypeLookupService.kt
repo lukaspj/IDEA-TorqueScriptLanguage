@@ -4,7 +4,6 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import org.lukasj.idea.torquescript.completion.TSMethodCallCompletionContributor
 import org.lukasj.idea.torquescript.engine.EngineApiService
 import org.lukasj.idea.torquescript.psi.TSObjectDeclaration
 import org.lukasj.idea.torquescript.reference.ReferenceUtil
@@ -15,7 +14,7 @@ interface TSCachedObject {
     val name: String
     val type: String
     val parent: String?
-    val containingFile: VirtualFile
+    val containingFile: VirtualFile?
 }
 
 class CachedObjectDeclaration(private val declaration: TSObjectDeclaration) : TSCachedObject {
@@ -32,8 +31,10 @@ class CachedObjectDeclaration(private val declaration: TSObjectDeclaration) : TS
     override val parent: String?
         get() = declaration.getParentBlock()?.lastChild?.text
 
-    override val containingFile: VirtualFile
-        get() = declaration.containingFile!!.virtualFile
+    override val containingFile: VirtualFile?
+        get() = declaration.containingFile?.virtualFile
+
+    override fun toString() = name
 }
 
 class ModuleObject(private val module: TamlModule) : TSCachedObject {
@@ -64,6 +65,20 @@ class TSTypeLookupService {
                     .getModules()
                     .map(ModuleObject::fromModule)
             )
+            .plus(
+                object : TSCachedObject {
+                    override val name: String
+                        get() = "ModuleDatabase"
+                    override val type: String
+                        get() = "ModuleManager"
+                    override val parent: String?
+                        get() = null
+                    override val containingFile: VirtualFile?
+                        get() = null
+
+                    override fun toString() = name
+                }
+            )
 
 
     fun findObject(project: Project, key: String): List<TSCachedObject> =
@@ -78,7 +93,7 @@ class TSTypeLookupService {
         val obj = findObject(project, rootNs)
 
         if (obj.size > 1) {
-            logger<TSMethodCallCompletionContributor>()
+            logger<TSTypeLookupService>()
                 .warn("Too many instances of obj $rootNs")
         }
         if (obj.isEmpty()) {
@@ -89,7 +104,7 @@ class TSTypeLookupService {
                 getNamespaces(superType, project)
                     .plus(rootNs)
             } else {
-                logger<TSMethodCallCompletionContributor>()
+                logger<TSTypeLookupService>()
                     .warn("No instances of $rootNs found")
                 listOf(rootNs)
             }

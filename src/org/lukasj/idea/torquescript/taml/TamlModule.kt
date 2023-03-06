@@ -1,9 +1,6 @@
 package org.lukasj.idea.torquescript.taml
 
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.util.containers.stopAfter
-import kotlinx.coroutines.flow.asFlow
-import javax.xml.namespace.QName
 import javax.xml.stream.XMLInputFactory
 
 class TamlModule(
@@ -30,6 +27,7 @@ class TamlModule(
                     while (eventReader.hasNext()) {
                         val nextEvent = eventReader.nextEvent()
                         if (nextEvent.isEndElement && nextEvent.asEndElement().name.localPart == "ModuleDefinition") break
+                        if (nextEvent.isEndElement && nextEvent.asEndElement().name.localPart in listOf("ModuleDefinition", "DeclaredAssets", "AutoloadAssets")) break
                         if (nextEvent.isCharacters) continue
                         if (!nextEvent.isStartElement) {
                             println("Unexpected Module Definition child in ${file.name} line number: ${nextEvent.location.lineNumber}")

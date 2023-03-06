@@ -26,7 +26,7 @@ class TSGlobalCallCompletionContributor : CompletionProvider<CompletionParameter
                     .withCaseSensitivity(false)
                     .withTypeText(function.containingFile.name)
                     .withTailText(function.getParameters().joinToString(prefix = "(", postfix = ")") { it.text })
-                    .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
+                    .withInsertHandler(TSMethodCallInsertHandler.INSTANCE)
             }
             .plus(
                 project.getService(EngineApiService::class.java)
@@ -38,7 +38,7 @@ class TSGlobalCallCompletionContributor : CompletionProvider<CompletionParameter
                             .withCaseSensitivity(false)
                             .withTypeText(it.returnType)
                             .withTailText(it.arguments.joinToString(", ", "(", ")") { a -> a.toArgString() })
-                            .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
+                            .withInsertHandler(TSMethodCallInsertHandler.INSTANCE)
                     }
             )
             .forEach {

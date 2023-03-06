@@ -28,7 +28,7 @@ class TSObjectReference(element: PsiNamedElement, textRange: TextRange) : PsiRef
             LookupElementBuilder
                 .create(obj)
                 .withIcon(TSIcons.FILE)
-                .withTypeText(obj.containingFile.name)
+                .withTypeText(obj.containingFile?.name)
                 .withCaseSensitivity(false)
         }.toTypedArray()
     }

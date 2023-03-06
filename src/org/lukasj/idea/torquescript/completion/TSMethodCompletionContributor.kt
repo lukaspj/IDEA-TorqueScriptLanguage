@@ -48,7 +48,7 @@ class TSMethodCompletionContributor : CompletionProvider<CompletionParameters>()
                     .withTypeText(method.returnType)
                     .withPresentableText(method.toString())
                     .withTailText(method.arguments.joinToString(", ", "(", ")") { a -> a.toArgString() })
-                    .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)
+                    .withInsertHandler(TSMethodCallInsertHandler.INSTANCE)
             }
             .let { result.addAllElements(it) }
         result.stopHere()
