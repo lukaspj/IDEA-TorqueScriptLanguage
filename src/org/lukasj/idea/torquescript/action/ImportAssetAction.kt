@@ -11,20 +11,10 @@ interface ImportAssetHandler {
 
 class ImportAssetAction : AnAction() {
     override fun update(e: AnActionEvent) {
-        // Hacky-workaround for legacy code
-        (try {
-            Class.forName("org.lukasj.idea.torquescript.action.LegacyImportAsset")
-        } catch (ex: ClassNotFoundException) {
-            Class.forName("org.lukasj.idea.torquescript.action.ImportAsset")
-        }.kotlin.createInstance() as ImportAssetHandler).update(e)
+        ImportAsset().update(e)
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        // Hacky-workaround for legacy code
-        (try {
-            Class.forName("org.lukasj.idea.torquescript.action.LegacyImportAsset")
-        } catch (ex: ClassNotFoundException) {
-            Class.forName("org.lukasj.idea.torquescript.action.ImportAsset")
-        }.kotlin.createInstance() as ImportAssetHandler).actionPerformed(e)
+        ImportAsset().actionPerformed(e)
     }
 }

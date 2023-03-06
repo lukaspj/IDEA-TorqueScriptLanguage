@@ -21,6 +21,12 @@
 - Cleaned up AST a little
 - Add parentheses when auto-completing method calls
 
+### Deprecated
+- IDEA versions less than 2022.3 
+
+### Removed
+- Support for IDEA versions less than 2022.1
+
 ### Fixed
 - Removed logging of noisy warning
 - Autocomplete of objects

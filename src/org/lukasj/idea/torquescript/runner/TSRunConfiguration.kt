@@ -52,12 +52,7 @@ class TSRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
         TSCommandLineState(this, environment)
 
     override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> =
-        // Hacky-workaround for legacy code
-        try {
-            Class.forName("org.lukasj.idea.torquescript.runner.TSLegacyRunConfigurationSettingsEditor")
-        } catch (ex: ClassNotFoundException) {
-            Class.forName("org.lukasj.idea.torquescript.runner.TSRunConfigurationSettingsEditor")
-        }.kotlin.primaryConstructor!!.call(project) as SettingsEditor<out RunConfiguration>
+        TSRunConfigurationSettingsEditor(project)
 
     private val defaultWorkingDir: String?
         // On MacOS, executable is not necessarily placed in root, so always use project root directory as the root.

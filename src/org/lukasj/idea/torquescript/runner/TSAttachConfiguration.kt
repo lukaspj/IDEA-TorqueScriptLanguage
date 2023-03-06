@@ -29,12 +29,7 @@ class TSAttachConfiguration(project: Project, factory: ConfigurationFactory, nam
         TSAttachCommandLineState()
 
     override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> =
-        // Hacky-workaround for legacy code
-        try {
-            Class.forName("org.lukasj.idea.torquescript.runner.TSLegacyAttachConfigurationSettingsEditor")
-        } catch (ex: ClassNotFoundException) {
-            Class.forName("org.lukasj.idea.torquescript.runner.TSAttachConfigurationSettingsEditor")
-        }.kotlin.primaryConstructor!!.call(project) as SettingsEditor<out RunConfiguration>
+        TSAttachConfigurationSettingsEditor(project)
 
     var host
         get() = options.host ?: "127.0.0.1"

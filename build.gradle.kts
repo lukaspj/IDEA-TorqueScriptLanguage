@@ -1,3 +1,4 @@
+import org.jetbrains.changelog.Changelog
 import org.jetbrains.intellij.tasks.PublishPluginTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -42,12 +43,6 @@ sourceSets {
         java {
             if (isLegacyBuild) {
                 srcDirs("src", "gen")
-                    .exclude(
-                        "org/lukasj/idea/torquescript/runner/TSRunConfigurationSettingsEditor.kt",
-                        "org/lukasj/idea/torquescript/runner/TSAttachConfigurationSettingsEditor.kt",
-                        "org/lukasj/idea/torquescript/asset/**",
-                        "org/lukasj/idea/torquescript/action/ImportAsset.kt"
-                    )
             } else {
                 srcDirs("src", "gen")
                     .exclude("org/lukasj/idea/torquescript/**/*legacy*")
@@ -62,15 +57,16 @@ sourceSets {
 }
 
 // Java target version
-if (isLegacyBuild) {
-    java.sourceCompatibility = JavaVersion.VERSION_11
-} else {
-    java.sourceCompatibility = JavaVersion.VERSION_17
-}
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version.set("2022.3")
+    if (isLegacyBuild) {
+        version.set("2022.2")
+    } else {
+        version.set("2022.3")
+    }
+
     //version.set("2021.2")
     //type.set("RD")
     pluginName.set("TorqueScript")
@@ -83,14 +79,19 @@ changelog {
 tasks {
     patchPluginXml {
         if (!prop("pluginVersion").contains("beta")) {
-            changeNotes.set(provider { changelog.get(prop("pluginVersion")).toHTML() })
+            changeNotes.set(provider {
+                changelog.renderItem(
+                    changelog.get(prop("pluginVersion")),
+                    Changelog.OutputType.HTML
+                )
+            })
         }
         if (isLegacyBuild) {
-            sinceBuild.set("211")
-            untilBuild.set("221")
-        } else {
             sinceBuild.set("221")
-            untilBuild.set("225")
+            untilBuild.set("223")
+        } else {
+            sinceBuild.set("223")
+            untilBuild.set("231.*")
         }
     }
 
@@ -147,11 +148,7 @@ tasks {
     withType<KotlinCompile>().configureEach {
         dependsOn("generateLexer", "generateParser")
         kotlinOptions {
-            if (isLegacyBuild) {
-                jvmTarget = "11"
-            } else {
-                jvmTarget = "17"
-            }
+            jvmTarget = "17"
             freeCompilerArgs = listOf("-Xjvm-default=all")
         }
     }
