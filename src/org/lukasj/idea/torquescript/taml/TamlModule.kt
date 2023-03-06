@@ -15,11 +15,11 @@ class TamlModule(
     val autoloadAssetDeclarations: List<AutoloadAssets>
 ) {
     companion object {
-        fun parse(file: VirtualFile): TamlModule? {
+        fun parse(file: VirtualFile): TamlModule {
             val eventReader = XMLInputFactory.newInstance().createXMLEventReader(file.inputStream, "UTF-8")
             if (!eventReader.hasNext()) throw Throwable("No root element in Module file")
             eventReader.nextEvent()
-            return eventReader.nextEvent()
+            eventReader.nextEvent()
                 .asStartElement()
                 .let { startElement ->
                     val declaredAssets = mutableListOf<DeclaredAssets>()

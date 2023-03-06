@@ -1,6 +1,7 @@
 # Changelog
 
-## [Unreleased]
+## Unreleased
+
 ### Added
 
 ### Changed
@@ -13,7 +14,14 @@
 
 ### Security
 
-## [1.14.0]
+## 1.14.1 - 2023-03-06
+
+### Fixed
+- Stop trying to resolve paths in non-TAML XML files
+- Highlighting of detected paths in TAML files
+
+## 1.14.0
+
 ### Added
 - Autocomplete for ModuleDatabase built-in object
 
@@ -22,7 +30,7 @@
 - Add parentheses when auto-completing method calls
 
 ### Deprecated
-- IDEA versions less than 2022.3 
+- IDEA versions less than 2022.3
 
 ### Removed
 - Support for IDEA versions less than 2022.1
@@ -33,33 +41,40 @@
 - Updated dependencies
 - ModuleDatabase warning
 
-## [1.13.0]
+## 1.13.0
+
 ### Added
 - .mis and .gui file type association
+
 ### Fixed
 - Find Objects defined in TAML when auto-completing
 - Do not show other function declarations in auto-complete for new function declarations
 - Fix auto-complete for functions on variables
 - Fix highlight and documentation of built-in methods
 
-## [1.12.4]
+## 1.12.4
+
 ### Fixed
 - Updated Java version to 17
 
-## [1.12.3]
+## 1.12.3
+
 ### Fixed
 - Improved parsing of nested SimObject declarations
 
-## [1.12.2]
+## 1.12.2
+
 ### Fixed
 - Fixed ClassNotFound for ImportAssetAction in legacy builds
 
-## [1.12.1]
+## 1.12.1
+
 ### Fixed
 - Fixed a NoSuchElementException in getRootDir
 - Fixed ClassNotFound for ImportAssetAction in legacy builds
 
-## [1.12.0]
+## 1.12.0
+
 ### Added
 - Added "Attach to existing process" debug functionality
 - Support for legacy version of IDEA, supporting 2021.1 and above
@@ -67,13 +82,15 @@
 ### Fixed
 - Improved auto-detection of script root
 
-## [1.11.6]
+## 1.11.6
+
 ### Fixed
 - Normalize run configuration paths to eliminate back-slashes on Windows-based systems in some IDE's.
 - Added a separate release-track for legacy versions of IDEA to extend support for 2021 versions of IDEA
 - Fixed an issue with back-slashes in paths in Rider
 
-## [1.11.5]
+## 1.11.5
+
 ### Changed
 - Now using relative paths in run configuration
 
@@ -81,7 +98,8 @@
 - Fixed NPE with the message "The parent of ... was null" and changed it to an invisible warning
 - A bug in run-configuration made it impossible to change it
 
-## [1.11.4]
+## 1.11.4
+
 ### Deprecated
 - Upgraded to new UI DSL, breaking compatibility with IDEs before version 2021.3
 
@@ -91,21 +109,25 @@
 - Added more debug information to a NPE
 - Made ShapeAsset Import work for newer versions of Torque3D 4.0
 
-## [1.11.3]
+## 1.11.3
+
 ### Fixed
 - Updated dependencies
 - Build for Jetbrains 2022.1
 
-## [1.11.2]
+## 1.11.2
+
 ### Fixed
 - Updated security
 - Handle NPE
 
-## [1.11.1]
+## 1.11.1
+
 ### Fixed
 - Object representation in debugger views
 
-## [1.11.0]
+## 1.11.0
+
 ### Added
 - Report errors directly through IDE
 - Improved variables view, so objects are expandable
@@ -113,7 +135,8 @@
 ### Fixed
 - Fixed viewing of variables with spaces
 
-## [1.10.6]
+## 1.10.6
+
 ### Added
 - Experimental Asset Import functionality
 
@@ -125,35 +148,36 @@
 - Debugger socket wouldn't close on Linux
 - Improved Console Dump parsing
 
-## [1.10.5]
+## 1.10.5
+
 ### Fixed
 - A NoSuchElementException in TSFoldingBuilder when a switch is being written and a LBRACE exists but no RBRACE
 
-## [1.10.4]
+## 1.10.4
+
 ### Fixed
 - Rendering of see docstring elements after a codeblock
 - NPE for formatting block in empty files
 
-## [1.10.3]
+## 1.10.3
+
 ### Fixed
 - Docstrings now fix illegal line-endings in attributes
 - "See" docstring now properly renders
 
-## [1.10.2]
+## 1.10.2
+
 ### Fixed
 - A reference error on TSFunctionCallExpr
 - Improved reference resolution of namespaced functions
-- Fixed a null pointer exception on completion namespaced functions when there are syntax errors
-  
-  For example the following text would cause a NPE
-  ```
+- ```
   funtion AIPlayer::
   ```
 
-## [1.10.1]
+## 1.10.1
+
 ### Fixed
-- Handle ugly-formatted identifiers like:
-  ```
+- ```
   Foo
   ::
   // Some Comment
@@ -161,35 +185,40 @@
   ```
 - Auto-complete of namespace function wasn't working
 
-## [1.10.0]
+## 1.10.0
+
 ### Added
 - AutoCompletion of paths in TAML
 - AutoCompletion of paths in TorqueScript
 - Go To File for paths in TAML
 - Support for module-references in paths
 
-## [1.9.1]
+## 1.9.1
+
 ### Added
 - Default engine API and schema library files, for smoother "getting-started" experience
 
-## [1.9.0]
-### Added
-- TAML file support
-  - Currently, this only works with files ending in `.taml` because of a quirk in IDEA
+## 1.9.0
 
-## [1.8.0]
+### Added
+- - Currently, this only works with files ending in `.taml` because of a quirk in IDEA
+
+## 1.8.0
+
 ### Added
 - Auto-completion for fields
 
 ### Changed
 - Auto-completion will now only show class names when instantiating new objects
 
-## [1.7.1]
+## 1.7.1
+
 ### Fixed
 - Named object function reference resolution
 - Trim empty description elements in documentation
 
-## [1.7.0]
+## 1.7.0
+
 ### Added
 - Support for TorqueScript docstrings (comments starting with three slashes)
   on functions
@@ -202,42 +231,48 @@
 - Debugger issues with latest version of Torque3D 4.0
 - Made the IDE more robust against engine crashes
 
-## [1.6.7]
+## 1.6.7
+
 ### Fixed
 - Improve error handling when breakpoint file is not found
 - Resolve files from root directory upon hitting a breakpoint
 
-## [1.6.6]
-### Fixed
-- Use project root as game root when setting breakpoints
-  
-  This solves an issue on OSX where the game executable is not in the root folder
+## 1.6.6
 
-## [1.6.5]
+### Fixed
+- This solves an issue on OSX where the game executable is not in the root folder
+
+## 1.6.5
+
 ### Fixed
 - Fixed a race-condition when connecting to debugger via telnet
 
-## [1.6.4]
+## 1.6.4
+
 ### Changed
 - Removed dependency on `com.intellij.java`
 
 ### Fixed
 - Improved error handling in Rebuild Exports action
 
-## [1.6.3]
+## 1.6.3
+
 ### Fixed
 - Breakpoints added after application had started would get the 
   string "null" as a condition if no condition were specified. Now it correctly defaults to "true"
 
-## [1.6.2]
+## 1.6.2
+
 ### Fixed
 - Global Functions are no longer incorrectly prefixed with :: in auto-completion
 
-## [1.6.1]
+## 1.6.1
+
 ### Fixed
 - Handle more illegal XML chars in the Rebuild Exports action
 
-## [1.6.0]
+## 1.6.0
+
 ### Added
 - Auto-show local variables when breakpoint is hit
 
@@ -247,7 +282,8 @@
 ### Fixed
 - Parent references in object initializers are now properly resolved and highlighted
 
-## [1.5.1]
+## 1.5.1
+
 ### Added
 - Hyperlinks for simple file paths in strings
 
@@ -260,7 +296,8 @@
 - Fixed a bug with formatter indenting body on new instance expressions
 - Find usages for local variables is now working
 
-## [1.5.0]
+## 1.5.0
+
 ### Added
 - Experimental formatter support
 
@@ -272,7 +309,8 @@
 - Technical Debt: Renamed brack and paren token types
 - Fixed highlighting of `default` keyword
 
-## [1.4.0]
+## 1.4.0
+
 ### Added
 - Run To Position in Debugger
 - Conditional breakpoint support
@@ -283,36 +321,37 @@
 ### Fixed
 - Namespaced functions had inversed lookup logic
 
-## [1.3.1]
+## 1.3.1
+
 ### Added
 - Go to symbol for Objects and Global Variables
 
 ### Fixed
-- Rename refactoring now works for:
-  - Global Variables
+- - Global Variables
   - Function Names
   - Object Names
 - Step-by-step debugging wasn't working properly, should be working better now
 
-## [1.3.0]
+## 1.3.0
+
 ### Added
-- Debugger support for:
-  - Line breakpoints
+- - Line breakpoints
   - Step-by-step debugging
   - On-hover evaluation of variables
   - Evaluation dialog support
   - Stack frame with function arguments
 
-## [1.2.1]
+## 1.2.1
+
 ### Fixed
 - Parameters did not pass as variables, fixed with a change to the PSI
 - Find usages for functions
 
-## [1.2.0]
+## 1.2.0
+
 ### Added
 - Basic run configuration
-- Completion for
-  - Local Variables
+- - Local Variables
   - Global Variables
   - Object names
   - Functions
@@ -320,15 +359,15 @@
   - Keywords
 - Brace Matchine
 - Commenter
-- Find usages for
-  - Global Variables
+- - Global Variables
   - Global Functions
   - Namespaces Functions
   - Object Names
 - Basic code folding for blocks
 - Navigate to function
 
-## [1.1.0]
+## 1.1.0
+
 ### Added
 - Go to definition on method calls
 - Go to definition on object instances
@@ -338,7 +377,8 @@
 ### Fixed
 - Improvements to grammars to handle more edge-cases
 
-## [1.0.0]
+## 1.0.0
+
 ### Added
 - Plugin icon
 
@@ -346,7 +386,8 @@
 - Update version to 1.0.0 this is the initial stable release
 - Update file logo to Torque3D logo
 
-## [0.2.0]
+## 0.2.0
+
 ### Added
 - Support for simple completion of functions
 

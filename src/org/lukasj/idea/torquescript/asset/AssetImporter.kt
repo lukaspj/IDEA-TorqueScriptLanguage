@@ -103,7 +103,7 @@ class AssetImporter {
 
     fun extractDataFromEngine(project: Project, assetFile: VirtualFile): List<TamlAsset> {
         var result: List<TamlAsset> = listOf()
-        val success = project.getService(TelnetConsoleService::class.java)
+        project.getService(TelnetConsoleService::class.java)
             .runTelnetSession(project) { telnetClient ->
                 runBlocking {
                     telnetClient.eval(
