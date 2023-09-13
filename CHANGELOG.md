@@ -14,6 +14,12 @@
 
 ### Security
 
+## 1.14.3 - 2023-09-13
+
+### Fixed
+- Fixed an exception in the object name completion logic
+- NPE in Method Call annotations
+
 ## 1.14.2 - 2023-09-13
 
 ### Fixed

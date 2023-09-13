@@ -67,7 +67,6 @@ class TSFileReference(literal: PsiElement, rangeInElement: TextRange, val isAsse
             }
 
             val references = (nextValidSibling.reference as TSGlobalVarReference).multiResolve(false)
-            println(references)
         }
         return path
     }

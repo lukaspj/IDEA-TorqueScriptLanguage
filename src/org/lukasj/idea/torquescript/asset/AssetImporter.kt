@@ -169,7 +169,6 @@ class AssetImporter {
                                 matchResult.groupValues.drop(1).first()
                             }
                     }
-                    .onEach { println(it) }
                     .mapNotNull { objectDumpLog ->
                         project.getService(EngineDumpService::class.java)
                             .readObjectDump(objectDumpLog)

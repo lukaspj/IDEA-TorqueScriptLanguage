@@ -1,9 +1,11 @@
 package org.lukasj.idea.torquescript.taml
 
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import javax.xml.stream.XMLInputFactory
 
 class TamlModule(
+    val project: Project,
     val file: VirtualFile,
     val moduleId: String?,
     val versionId: String?,
@@ -15,7 +17,7 @@ class TamlModule(
     val autoloadAssetDeclarations: List<AutoloadAssets>
 ) {
     companion object {
-        fun parse(file: VirtualFile): TamlModule {
+        fun parse(project: Project, file: VirtualFile): TamlModule {
             val eventReader = XMLInputFactory.newInstance().createXMLEventReader(file.inputStream, "UTF-8")
             if (!eventReader.hasNext()) throw Throwable("No root element in Module file")
             eventReader.nextEvent()
@@ -40,6 +42,7 @@ class TamlModule(
                         }
                     }
                     return TamlModule(
+                        project,
                         file,
                         startElement.attributes.asSequence()
                             .firstOrNull { it.name.localPart.lowercase() == "moduleid" }

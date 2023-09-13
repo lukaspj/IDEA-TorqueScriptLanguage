@@ -13,7 +13,7 @@ class TSChooseByNameContributor : ChooseByNameContributor {
             .map { it.name!! }
             .plus (
                 project.getService(TSTypeLookupService::class.java).getObjects(project)
-                    .map { it.name }
+                    .map { it.objectName }
             )
             .plus (
                 ReferenceUtil.getGlobals(project)
@@ -35,6 +35,5 @@ class TSChooseByNameContributor : ChooseByNameContributor {
             .plus (
                 ReferenceUtil.findGlobal(project, name)
             )
-            .map { it as NavigationItem }
             .toTypedArray()
 }
