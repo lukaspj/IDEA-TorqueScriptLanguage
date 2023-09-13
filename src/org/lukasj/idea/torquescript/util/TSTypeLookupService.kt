@@ -46,10 +46,10 @@ class ModuleObject(private val module: TamlModule) : TSCachedObject {
         get() = module.moduleId!!
 
     override val type: String
-        get() = "ModuleDefinition"
+        get() = "SimSet"
 
     override val parent: String?
-        get() = null
+        get() = "ModuleRoot"
 
     override val containingFile: VirtualFile
         get() = module.file
@@ -71,6 +71,34 @@ class TSTypeLookupService {
                         get() = "ModuleDatabase"
                     override val type: String
                         get() = "ModuleManager"
+                    override val parent: String?
+                        get() = null
+                    override val containingFile: VirtualFile?
+                        get() = null
+
+                    override fun toString() = name
+                }
+            )
+            .plus(
+                object : TSCachedObject {
+                    override val name: String
+                        get() = "AssetDatabase"
+                    override val type: String
+                        get() = "AssetDatabase"
+                    override val parent: String?
+                        get() = null
+                    override val containingFile: VirtualFile?
+                        get() = null
+
+                    override fun toString() = name
+                }
+            )
+            .plus(
+                object : TSCachedObject {
+                    override val name: String
+                        get() = "ModuleRoot"
+                    override val type: String
+                        get() = "SimSet"
                     override val parent: String?
                         get() = null
                     override val containingFile: VirtualFile?
