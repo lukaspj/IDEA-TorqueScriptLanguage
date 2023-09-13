@@ -11,6 +11,7 @@
 ### Removed
 
 ### Fixed
+- Removed usages of API's deprecated in 2023.2
 
 ### Security
 

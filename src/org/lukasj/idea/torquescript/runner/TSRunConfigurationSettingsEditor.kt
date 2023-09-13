@@ -3,6 +3,8 @@ package org.lukasj.idea.torquescript.runner
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
+import com.intellij.ui.dsl.builder.Align
+import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.gridLayout.HorizontalAlign
@@ -23,7 +25,7 @@ class TSRunConfigurationSettingsEditor(val project: Project) : SettingsEditor<TS
                 ) { TSFileUtil.relativePathFromRoot(project, it).toString() }
                     .bindText(model::appPath)
                     .comment("Specify path to Torque App executable")
-                    .horizontalAlign(HorizontalAlign.FILL)
+                    .align(AlignX.FILL)
             }
             row("Working Directory:") {
                 textFieldWithBrowseButton(
@@ -33,7 +35,7 @@ class TSRunConfigurationSettingsEditor(val project: Project) : SettingsEditor<TS
                 ) { TSFileUtil.relativePathFromRoot(project, it).toString() }
                     .bindText(model::workingDirectory)
                     .comment("Specify path to the working directory")
-                    .horizontalAlign(HorizontalAlign.FILL)
+                    .align(AlignX.FILL)
             }
             row("Main Script:") {
                 textFieldWithBrowseButton(
@@ -43,7 +45,7 @@ class TSRunConfigurationSettingsEditor(val project: Project) : SettingsEditor<TS
                 ) { TSFileUtil.relativePathFromRoot(project, it).toString() }
                     .bindText(model::mainScript)
                     .comment("Specify path to the main script file")
-                    .horizontalAlign(HorizontalAlign.FILL)
+                    .align(AlignX.FILL)
             }
         }
 

@@ -7,9 +7,9 @@ val channel = prop("publishChannel")
 plugins {
     kotlin("jvm") version "1.8.10"
 
-    id("org.jetbrains.intellij") version "1.13.1"
+    id("org.jetbrains.intellij") version "1.15.0"
     id("org.jetbrains.grammarkit") version "2022.3.1"
-    id("org.jetbrains.changelog") version "2.0.0"
+    id("org.jetbrains.changelog") version "2.2.0"
 }
 
 group = "org.lukasj"
@@ -64,7 +64,7 @@ intellij {
     if (isLegacyBuild) {
         version.set("2022.2")
     } else {
-        version.set("2022.3")
+        version.set("2023.2")
     }
 
     //version.set("2021.2")

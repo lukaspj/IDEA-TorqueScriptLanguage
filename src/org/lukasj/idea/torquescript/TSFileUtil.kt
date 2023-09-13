@@ -11,7 +11,7 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiElement
-import com.intellij.util.io.exists
+import kotlin.io.path.exists
 import io.sentry.SentryLevel
 import org.lukasj.idea.torquescript.taml.TamlModuleService
 import java.io.File
