@@ -91,7 +91,7 @@ tasks {
             untilBuild.set("223")
         } else {
             sinceBuild.set("223")
-            untilBuild.set("231.*")
+            untilBuild.set("232.*")
         }
     }
 
