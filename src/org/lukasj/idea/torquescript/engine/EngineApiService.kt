@@ -14,7 +14,7 @@ import org.lukasj.idea.torquescript.symbols.TSModificationTracker
 import java.nio.file.Path
 import javax.xml.stream.XMLInputFactory
 
-@Service
+@Service(Service.Level.PROJECT)
 class EngineApiService(private val project: Project) {
 
     private val modificationTracker = TSModificationTracker()

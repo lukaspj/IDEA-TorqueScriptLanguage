@@ -16,7 +16,13 @@
                   fieldName="INSTANCE"
                   language="TAML"
                   extensions="module"/>
+        <fileType name="Torque Shader Language"
+                  implementationClass="org.lukasj.idea.torquescript.TslFileType"
+                  fieldName="INSTANCE"
+                  language="Torque Shader Language"
+                  extensions="tlsl"/>
 
+        <!-- TAML -->
         <lang.parserDefinition language="TAML"
                                implementationClass="org.lukasj.idea.torquescript.parser.TamlParserDefinition"/>
 
@@ -29,7 +35,19 @@
                    implementationClass="org.lukasj.idea.torquescript.annotator.TamlPathAnnotator"/>
         <!-- <xml.namespaceHelper implementation="org.lukasj.idea.torquescript.editor.TamlNamespaceHelper" /> -->
 
-        <!-- <treeStructureProvider implementation="org.lukasj.idea.torquescript.editor.TSTreeStructureProvider" /> -->
+        <!-- Torque Shader Language -->
+        <lang.parserDefinition language="Torque Shader Language"
+                               implementationClass="org.lukasj.idea.torquescript.parser.TslParserDefinition" />
+
+        <lang.syntaxHighlighterFactory language="Torque Shader Language"
+                                       implementationClass="org.lukasj.idea.torquescript.TslSyntaxHighlighterFactory"/>
+
+        <lang.braceMatcher language="Torque Shader Language"
+                           implementationClass="org.lukasj.idea.torquescript.editor.TslBraceMatcher"/>
+
+        <colorSettingsPage implementation="org.lukasj.idea.torquescript.editor.TslColorSettingsPage"/>
+
+        <!-- TorqueScript -->
 
         <internalFileTemplate name="TorqueScript Module"/>
         <internalFileTemplate name="TorqueScript File"/>
@@ -82,8 +100,6 @@
         <configurationType implementation="org.lukasj.idea.torquescript.runner.TSAttachConfigurationType"/>
 
         <xdebugger.breakpointType implementation="org.lukasj.idea.torquescript.runner.TSLineBreakpointType"/>
-
-        <projectService serviceImplementation="org.lukasj.idea.torquescript.engine.EngineApiService"/>
 
         <errorHandler implementation="org.lukasj.idea.torquescript.editor.SentryErrorReporter"/>
 

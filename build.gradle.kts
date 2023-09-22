@@ -1,4 +1,6 @@
 import org.jetbrains.changelog.Changelog
+import org.jetbrains.grammarkit.tasks.GenerateLexerTask
+import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.intellij.tasks.PublishPluginTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -121,6 +123,32 @@ tasks {
         outputs.dir("${targetRoot.get()}${pathToPsiRoot.get()}")
     }
 
+    register<GenerateLexerTask>("generateTslLexer").configure {
+        sourceFile.set(file("src/org/lukasj/idea/torquescript/grammar/TorqueShaderLanguage.flex"))
+
+        targetDir.set("gen/org/lukasj/idea/torquescript/lexer")
+        targetClass.set("TslLexer")
+
+        purgeOldFiles.set(true)
+
+        outputs.file("${targetDir.get()}/${targetClass.get()}.java")
+    }
+
+    register<GenerateParserTask>("generateTslParser").configure {
+        sourceFile.set(file("src/org/lukasj/idea/torquescript/grammar/TorqueShaderLanguage.bnf"))
+
+        targetRoot.set("gen")
+
+        pathToParser.set("/org/lukasj/idea/torquescript/parser/TslParser")
+
+        pathToPsiRoot.set("/org/lukasj/idea/torquescript/psi")
+
+        purgeOldFiles.set(true)
+
+        outputs.file("${targetRoot.get()}${pathToParser.get()}.java")
+        outputs.dir("${targetRoot.get()}${pathToPsiRoot.get()}")
+    }
+
     // https://plugins.jetbrains.com/docs/intellij/dynamic-plugins.html#diagnosing-leaks
     runIde {
         jvmArgs = mutableListOf("-XX:+UnlockDiagnosticVMOptions")
@@ -146,7 +174,7 @@ tasks {
 
     // Specify the right jvm target for Kotlin
     withType<KotlinCompile>().configureEach {
-        dependsOn("generateLexer", "generateParser")
+        dependsOn("generateLexer", "generateParser", "generateTslLexer", "generateTslParser")
         kotlinOptions {
             jvmTarget = "17"
             freeCompilerArgs = listOf("-Xjvm-default=all")
