@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Rudimentary Torque Shader Language (TSL) support
 
 ### Changed
 
