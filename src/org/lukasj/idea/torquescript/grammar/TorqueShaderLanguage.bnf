@@ -45,23 +45,47 @@ functionStatement ::= (structType | type) IDENT LPAREN structType IDENT RPAREN L
 functionBody ::= functionBodyStatement*
 
 functionBodyStatement ::= comment
-                        | variableDeclarationStatement
                         | returnStatement
                         | assignStatement
-                        // ifStatement
-                        // whileStatement
-                        // switchStatement
-                        // forStatement
-                        // doStatement
-                        // break, continue, discard
+                        | ifStatement
+                        | switchStatement
+                        | whileStatement
+                        | doStatement
+                        | forStatement
+                        | breakStatement
+                        | continueStatement
+                        | discardStatement
+                        | expressionStatement
                         // https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-flow-control
 
 
-variableDeclarationStatement ::= (structType | type) IDENT (ASSIGN expression)? STMT_SEPARATOR
+expressionStatement ::= expression STMT_SEPARATOR
 
 returnStatement ::= RETURN expression STMT_SEPARATOR
 
 assignStatement ::= IDENT accessor? assignOperator expression STMT_SEPARATOR
+
+ifStatement ::= ifAttribute* IF LPAREN expression RPAREN functionStatementOrBlock elseStatement?
+elseStatement ::= ELSE functionStatementOrBlock
+switchStatement ::= switchAttribute* SWITCH LPAREN expression RPAREN LBRACE (comment | caseBlock)* RBRACE
+caseBlock ::= (CASE INTEGER | DEFAULT) COLON functionBody
+
+whileStatement ::= loopAttribute* WHILE LPAREN expression RPAREN functionStatementOrBlock
+doStatement ::= doAttribute* DO functionStatementOrBlock WHILE LPAREN expression RPAREN
+forStatement ::= loopAttribute* FOR LPAREN expression? STMT_SEPARATOR expression? STMT_SEPARATOR expression? RPAREN functionStatementOrBlock
+// TODO should only be able to break inside for, do or while
+breakStatement ::= BREAK STMT_SEPARATOR
+// TODO should only be able to continue inside for, do or while
+continueStatement ::= CONTINUE STMT_SEPARATOR
+discardStatement ::= DISCARD STMT_SEPARATOR
+
+private functionStatementOrBlock ::= (LBRACE functionBody RBRACE | functionBodyStatement)
+
+
+ifAttribute ::= LBRACK (BRANCH | FLATTEN) RBRACK
+switchAttribute ::= LBRACK (BRANCH | FLATTEN | FORCECASE | CALL) RBRACK
+doAttribute ::= LBRACK FASTOPT RBRACK
+loopAttribute ::= LBRACK (LOOP | FASTOPT | ALLOW_UAV_CONDITION | UNROLL LPAREN INTEGER RPAREN) RBRACK
 
 assignOperator ::= ASSIGN
                  | ADD_ASSIGN
@@ -102,6 +126,7 @@ accessor ::= DOT IDENT accessor?
 
 expression ::= accessorExpression
              | constructorExpression
+             | variableDeclarationExpression
              | callExpression
              | prefixUnaryExpression
              | postfixUnaryExpression
@@ -112,6 +137,7 @@ expression ::= accessorExpression
 
 accessorExpression ::= expression accessor
 constructorExpression ::= type LPAREN expression (COMMA expression)* RPAREN
+variableDeclarationExpression ::= (structType | type) IDENT (ASSIGN expression)? {pin=1}
 callExpression ::= IDENT LPAREN (expression (COMMA expression)*)? RPAREN {pin=2}
 binaryOperatorExpression ::= expression binaryOperator expression {pin=2}
 ternaryExpression ::= expression QUESTION_MARK expression COLON expression {pin=2}
