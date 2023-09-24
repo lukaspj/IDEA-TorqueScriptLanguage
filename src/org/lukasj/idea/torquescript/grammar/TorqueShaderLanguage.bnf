@@ -1,0 +1,190 @@
+{
+    parserClass="org.lukasj.idea.torquescript.parser.TslParser"
+    
+    // extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+    extends(".*Expression")=expression
+    
+    psiClassPrefix="Tsl"
+    psiImplClassSuffix="Impl"
+    psiPackage="org.lukasj.idea.torquescript.psi"
+    psiImplPackage="org.lukasj.idea.torquescript.psi.impl"
+    
+    elementTypeHolderClass="org.lukasj.idea.torquescript.psi.TslTypes"
+    elementTypeClass="org.lukasj.idea.torquescript.psi.TslElementType"
+    tokenTypeClass="org.lukasj.idea.torquescript.psi.TslTokenType"
+}
+
+torqueshaderlanguageFile ::= blueprintStatement
+
+blueprintStatement ::= BLUEPRINT QUOTED_STRING LBRACE blueprintBody RBRACE STMT_SEPARATOR
+
+blueprintBody ::= blueprintBodyStatement*
+
+blueprintBodyStatement ::= comment
+                         | structStatement
+                         | shaderStatement
+
+comment ::= LINE_COMMENT
+          | BLOCK_COMMENT
+
+structStatement ::= STRUCT structType LBRACE structField* RBRACE STMT_SEPARATOR
+structType ::= STRUCT_VERTDATA | STRUCT_CONNECTDATA | STRUCT_FRAGOUT
+structField ::= type IDENT COLON semantic STMT_SEPARATOR
+
+shaderStatement ::= (VERTEX_SHADER | PIXEL_SHADER) LBRACE shaderProgramStatement* RBRACE STMT_SEPARATOR { pin=1 }
+
+shaderProgramStatement ::= comment
+                        | pragmaStatement
+                        | uniformStatement
+                        | functionStatement
+
+pragmaStatement ::= PRAGMA IDENT QUOTED_STRING { pin=1 }
+uniformStatement ::= UNIFORM type IDENT STMT_SEPARATOR { pin=1 }
+functionStatement ::= (structType | type) IDENT LPAREN structType IDENT RPAREN LBRACE functionBody RBRACE STMT_SEPARATOR { pin=3 }
+
+functionBody ::= functionBodyStatement*
+
+functionBodyStatement ::= comment
+                        | returnStatement
+                        | assignStatement
+                        | ifStatement
+                        | switchStatement
+                        | whileStatement
+                        | doStatement
+                        | forStatement
+                        | breakStatement
+                        | continueStatement
+                        | discardStatement
+                        | expressionStatement
+                        // https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-flow-control
+
+
+expressionStatement ::= expression STMT_SEPARATOR
+
+returnStatement ::= RETURN expression STMT_SEPARATOR
+
+assignStatement ::= IDENT accessor? assignOperator expression STMT_SEPARATOR
+
+ifStatement ::= ifAttribute* IF LPAREN expression RPAREN functionStatementOrBlock elseStatement?
+elseStatement ::= ELSE functionStatementOrBlock
+switchStatement ::= switchAttribute* SWITCH LPAREN expression RPAREN LBRACE (comment | caseBlock)* RBRACE
+caseBlock ::= (CASE INTEGER | DEFAULT) COLON functionBody
+
+whileStatement ::= loopAttribute* WHILE LPAREN expression RPAREN functionStatementOrBlock
+doStatement ::= doAttribute* DO functionStatementOrBlock WHILE LPAREN expression RPAREN
+forStatement ::= loopAttribute* FOR LPAREN expression? STMT_SEPARATOR expression? STMT_SEPARATOR expression? RPAREN functionStatementOrBlock
+// TODO should only be able to break inside for, do or while
+breakStatement ::= BREAK STMT_SEPARATOR
+// TODO should only be able to continue inside for, do or while
+continueStatement ::= CONTINUE STMT_SEPARATOR
+discardStatement ::= DISCARD STMT_SEPARATOR
+
+private functionStatementOrBlock ::= (LBRACE functionBody RBRACE | functionBodyStatement)
+
+
+ifAttribute ::= LBRACK (BRANCH | FLATTEN) RBRACK
+switchAttribute ::= LBRACK (BRANCH | FLATTEN | FORCECASE | CALL) RBRACK
+doAttribute ::= LBRACK FASTOPT RBRACK
+loopAttribute ::= LBRACK (LOOP | FASTOPT | ALLOW_UAV_CONDITION | UNROLL LPAREN INTEGER RPAREN) RBRACK
+
+assignOperator ::= ASSIGN
+                 | ADD_ASSIGN
+                 | SUBTRACT_ASSIGN
+                 | MULTIPLY_ASSIGN
+                 | DIVIDE_ASSIGN
+                 | MODULO_ASSIGN
+                 | BIT_SHIFT_LEFT_ASSIGN
+                 | BIT_SHIFT_RIGHT_ASSIGN
+                 | BIT_AND_ASSIGN
+                 | BIT_OR_ASSIGN
+                 | BIT_XOR_ASSIGN
+
+binaryOperator ::= BIT_NOT
+                 | BIT_SHIFT_LEFT
+                 | BIT_SHIFT_RIGHT
+                 | BIT_AND
+                 | BIT_OR
+                 | BIT_XOR
+                 | AND
+                 | OR
+                 | NOT
+                 | EQUAL
+                 | NOT_EQUAL
+                 | GT_EQUAL
+                 | GT
+                 | LT_EQUAL
+                 | LT
+                 | PLUS
+                 | MINUS
+                 | MULTIPLY
+                 | DIVIDE
+                 | MODULO
+
+
+accessor ::= DOT IDENT accessor?
+           | LBRACK expression RBRACK accessor?
+
+expression ::= accessorExpression
+             | constructorExpression
+             | variableDeclarationExpression
+             | callExpression
+             | prefixUnaryExpression
+             | postfixUnaryExpression
+             | binaryOperatorExpression
+             | ternaryExpression
+             | literalExpression
+             | identExpression
+
+accessorExpression ::= expression accessor
+constructorExpression ::= type LPAREN expression (COMMA expression)* RPAREN
+variableDeclarationExpression ::= (structType | type) IDENT (ASSIGN expression)? {pin=1}
+callExpression ::= IDENT LPAREN (expression (COMMA expression)*)? RPAREN {pin=2}
+binaryOperatorExpression ::= expression binaryOperator expression {pin=2}
+ternaryExpression ::= expression QUESTION_MARK expression COLON expression {pin=2}
+prefixUnaryExpression ::= (NOT | MINUS | INCREMENT | DECREMENT) expression {pin=1}
+postfixUnaryExpression ::= expression (INCREMENT | DECREMENT) {pin=2}
+literalExpression ::= INTEGER
+                    | FLOAT
+                    | DOUBLE
+
+identExpression ::= IDENT
+
+type ::= FLOAT
+       | FLOAT2
+       | FLOAT3
+       | FLOAT4
+       | FLOAT2X2
+       | FLOAT3X3
+       | FLOAT3X4
+       | FLOAT4X3
+       | FLOAT4X4
+       | VEC2
+       | VEC3
+       | VEC4
+       | MAT2X2
+       | MAT3X3
+       | MAT3X4
+       | MAT4X3
+       | MAT4X4
+       | INT
+       | INT2
+       | INT3
+       | INT4
+       | SAMPLER1D
+       | SAMPLER2D
+       | SAMPLER3D
+       | SAMPLER1DSHADOW
+       | SAMPLER2DSHADOW
+       | SAMPLER2DARRAY
+       | SAMPLERCUBE
+       | SAMPLERCUBEARRAY
+
+semantic ::= POSITION
+           | BINORMAL
+           | NORMAL
+           | COLOR
+           | SV_POSITION
+           | SV_TARGET
+           | SV_DEPTH
+           | TEXCOORD
+
