@@ -3,7 +3,6 @@
 ## Unreleased
 
 ### Added
-- Rudimentary Torque Shader Language (TSL) support
 
 ### Changed
 
@@ -12,6 +11,8 @@
 ### Removed
 
 ### Fixed
+- Rudimentary Torque Shader Language (TLSL) support
+  - Syntax highlighting and checking
 
 ### Security
 

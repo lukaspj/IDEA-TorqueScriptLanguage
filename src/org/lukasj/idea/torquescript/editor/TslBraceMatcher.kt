@@ -16,6 +16,8 @@ class TslBraceMatcher : PairedBraceMatcher {
     companion object {
         val BRACE_PAIRS = arrayOf(
             BracePair(TslTypes.LBRACE, TslTypes.RBRACE, true),
+            BracePair(TslTypes.LPAREN, TslTypes.RPAREN, true),
+            BracePair(TslTypes.LBRACK, TslTypes.RBRACK, true),
         )
     }
 }
