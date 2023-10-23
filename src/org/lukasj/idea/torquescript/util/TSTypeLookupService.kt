@@ -153,7 +153,7 @@ class TSTypeLookupService {
                     override val objectName: String
                         get() = "AssetDatabase"
                     override val type: String
-                        get() = "AssetDatabase"
+                        get() = "AssetManager"
                 }
             )
             .plus(
