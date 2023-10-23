@@ -107,6 +107,25 @@ STRING = {STR} ( [^\"\\\n\r] | "\\" ("\\" | {STR} | {ESCAPES} | [0-8xuU] ) )* {S
     samplerCube                                             { return TslTypes.SAMPLERCUBE; }
     samplerCubeArray                                        { return TslTypes.SAMPLERCUBEARRAY; }
     return                                                  { return TslTypes.RETURN; }
+    if                                                      { return TslTypes.IF; }
+    else                                                    { return TslTypes.ELSE; }
+    switch                                                  { return TslTypes.SWITCH; }
+    case                                                    { return TslTypes.CASE; }
+    default                                                 { return TslTypes.DEFAULT; }
+    while                                                   { return TslTypes.WHILE; }
+    do                                                      { return TslTypes.DO; }
+    for                                                     { return TslTypes.FOR; }
+    break                                                   { return TslTypes.BREAK; }
+    continue                                                { return TslTypes.CONTINUE; }
+    discard                                                 { return TslTypes.DISCARD; }
+    branch                                                  { return TslTypes.BRANCH; }
+    flatten                                                 { return TslTypes.FLATTEN; }
+    unroll                                                  { return TslTypes.UNROLL; }
+    loop                                                    { return TslTypes.LOOP; }
+    fastopt                                                 { return TslTypes.FASTOPT; }
+    allow_uav_condition                                     { return TslTypes.ALLOW_UAV_CONDITION; }
+    forcecase                                               { return TslTypes.FORCECASE; }
+    call                                                    { return TslTypes.CALL; }
 // ----- KEYWORDS END -----
 // ----- PUNCTUATION START -----
     \(                                                      { return TslTypes.LPAREN; }

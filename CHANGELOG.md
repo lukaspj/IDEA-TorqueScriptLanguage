@@ -3,7 +3,6 @@
 ## Unreleased
 
 ### Added
-- Rudimentary Torque Shader Language (TSL) support
 
 ### Changed
 
@@ -12,8 +11,16 @@
 ### Removed
 
 ### Fixed
+- TLSL: Added brackets and parentheses to brace matching
+- TLSL: Fix attributes for switch and do statements
 
 ### Security
+
+## 1.15.0 - 2023-09-24
+
+### Added
+- Rudimentary Torque Shader Language (TLSL) support
+  - Syntax highlighting and checking
 
 ## 1.14.4 - 2023-10-23
 
