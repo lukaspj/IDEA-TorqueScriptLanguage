@@ -20,6 +20,7 @@
 
 - Removed usages of API's deprecated in 2023.2
 - Fixed an issue with TAML file type re-registering over and over
+- Fix recursive loop in type lookup of AssetDatabase
 
 ## 1.14.3 - 2023-09-13
 
