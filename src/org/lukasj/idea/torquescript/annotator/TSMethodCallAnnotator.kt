@@ -1,18 +1,11 @@
 package org.lukasj.idea.torquescript.annotator
 
 import com.intellij.lang.annotation.AnnotationHolder
-import com.intellij.lang.annotation.HighlightSeverity
-import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.psi.PsiElement
 import org.lukasj.idea.torquescript.editor.TSSyntaxHighlightingColors
 import org.lukasj.idea.torquescript.engine.EngineApiService
-import org.lukasj.idea.torquescript.psi.impl.TSAccessorChainImpl
-import org.lukasj.idea.torquescript.psi.impl.TSFunctionCallExpressionElementImpl
+import org.lukasj.idea.torquescript.psi.impl.*
 import org.lukasj.idea.torquescript.reference.ReferenceUtil
-import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
-import org.lukasj.idea.torquescript.psi.impl.TSFunctionType
-import org.lukasj.idea.torquescript.psi.impl.TSPropertyElementImpl
-import org.lukasj.idea.torquescript.reference.TSFunctionReference
 import org.lukasj.idea.torquescript.util.TSTypeLookupService
 
 class TSMethodCallAnnotator : TSAnnotator() {
@@ -68,6 +61,15 @@ class TSMethodCallAnnotator : TSAnnotator() {
             }
         } else if (element is TSPropertyElementImpl) {
             if (element.nextSibling is TSAccessorChainImpl) {
+                // Only handle simple cases, the call chain is not an array of operators, rather it is like a deeply
+                // nested list of operators. So, the case where the parent has a prevSibling is only at the beginning of
+                // the chain.
+                // This is the only case we can hope to handle right now. We could handle shallow chains by inferring
+                // types of fields, theoretically, but that seems like goldplating at this point.
+                if (element.parent.prevSibling == null) {
+                    return
+                }
+
                 val namespace = ReferenceUtil.tryResolveType(element.parent.prevSibling)
                 val functionName = element
 

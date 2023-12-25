@@ -4,6 +4,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
+import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.bindIntText
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.panel
@@ -21,19 +22,19 @@ class TSAttachConfigurationSettingsEditor(val project: Project) : SettingsEditor
                 textField()
                     .bindText(model::host)
                     .comment("Specify the host of the remote Torque App, typically 127.0.0.1")
-                    .horizontalAlign(HorizontalAlign.FILL)
+                    .align(AlignX.FILL)
             }
             row("Port:") {
                 intTextField()
                     .bindIntText(model::port)
                     .comment("Specify the port of the remote Torque App")
-                    .horizontalAlign(HorizontalAlign.FILL)
+                    .align(AlignX.FILL)
             }
             row("Password:") {
                 textField()
                     .bindText(model::password)
                     .comment("Specify the password for the Torque App telnet process")
-                    .horizontalAlign(HorizontalAlign.FILL)
+                    .align(AlignX.FILL)
             }
         }
 

@@ -9,7 +9,7 @@ import com.intellij.openapi.progress.util.ProgressWindow
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.util.io.exists
+import kotlin.io.path.exists
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -103,7 +103,7 @@ class AssetImporter {
 
     fun extractDataFromEngine(project: Project, assetFile: VirtualFile): List<TamlAsset> {
         var result: List<TamlAsset> = listOf()
-        val success = project.getService(TelnetConsoleService::class.java)
+        project.getService(TelnetConsoleService::class.java)
             .runTelnetSession(project) { telnetClient ->
                 runBlocking {
                     telnetClient.eval(
@@ -169,7 +169,6 @@ class AssetImporter {
                                 matchResult.groupValues.drop(1).first()
                             }
                     }
-                    .onEach { println(it) }
                     .mapNotNull { objectDumpLog ->
                         project.getService(EngineDumpService::class.java)
                             .readObjectDump(objectDumpLog)

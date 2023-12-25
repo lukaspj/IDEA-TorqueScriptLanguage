@@ -19,7 +19,7 @@ class TSObjectNameCompletionContributor : CompletionProvider<CompletionParameter
         .map { obj ->
             LookupElementBuilder.create(obj)
                 .withIcon(PlatformIcons.CLASS_INITIALIZER)
-                .withPresentableText(obj.name)
+                .withPresentableText(obj.objectName)
                 .withCaseSensitivity(false)
                 .withTypeText(obj.containingFile?.name)
                 .withInsertHandler(TSCaseCorrectingInsertHandler.INSTANCE)

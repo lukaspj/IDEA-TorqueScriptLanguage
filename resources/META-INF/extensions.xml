@@ -23,9 +23,9 @@
         <xml.schemaProvider implementation="org.lukasj.idea.torquescript.editor.TamlXmlSchemaProvider"/>
         <metaDataContributor implementation="org.lukasj.idea.torquescript.editor.TamlFileNSInfoProvider"/>
         <xml.fileNSInfoProvider implementation="org.lukasj.idea.torquescript.editor.TamlFileNSInfoProvider"/>
-        <psi.referenceContributor language="XML"
+        <psi.referenceContributor language="TAML"
                                   implementation="org.lukasj.idea.torquescript.reference.TamlReferenceContributor"/>
-        <annotator language="XML"
+        <annotator language="TAML"
                    implementationClass="org.lukasj.idea.torquescript.annotator.TamlPathAnnotator"/>
         <!-- <xml.namespaceHelper implementation="org.lukasj.idea.torquescript.editor.TamlNamespaceHelper" /> -->
 

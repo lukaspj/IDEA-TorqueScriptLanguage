@@ -36,15 +36,15 @@ class TamlModuleService(private val project: Project) {
                         cachedValuesManager.createCachedValue {
                             CachedValueProvider.Result
                                 .create(
-                                    parseModule(it),
+                                    parseModule(project, it),
                                     arrayOf(modificationTracker, it)
                                 )
                         }
                     })
             }
 
-    private fun parseModule(file: VirtualFile): TamlModule =
-        TamlModule.parse(file)!!
+    private fun parseModule(project: Project, file: VirtualFile): TamlModule =
+        TamlModule.parse(project, file)!!
 
     fun dropCaches() {
         modificationTracker.count++

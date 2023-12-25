@@ -14,6 +14,9 @@ class TamlParserDefinition : XMLParserDefinition() {
 }
 
 class TamlFileImpl(viewProvider: FileViewProvider)
-    : XmlFileImpl(viewProvider, IFileElementType(TamlLanguage.INSTANCE)) {
+    : XmlFileImpl(viewProvider, FILE_TYPE) {
 
+    companion object {
+        val FILE_TYPE = IFileElementType(TamlLanguage.INSTANCE)
+    }
 }

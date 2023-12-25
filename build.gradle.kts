@@ -1,23 +1,20 @@
+import org.jetbrains.grammarkit.tasks.*
 import org.jetbrains.intellij.tasks.PublishPluginTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.resolve.compatibility
 
 val channel = prop("publishChannel")
 
 plugins {
-    kotlin("jvm") version "1.8.10"
+    kotlin("jvm") version "1.7.10"
 
-    id("org.jetbrains.intellij") version "1.13.1"
-    id("org.jetbrains.grammarkit") version "2022.3.1"
-    id("org.jetbrains.changelog") version "2.0.0"
+    id("org.jetbrains.intellij") version "1.9.0"
+    id("org.jetbrains.grammarkit") version "2021.2.2"
+    id("org.jetbrains.changelog") version "1.3.1"
 }
 
 group = "org.lukasj"
-val isLegacyBuild = prop("legacyBuild") == "true"
-version = if (isLegacyBuild) {
-    "${prop("pluginVersion")}-legacy"
-} else {
-    prop("pluginVersion")
-}
+version = "${prop("pluginVersion")}-legacy2021"
 
 repositories {
     mavenCentral()
@@ -40,18 +37,13 @@ idea {
 sourceSets {
     main {
         java {
-            if (isLegacyBuild) {
-                srcDirs("src", "gen")
-                    .exclude(
-                        "org/lukasj/idea/torquescript/runner/TSRunConfigurationSettingsEditor.kt",
-                        "org/lukasj/idea/torquescript/runner/TSAttachConfigurationSettingsEditor.kt",
-                        "org/lukasj/idea/torquescript/asset/**",
-                        "org/lukasj/idea/torquescript/action/ImportAsset.kt"
-                    )
-            } else {
-                srcDirs("src", "gen")
-                    .exclude("org/lukasj/idea/torquescript/**/*legacy*")
-            }
+            srcDirs("src", "gen")
+                .exclude(
+                    "org/lukasj/idea/torquescript/runner/TSRunConfigurationSettingsEditor.kt",
+                    "org/lukasj/idea/torquescript/runner/TSAttachConfigurationSettingsEditor.kt",
+                    "org/lukasj/idea/torquescript/asset/**",
+                    "org/lukasj/idea/torquescript/action/ImportAsset.kt"
+                )
         }
         resources {
             srcDirs("resources")
@@ -62,16 +54,11 @@ sourceSets {
 }
 
 // Java target version
-if (isLegacyBuild) {
-    java.sourceCompatibility = JavaVersion.VERSION_11
-} else {
-    java.sourceCompatibility = JavaVersion.VERSION_17
-}
+java.sourceCompatibility = JavaVersion.VERSION_11
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version.set("2022.3")
-    //version.set("2021.2")
+    version.set("2021.2")
     //type.set("RD")
     pluginName.set("TorqueScript")
 }
@@ -85,17 +72,12 @@ tasks {
         if (!prop("pluginVersion").contains("beta")) {
             changeNotes.set(provider { changelog.get(prop("pluginVersion")).toHTML() })
         }
-        if (isLegacyBuild) {
-            sinceBuild.set("211")
-            untilBuild.set("221")
-        } else {
-            sinceBuild.set("221")
-            untilBuild.set("225")
-        }
+        sinceBuild.set("211")
+        untilBuild.set("221")
     }
 
     generateLexer {
-        sourceFile.set(file("src/org/lukasj/idea/torquescript/grammar/TorqueScript.flex"))
+        source.set("src/org/lukasj/idea/torquescript/grammar/TorqueScript.flex")
 
         targetDir.set("gen/org/lukasj/idea/torquescript/lexer")
         targetClass.set("TSLexer")
@@ -106,7 +88,7 @@ tasks {
     }
 
     generateParser {
-        sourceFile.set(file("src/org/lukasj/idea/torquescript/grammar/TorqueScript.bnf"))
+        source.set("src/org/lukasj/idea/torquescript/grammar/TorqueScript.bnf")
 
         targetRoot.set("gen")
 
@@ -147,11 +129,7 @@ tasks {
     withType<KotlinCompile>().configureEach {
         dependsOn("generateLexer", "generateParser")
         kotlinOptions {
-            if (isLegacyBuild) {
-                jvmTarget = "11"
-            } else {
-                jvmTarget = "17"
-            }
+            jvmTarget = "11"
             freeCompilerArgs = listOf("-Xjvm-default=all")
         }
     }

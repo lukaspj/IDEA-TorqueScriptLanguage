@@ -5,6 +5,7 @@ import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.*
 import com.intellij.psi.xml.XmlAttributeValue
 import com.intellij.util.ProcessingContext
+import org.lukasj.idea.torquescript.TamlLanguage
 
 class TamlReferenceContributor : PsiReferenceContributor() {
     override fun registerReferenceProviders(registrar: PsiReferenceRegistrar) {
@@ -18,6 +19,7 @@ class TamlReferenceContributor : PsiReferenceContributor() {
                     val attributeValue = element as XmlAttributeValue
 
                     return when {
+                        attributeValue.language != TamlLanguage.INSTANCE -> arrayOf()
                         attributeValue.value.startsWith("@assetFile=") ->
                             arrayOf(
                                 TSFileReference(

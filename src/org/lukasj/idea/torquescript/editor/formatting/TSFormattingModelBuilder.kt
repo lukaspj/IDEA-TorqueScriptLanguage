@@ -69,7 +69,7 @@ class TSFormattingModelBuilder : FormattingModelBuilder {
                     formattingContext.node,
                     null,
                     AlignmentStrategy.getNullStrategy(),
-                    Indent.getNoneIndent(),
+                    Indent.getSmartIndent(Indent.Type.CONTINUATION),
                     formattingContext.codeStyleSettings,
                     createSpaceBuilder(formattingContext.codeStyleSettings)
                 ),

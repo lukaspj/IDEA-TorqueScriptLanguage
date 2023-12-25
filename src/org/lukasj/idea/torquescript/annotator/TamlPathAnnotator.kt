@@ -8,6 +8,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
 import com.intellij.psi.xml.XmlAttributeValue
+import com.intellij.psi.xml.XmlElementType
 import com.intellij.psi.xml.XmlTokenType
 import com.intellij.refactoring.suggested.startOffset
 import org.lukasj.idea.torquescript.ModuleFileType
@@ -18,14 +19,14 @@ import org.lukasj.idea.torquescript.reference.TSFileReference
 
 class TamlPathAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
-        if (element.elementType != XmlTokenType.XML_ATTRIBUTE_VALUE_TOKEN) {
+        if (element.elementType != XmlElementType.XML_ATTRIBUTE_VALUE) {
             return
         }
-        if (element.language == TamlLanguage.INSTANCE) {
+        if (element.language != TamlLanguage.INSTANCE) {
             return
         }
 
-        element.parent.references
+        element.references
             .firstOrNull { it is TSFileReference }
             ?.let { reference ->
                 reference.resolve()

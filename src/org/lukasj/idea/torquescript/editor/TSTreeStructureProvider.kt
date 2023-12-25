@@ -13,7 +13,7 @@ class TSTreeStructureProvider : TreeStructureProvider {
     ): MutableCollection<AbstractTreeNode<*>> =
         children.onEach { it.icon = TSIcons.FILE }
 
-    override fun getData(selected: MutableCollection<AbstractTreeNode<*>>, dataId: String): Any? {
+    override fun getData(selected: MutableCollection<out AbstractTreeNode<*>>, dataId: String): Any? {
         return null
     }
 }

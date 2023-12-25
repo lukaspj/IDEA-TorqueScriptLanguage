@@ -42,8 +42,7 @@ open class TSFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TS
     fun getGlobals() = bodyCache.getGlobals()
 
     fun getVariables() =
-        PsiTreeUtil.getChildrenOfType(this, TSDeclaration::class.java)
-            ?.filter { it.firstChild is TSStatement }
+        PsiTreeUtil.getChildrenOfType(this, TSStatement::class.java)
             ?.flatMap {
                 PsiTreeUtil.findChildrenOfAnyType(it, TSVarExpressionElementImpl::class.java)
             }

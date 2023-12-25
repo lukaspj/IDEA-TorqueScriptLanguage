@@ -83,7 +83,6 @@ class TSDocumentationProvider : AbstractDocumentationProvider() {
         return if (obj is PsiElement) {
             obj
         } else {
-            println(element.text)
             null
         }
     }
