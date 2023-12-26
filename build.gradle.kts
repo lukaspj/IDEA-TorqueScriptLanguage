@@ -6,9 +6,8 @@ import org.jetbrains.kotlin.resolve.compatibility
 val channel = prop("publishChannel")
 
 plugins {
-    kotlin("jvm") version "1.7.10"
-
-    id("org.jetbrains.intellij") version "1.9.0"
+    id("org.jetbrains.intellij") version "1.16.1"
+    id("org.jetbrains.kotlin.jvm") version "1.9.21"
     id("org.jetbrains.grammarkit") version "2021.2.2"
     id("org.jetbrains.changelog") version "1.3.1"
 }
@@ -72,7 +71,7 @@ tasks {
         if (!prop("pluginVersion").contains("beta")) {
             changeNotes.set(provider { changelog.get(prop("pluginVersion")).toHTML() })
         }
-        sinceBuild.set("211")
+        sinceBuild.set("212")
         untilBuild.set("221")
     }
 
