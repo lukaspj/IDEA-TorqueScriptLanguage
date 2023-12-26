@@ -18,7 +18,8 @@
 
 ### Fixed
 
--
+- Debugger would freeze because of an internal compiler error in Kotlin, 
+  this has been solved by reverting to a classic Java paradigm for the Telnet client
 
 ## 1.14.4 - 2023-10-23
 

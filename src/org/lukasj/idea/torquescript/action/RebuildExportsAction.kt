@@ -9,7 +9,6 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.util.ProgressWindow
 import com.intellij.openapi.ui.Messages
-import kotlinx.coroutines.runBlocking
 import org.lukasj.idea.torquescript.runner.TSRunConfiguration
 import org.lukasj.idea.torquescript.telnet.TelnetConsoleService
 
@@ -48,17 +47,15 @@ class RebuildExportsAction : AnAction() {
                             try {
                                 val success = project.getService(TelnetConsoleService::class.java)
                                     .runTelnetSession(project) { telnetClient ->
-                                        runBlocking {
-                                            telnetClient.eval(
-                                                """setLogMode(6);
-                                               ${'$'}pref::T2D::TAMLSchema = "$dir/engineApiSchema.xsd";
-                                               ${'$'}pref::T3D::TAMLSchema = "$dir/engineApiSchema.xsd";
-                                               exportEngineAPIToXML().saveFile("$dir/engineApi.xml");
-                                               GenerateTamlSchema();
-                                            """.split('\n')
-                                                    .joinToString(" ") { it.trim() }
-                                            )
-                                        }
+                                        telnetClient.eval(
+                                            """setLogMode(6);
+                                           ${'$'}pref::T2D::TAMLSchema = "$dir/engineApiSchema.xsd";
+                                           ${'$'}pref::T3D::TAMLSchema = "$dir/engineApiSchema.xsd";
+                                           exportEngineAPIToXML().saveFile("$dir/engineApi.xml");
+                                           GenerateTamlSchema();
+                                        """.split('\n')
+                                                .joinToString(" ") { it.trim() }
+                                        )
                                     }
                                 ApplicationManager.getApplication()
                                     .invokeLater {

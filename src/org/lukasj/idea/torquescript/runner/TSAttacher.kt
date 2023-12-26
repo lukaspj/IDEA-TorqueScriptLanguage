@@ -57,7 +57,7 @@ class TSAttacher : GenericProgramRunner<RunnerSettings>() {
             override fun start(xDebugSession: XDebugSession): XDebugProcess {
                 val configuration: TSAttachConfiguration = environment.runProfile as TSAttachConfiguration
 
-                return TSDebugProcess(configuration.host, configuration.port, configuration.password, xDebugSession)
+                return TSDebugProcess(configuration.host, configuration.port, configuration.password, null, xDebugSession)
             }
         })
     }

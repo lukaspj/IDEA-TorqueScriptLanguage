@@ -18,12 +18,7 @@ import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.util.Key
-import com.intellij.xdebugger.XDebugProcess
-import com.intellij.xdebugger.XDebugProcessStarter
-import com.intellij.xdebugger.XDebugSession
-import com.intellij.xdebugger.XDebugSessionListener
-import com.intellij.xdebugger.XDebuggerManager
-import kotlinx.coroutines.runBlocking
+import com.intellij.xdebugger.*
 import org.lukasj.idea.torquescript.TSFileUtil
 import java.io.File
 
@@ -62,15 +57,13 @@ class TSRunner : GenericProgramRunner<RunnerSettings>() {
             override fun start(xDebugSession: XDebugSession): XDebugProcess {
                 val configuration: TSRunConfiguration = environment.runProfile as TSRunConfiguration
 
+                val dir = configuration.workingDirectory!!.replace('\\', '/')
                 val debugProcess =
-                    TSDebugProcess("127.0.0.1", 17432, "password", xDebugSession) {
-                        runBlocking {
-                            val dir = configuration.workingDirectory
-                            it.eval("setMainDotCsDir(\"${dir?.replace('\\', '/')}\");")
-                            it.eval("setCurrentDirectory(\"${dir?.replace('\\', '/')}\");")
-                            it.eval("echo(\"Hello From IntelliJ!\");")
-                            it.eval("exec(\"${configuration.mainScript}\");")
-                        }
+                    TSDebugProcess("127.0.0.1", 17432, "password", dir, xDebugSession) {
+                        it.eval("setMainDotCsDir(\"$dir\");")
+                        it.eval("setCurrentDirectory(\"$dir\");")
+                        it.eval("echo(\"Hello From IntelliJ!\");")
+                        it.eval("exec(\"${configuration.mainScript}\");")
                     }
                 val debugLogger = debugProcess
 
@@ -79,7 +72,6 @@ class TSRunner : GenericProgramRunner<RunnerSettings>() {
                 val commandLine = GeneralCommandLine(configuration.appPath)
                 commandLine.addParameters(debugMain)
 
-                val dir = configuration.workingDirectory
                 commandLine.workDirectory = File(dir)
                 val processHandler = TSProcessHandler(commandLine)
 

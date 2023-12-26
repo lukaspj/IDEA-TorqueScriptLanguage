@@ -26,21 +26,25 @@ import org.lukasj.idea.torquescript.TSFileUtil
 import org.lukasj.idea.torquescript.telnet.TSTelnetClient
 import java.io.File
 import java.nio.file.Path
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 
 class TSDebugProcess(
     val host: String,
     val port: Int,
     val password: String,
+    var workingDirectory: String?,
     debugSession: XDebugSession,
     val initFn: ((TSTelnetClient) -> Unit)? = null
 ) :
     XDebugProcess(debugSession), DebugLogger {
+    private lateinit var startupThread: Thread
+    private lateinit var breakpointThread: Thread
+    private lateinit var breakpointMovedThread: Thread
+    private lateinit var logOutputThread: Thread
     private var isStopped: Boolean = false
-    private var outputThread: Thread? = null
-    private val scope = CoroutineScope(Dispatchers.Default + CoroutineName("TSDebugProcess"))
     private var telnetClient: TSTelnetClient? = null
     private var targetPosition: XSourcePosition? = null
-    private var workingDirectory: String? = TSFileUtil.getRootDirectory(debugSession.project)
 
     override fun getEditorsProvider(): XDebuggerEditorsProvider =
         TSDebuggerEditorsProvider()
@@ -50,110 +54,109 @@ class TSDebugProcess(
             telnetClient = TSTelnetClient(host, port)
             telnetClient!!.connect()
 
-            scope.launch(CoroutineName("log-output")) {
-                telnetClient!!.output
-                    .consumeAsFlow()
-                    .collect {
-                        println(it, LogConsoleType.NORMAL, ConsoleViewContentType.LOG_INFO_OUTPUT)
-                    }
+            logOutputThread = thread {
+                while (!isStopped) {
+                    val output = telnetClient!!.output.poll(3, TimeUnit.SECONDS) ?: continue
+                    println(output, LogConsoleType.NORMAL, ConsoleViewContentType.LOG_INFO_OUTPUT)
+                }
             }
 
-            scope.launch(CoroutineName("moved-breakpoints")) {
-                telnetClient!!.movedBreakpoints.consumeAsFlow()
-                    .collect { bpEvent ->
-                        val file = findFile(bpEvent.file)
-                        val resolvedBp = file?.let { getBreakpoint(it, bpEvent.line) }
-                        if (resolvedBp != null) {
-                            val breakpointManager = XDebuggerManager.getInstance(session.project).breakpointManager
-                            WriteCommandAction.runWriteCommandAction(session.project) {
-                                breakpointManager.removeBreakpoint(resolvedBp)
-                                if (bpEvent.newLine != null) {
-                                    breakpointManager.addLineBreakpoint(
-                                        TSLineBreakpointType(),
-                                        file.url,
-                                        bpEvent.newLine,
-                                        (resolvedBp.type as TSLineBreakpointType).createBreakpointProperties(
-                                            file,
-                                            bpEvent.newLine
-                                        )
+            breakpointMovedThread = thread {
+                while (!isStopped) {
+                    val bpEvent = telnetClient!!.movedBreakpoints.poll(3, TimeUnit.SECONDS) ?: continue
+                    val file = findFile(bpEvent.file)
+                    val resolvedBp = file?.let { getBreakpoint(it, bpEvent.line) }
+                    if (resolvedBp != null) {
+                        val breakpointManager = XDebuggerManager.getInstance(session.project).breakpointManager
+                        WriteCommandAction.runWriteCommandAction(session.project) {
+                            breakpointManager.removeBreakpoint(resolvedBp)
+                            if (bpEvent.newLine != null) {
+                                breakpointManager.addLineBreakpoint(
+                                    TSLineBreakpointType(),
+                                    file.url,
+                                    bpEvent.newLine,
+                                    (resolvedBp.type as TSLineBreakpointType).createBreakpointProperties(
+                                        file,
+                                        bpEvent.newLine
                                     )
-                                }
+                                )
                             }
+                        }
+                    } else {
+                        print(
+                            "Debugger error, failed to resolve moved BP (${bpEvent.file}:${bpEvent.line})",
+                            LogConsoleType.DEBUGGER,
+                            ConsoleViewContentType.LOG_WARNING_OUTPUT
+                        )
+                    }
+                }
+            }
+
+            breakpointThread = thread {
+                while (!isStopped) {
+                    val bp = telnetClient!!.breakpoints.poll(3, TimeUnit.SECONDS) ?: continue
+                    val stackLines = bp.stackLines
+                    val sourcePosition = findSourcePosition(stackLines[0].file, stackLines[0].line)
+                    val file = findFile(stackLines[0].file)
+                    val resolvedBp = file?.let { getBreakpoint(it, stackLines[0].line) }
+                    val suspendContext = TSSuspendContext(
+                        TSExecutionStack(stackLines
+                            .mapIndexed { idx, stackLine ->
+                                Pair(idx, stackLine)
+                            }
+                            .filter { it.second.file != "<none>" }
+                            .map { idxStackline ->
+                                TSStackFrame(
+                                    session.project,
+                                    findSourcePosition(idxStackline.second.file, idxStackline.second.line),
+                                    idxStackline.second.function,
+                                    idxStackline.first,
+                                    telnetClient!!
+                                )
+                            }
+                        ))
+                    if (resolvedBp == null) {
+                        session.positionReached(suspendContext)
+                        if (targetPosition != null
+                            && targetPosition!!.file == sourcePosition?.file
+                            && targetPosition!!.line == sourcePosition.line
+                        ) {
+                            targetPosition = null
+                            unregisterBreakpoint(sourcePosition)
                         } else {
                             print(
-                                "Debugger error, failed to resolve moved BP (${bpEvent.file}:${bpEvent.line})",
+                                "Debugger error, failed to resolve triggered BP (${stackLines[0].file}:${stackLines[0].line})",
                                 LogConsoleType.DEBUGGER,
                                 ConsoleViewContentType.LOG_WARNING_OUTPUT
                             )
                         }
+                    } else {
+                        session.breakpointReached(
+                            resolvedBp,
+                            null,
+                            suspendContext
+                        )
                     }
-            }
-
-            scope.launch(CoroutineName("breakpoints")) {
-                telnetClient!!.breakpoints.consumeAsFlow()
-                    .map { it.stackLines }
-                    .collect { stackLines ->
-                        val sourcePosition = findSourcePosition(stackLines[0].file, stackLines[0].line)
-                        val file = findFile(stackLines[0].file)
-                        val resolvedBp = file?.let { getBreakpoint(it, stackLines[0].line) }
-                        val suspendContext = TSSuspendContext(
-                            TSExecutionStack(stackLines
-                                .mapIndexed { idx, stackLine ->
-                                    Pair(idx, stackLine)
-                                }
-                                .filter { it.second.file != "<none>" }
-                                .map { idxStackline ->
-                                    TSStackFrame(
-                                        session.project,
-                                        findSourcePosition(idxStackline.second.file, idxStackline.second.line),
-                                        idxStackline.second.function,
-                                        idxStackline.first,
-                                        telnetClient!!
-                                    )
-                                }
-                            ))
-                        if (resolvedBp == null) {
-                            session.positionReached(suspendContext)
-                            if (targetPosition != null
-                                && targetPosition!!.file == sourcePosition?.file
-                                && targetPosition!!.line == sourcePosition.line
-                            ) {
-                                targetPosition = null
-                                unregisterBreakpoint(sourcePosition)
-                            } else {
-                                print(
-                                    "Debugger error, failed to resolve triggered BP (${stackLines[0].file}:${stackLines[0].line})",
-                                    LogConsoleType.DEBUGGER,
-                                    ConsoleViewContentType.LOG_WARNING_OUTPUT
-                                )
-                            }
-                        } else {
-                            session.breakpointReached(
-                                resolvedBp,
-                                null,
-                                suspendContext
-                            )
+                    ApplicationManager.getApplication()
+                        .invokeLater {
+                            session.showExecutionPoint()
                         }
-                        ApplicationManager.getApplication()
-                            .invokeLater {
-                                session.showExecutionPoint()
-                            }
-                    }
+                }
             }
 
-            scope.launch(CoroutineName("startup")) {
+            startupThread = thread {
                 val loginResult = telnetClient!!.login(password)
                 if (loginResult.isFailure) {
                     error("Debugger was unable to login to TelNet Server - ${loginResult.exceptionOrNull()?.message}")
                     session.stop()
-                    return@launch
+                    return@thread
                 }
 
                 initFn?.invoke(telnetClient!!)
 
-                workingDirectory = telnetClient!!.evalAtLevel(0, "getMainDotCsDir()")
-
                 sendAllBreakpoints()
+                workingDirectory = workingDirectory ?: telnetClient!!.evalAtLevel(0, "getMainDotCsDir()")
+
                 telnetClient!!.resume()
             }
         } catch (e: Exception) {
@@ -164,7 +167,7 @@ class TSDebugProcess(
 
     private fun findFile(file: String): VirtualFile? =
         workingDirectory?.let {
-                VfsUtil.findFile(
+            VfsUtil.findFile(
                 Path.of(it)
                     .resolve(Path.of(file)),
                 false
@@ -182,9 +185,10 @@ class TSDebugProcess(
 
     override fun stop() {
         isStopped = true
-        if (outputThread != null) {
-            outputThread!!.join()
-        }
+        logOutputThread.join()
+        startupThread.join()
+        breakpointThread.join()
+        breakpointMovedThread.join()
         telnetClient!!.disconnect()
     }
 
@@ -211,23 +215,19 @@ class TSDebugProcess(
         )
 
     fun registerBreakpoint(sourcePosition: XSourcePosition, condition: String? = null) =
-        runBlocking {
-            telnetClient?.setBreakpoint(
-                File(sourcePosition.file.path).relativeTo(File(workingDirectory)).path.replace('\\', '/'),
-                sourcePosition.line,
-                false,
-                0,
-                condition ?: "true"
-            )
-        }
+        telnetClient?.setBreakpoint(
+            File(sourcePosition.file.path).relativeTo(File(workingDirectory)).path.replace('\\', '/'),
+            sourcePosition.line,
+            false,
+            0,
+            condition ?: "true"
+        )
 
     fun unregisterBreakpoint(sourcePosition: XSourcePosition) =
-        runBlocking {
-            telnetClient?.clearBreakpoint(
-                File(sourcePosition.file.path).relativeTo(File(workingDirectory)).path,
-                sourcePosition.line
-            )
-        }
+        telnetClient?.clearBreakpoint(
+            File(sourcePosition.file.path).relativeTo(File(workingDirectory)).path,
+            sourcePosition.line
+        )
 
     fun sendAllBreakpoints() {
         if (telnetClient != null) {
@@ -277,29 +277,19 @@ class TSDebugProcess(
         print("\n$text\n", consoleType, ConsoleViewContentType.ERROR_OUTPUT)
 
     override fun startPausing() =
-        runBlocking {
-            telnetClient!!.pause()
-        }
+        telnetClient!!.pause()
 
     override fun resume(context: XSuspendContext?) =
-        runBlocking {
-            telnetClient!!.resume()
-        }
+        telnetClient!!.resume()
 
     override fun startStepOver(context: XSuspendContext?) =
-        runBlocking {
-            telnetClient!!.stepOver()
-        }
+        telnetClient!!.stepOver()
 
     override fun startStepInto(context: XSuspendContext?) =
-        runBlocking {
-            telnetClient!!.stepIn()
-        }
+        telnetClient!!.stepIn()
 
     override fun startStepOut(context: XSuspendContext?) =
-        runBlocking {
-            telnetClient!!.stepOut()
-        }
+        telnetClient!!.stepOut()
 
     override fun runToPosition(position: XSourcePosition, context: XSuspendContext?) {
         targetPosition = position

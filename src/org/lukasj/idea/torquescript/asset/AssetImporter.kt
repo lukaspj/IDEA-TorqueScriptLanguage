@@ -10,8 +10,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.vfs.VirtualFile
 import kotlin.io.path.exists
-import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.lukasj.idea.torquescript.TSFileUtil
 import org.lukasj.idea.torquescript.engine.EngineDumpService
@@ -105,63 +103,59 @@ class AssetImporter {
         var result: List<TamlAsset> = listOf()
         project.getService(TelnetConsoleService::class.java)
             .runTelnetSession(project) { telnetClient ->
-                runBlocking {
-                    telnetClient.eval(
-                        """
-                        setLogMode(6);
-                        ModuleDatabase.setModuleExtension("module");
-                        ModuleDatabase.scanModules( "core", false );
-                        ModuleDatabase.LoadExplicit( "CoreModule" );
-    
-                        new AssetImporter(myImporter);
-                        ${'$'}assetImportConfig = new AssetImportConfig();
-                        if(!isObject(AssetImportSettings))
+                telnetClient.eval(
+                    """
+                    setLogMode(6);
+                    ModuleDatabase.setModuleExtension("module");
+                    ModuleDatabase.scanModules( "core", false );
+                    ModuleDatabase.LoadExplicit( "CoreModule" );
+
+                    new AssetImporter(myImporter);
+                    ${'$'}assetImportConfig = new AssetImportConfig();
+                    if(!isObject(AssetImportSettings))
+                    {
+                        new Settings(AssetImportSettings)
                         {
-                            new Settings(AssetImportSettings)
-                            {
-                                file = "tools/assetBrowser/assetImportConfigs.xml";
-                            };
-                        }
-                        AssetImportSettings.read();
-                        ${'$'}assetImportConfig.loadImportConfig(AssetImportSettings, "DefaultImportConfig");
-                        myImporter.setImportConfig(${'$'}assetImportConfig);
-    
-                        ${'$'}assetObj = myImporter.addImportingFile("${
-                            TSFileUtil.relativePathFromRoot(
-                                project,
-                                assetFile
-                            ).toString().replace('\\', '/')
-                        }");
-                        myImporter.processImportingAssets();
-                        
+                            file = "tools/assetBrowser/assetImportConfigs.xml";
+                        };
+                    }
+                    AssetImportSettings.read();
+                    ${'$'}assetImportConfig.loadImportConfig(AssetImportSettings, "DefaultImportConfig");
+                    myImporter.setImportConfig(${'$'}assetImportConfig);
+
+                    ${'$'}assetObj = myImporter.addImportingFile("${
+                        TSFileUtil.relativePathFromRoot(
+                            project,
+                            assetFile
+                        ).toString().replace('\\', '/')
+                    }");
+                    myImporter.processImportingAssets();
+                    
+                    echo("##XX####XX##OBJECT START##XX####XX##");
+                    ${'$'}assetObj.dump();
+                    echo("##XX####XX##OBJECT END##XX####XX##");
+
+                    ${'$'}count = myImporter.getAssetItemChildCount(${'$'}assetObj);
+                    echo("printing out " @ ${'$'}count @ " children");
+                    for (${'$'}i = 0; ${'$'}i < ${'$'}count; ${'$'}i++) {
                         echo("##XX####XX##OBJECT START##XX####XX##");
-                        ${'$'}assetObj.dump();
+                        ${'$'}assetObjChild = myImporter.getAssetItemChild(${'$'}assetObj, ${'$'}i);
+                        ${'$'}assetObjChild.dump();
                         echo("##XX####XX##OBJECT END##XX####XX##");
-    
-                        ${'$'}count = myImporter.getAssetItemChildCount(${'$'}assetObj);
-                        echo("printing out " @ ${'$'}count @ " children");
-                        for (${'$'}i = 0; ${'$'}i < ${'$'}count; ${'$'}i++) {
-                            echo("##XX####XX##OBJECT START##XX####XX##");
-                            ${'$'}assetObjChild = myImporter.getAssetItemChild(${'$'}assetObj, ${'$'}i);
-                            ${'$'}assetObjChild.dump();
-                            echo("##XX####XX##OBJECT END##XX####XX##");
-                        }
-                        
-                        quit();
-                    """.split('\n')
-                            .joinToString(" ") { it.trim() }
-                    )
-                }
-                suspend fun appendOutput(sb: StringBuilder): StringBuilder =
+                    }
+                    
+                    quit();
+                """.split('\n')
+                        .joinToString(" ") { it.trim() }
+                )
+                fun appendOutput(sb: StringBuilder): StringBuilder =
                     try {
-                        withTimeout(5000) {
-                            telnetClient.output.receive()
-                                .let { sb.appendLine(it) }
-                                .let { appendOutput(it) }
-                        }
+                        telnetClient.output.poll(5, TimeUnit.SECONDS)
+                            .let { sb.appendLine(it) }
+                            .let { appendOutput(it) }
                     } catch (e: Exception) { sb }
 
-                runBlocking { appendOutput(StringBuilder() ) }
+                appendOutput(StringBuilder() )
                     .let {
                         Regex("##XX####XX##OBJECT START##XX####XX##([\\s\\S]+?)##XX####XX##OBJECT END##XX####XX##")
                             .findAll(it.toString())

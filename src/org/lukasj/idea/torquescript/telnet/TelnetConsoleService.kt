@@ -9,7 +9,6 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.Key
-import kotlinx.coroutines.runBlocking
 import org.lukasj.idea.torquescript.TSFileUtil
 import org.lukasj.idea.torquescript.runner.TSProcessHandler
 import org.lukasj.idea.torquescript.runner.TSRunConfiguration
@@ -55,12 +54,10 @@ class TelnetConsoleService {
 
             val telnetClient = TSTelnetClient("127.0.0.1", 17432)
             telnetClient.connect()
-            runBlocking {
-                telnetClient.login("password")
-                telnetClient.resume()
-                sessionFn(telnetClient)
-                telnetClient.eval("quit();")
-            }
+            telnetClient.login("password")
+            telnetClient.resume()
+            sessionFn(telnetClient)
+            telnetClient.eval("quit();")
             return processHandler.waitFor(timeout)
         } catch (ex: Exception) {
             ApplicationManager.getApplication()

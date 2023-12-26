@@ -12,7 +12,6 @@ import com.intellij.psi.util.PsiUtilCore
 import com.intellij.psi.util.elementType
 import com.intellij.xdebugger.XSourcePosition
 import com.intellij.xdebugger.evaluation.XDebuggerEvaluator
-import kotlinx.coroutines.runBlocking
 import org.lukasj.idea.torquescript.psi.TSIdentExpression
 import org.lukasj.idea.torquescript.psi.TSLiteralExpression
 import org.lukasj.idea.torquescript.psi.TSTypes
@@ -60,19 +59,18 @@ class TSDebuggerEvaluator(private val telnetClient: TSTelnetClient, private val 
         ProgressManager.getInstance()
         (object : Task.Backgroundable(null, "Evaluating $expression") {
             override fun run(indicator: ProgressIndicator) =
-                runBlocking {
-                    telnetClient.evalAtLevel(level, expression)
-                }.let {
-                    callback.evaluated(
-                        TSNamedValue(
-                            expression,
-                            it,
-                            telnetClient,
-                            level,
-                            "unknown"
+                telnetClient.evalAtLevel(level, expression)
+                    .let {
+                        callback.evaluated(
+                            TSNamedValue(
+                                expression,
+                                it,
+                                telnetClient,
+                                level,
+                                "unknown"
+                            )
                         )
-                    )
-                }
+                    }
         }).queue()
     }
 }
