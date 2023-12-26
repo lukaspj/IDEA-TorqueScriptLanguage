@@ -6,6 +6,7 @@ import org.jetbrains.kotlin.resolve.compatibility
 val channel = prop("publishChannel")
 
 plugins {
+    id("java")
     id("org.jetbrains.intellij") version "1.16.1"
     id("org.jetbrains.kotlin.jvm") version "1.9.21"
     id("org.jetbrains.grammarkit") version "2021.2.2"
@@ -129,6 +130,9 @@ tasks {
         dependsOn("generateLexer", "generateParser")
         kotlinOptions {
             jvmTarget = "11"
+            languageVersion = "1.9"
+            // see https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library
+            apiVersion = "1.5"
             freeCompilerArgs = listOf("-Xjvm-default=all")
         }
     }
