@@ -86,6 +86,15 @@ class TSLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider() 
                 consumer.showStandardOptions("KEEP_BLANK_LINES_IN_CODE")
             }
             SettingsType.INDENT_SETTINGS -> {
+                consumer.showStandardOptions(
+                    IndentOption.INDENT_SIZE.name,
+                    IndentOption.CONTINUATION_INDENT_SIZE.name,
+                    IndentOption.USE_TAB_CHARACTER.name,
+                    IndentOption.TAB_SIZE.name,
+                    IndentOption.KEEP_INDENTS_ON_EMPTY_LINES.name,
+                    IndentOption.SMART_TABS.name,
+                    IndentOption.USE_RELATIVE_INDENTS.name,
+                )
             }
             SettingsType.COMMENTER_SETTINGS -> {
             }
@@ -94,6 +103,9 @@ class TSLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider() 
         }
     }
 
+    override fun getIndentOptionsEditor(): IndentOptionsEditor {
+        return SmartIndentOptionsEditor(this)
+    }
 
     override fun getCodeSample(settingsType: SettingsType) =
         when (settingsType) {

@@ -9,11 +9,7 @@ import java.io.BufferedReader
 import java.io.IOException
 import java.io.PrintWriter
 import java.net.Socket
-import java.rmi.UnexpectedException
 import java.util.*
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
 class TSBreakPointStackLine(val file: String, val line: Int, val function: String)
@@ -38,8 +34,7 @@ class TSTelnetClient(private val address: String, private val port: Int) {
     val movedBreakpoints = Channel<TSBreakpointMovedEvent>(100)
     private val evalResults: MutableSharedFlow<Pair<String, String>> = MutableSharedFlow(100)
     private val outputFlow: MutableSharedFlow<String> = MutableSharedFlow()
-    private var isStopped = false
-    private val scope = CoroutineScope(Job() + Dispatchers.Default)
+    private val scope = CoroutineScope(Dispatchers.Default + CoroutineName("TSTelnetClient"))
 
     private suspend fun <T> retry(retries: Int, fn: suspend () -> Result<T>): Result<T> {
         for (i in 1..retries) {
@@ -55,22 +50,22 @@ class TSTelnetClient(private val address: String, private val port: Int) {
     }
 
     private fun processOutput() {
-        scope.launch {
+        scope.launch(CoroutineName("TSTelnetClient-PASS-listener")) {
             outputFlow.map(String::trim)
                 .filter { it.startsWith("PASS") }
                 .collect { loginChannel.send(it == "PASS Connected.") }
         }
-        scope.launch {
+        scope.launch(CoroutineName("TSTelnetClient-COUT-listener")) {
             outputFlow.map(String::trim)
                 .filter { it.startsWith("COUT") }
                 .collect { output.send(it.substring(4).trim()) }
         }
-        scope.launch {
+        scope.launch(CoroutineName("TSTelnetClient-BREAK-listener")) {
             outputFlow.map(String::trim)
                 .filter { it.startsWith("BREAK") }
                 .collect { breakpoints.send(TSExecutionStackLines(it.substring(5).trim())) }
         }
-        scope.launch {
+        scope.launch(CoroutineName("TSTelnetClient-BRKMOV-listener")) {
             outputFlow.map(String::trim)
                 .filter { it.startsWith("BRKMOV") }
                 .map { it.substring(7).trim().split(' ') }
@@ -84,13 +79,13 @@ class TSTelnetClient(private val address: String, private val port: Int) {
                     )
                 }
         }
-        scope.launch {
+        scope.launch(CoroutineName("TSTelnetClient-BRKCLR-listener")) {
             outputFlow.map(String::trim)
                 .filter { it.startsWith("BRKCLR") }
                 .map { it.substring(7).trim().split(' ') }
                 .collect { movedBreakpoints.send(TSBreakpointMovedEvent(it[0], it[1].toInt() - 1, null)) }
         }
-        scope.launch {
+        scope.launch(CoroutineName("EVALOUT-listener")) {
             outputFlow.filter { it.startsWith("EVALOUT") }
                 .map { it.substring(8).split(' ') }
                 .collect {
@@ -102,7 +97,28 @@ class TSTelnetClient(private val address: String, private val port: Int) {
     fun connect() {
         processOutput()
 
-        scope.launch(CoroutineExceptionHandler { _, t -> logger<TSTelnetClient>().warn("Ignored ${t.message}") }) {
+        scope.launch(CoroutineName("TSTelnetClient-receiver")) {
+            while (scope.isActive) {
+                delay(10L)
+                val input = inputStream ?: continue
+
+                if (input.ready()) {
+                    try {
+                        withContext(Dispatchers.IO) {
+                            val line = input.readLine() ?: return@withContext
+                            outputFlow.emit(line)
+                        }
+                    } catch (ioe: IOException) {
+                        // Do nothing
+                        disconnect()
+                    }
+                }
+            }
+        }
+
+        scope.launch(CoroutineExceptionHandler { _, t -> logger<TSTelnetClient>().warn("Ignored ${t.message}") } + CoroutineName(
+            "TSTelnetClient-transmitter"
+        )) {
             while (scope.isActive) {
                 val result = runCatching {
                     withContext(Dispatchers.IO) {
@@ -123,7 +139,7 @@ class TSTelnetClient(private val address: String, private val port: Int) {
 
         scope.launch {
             try {
-                while (!isStopped) {
+                while (scope.isActive) {
                     val input = inputStream
                     withContext(Dispatchers.IO) {
                         if (input != null && input.ready()) {
@@ -142,7 +158,6 @@ class TSTelnetClient(private val address: String, private val port: Int) {
 
     fun disconnect() {
         runBlocking {
-            isStopped = true
             scope.cancel("Disconnect requested")
             output.close()
             breakpoints.close()

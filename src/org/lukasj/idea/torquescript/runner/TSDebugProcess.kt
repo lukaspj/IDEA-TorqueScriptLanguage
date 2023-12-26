@@ -50,14 +50,15 @@ class TSDebugProcess(
             telnetClient = TSTelnetClient(host, port)
             telnetClient!!.connect()
 
-            scope.launch {
-                telnetClient!!.output.consumeAsFlow()
+            scope.launch(CoroutineName("log-output")) {
+                telnetClient!!.output
+                    .consumeAsFlow()
                     .collect {
                         println(it, LogConsoleType.NORMAL, ConsoleViewContentType.LOG_INFO_OUTPUT)
                     }
             }
 
-            scope.launch {
+            scope.launch(CoroutineName("moved-breakpoints")) {
                 telnetClient!!.movedBreakpoints.consumeAsFlow()
                     .collect { bpEvent ->
                         val file = findFile(bpEvent.file)
@@ -88,7 +89,7 @@ class TSDebugProcess(
                     }
             }
 
-            scope.launch {
+            scope.launch(CoroutineName("breakpoints")) {
                 telnetClient!!.breakpoints.consumeAsFlow()
                     .map { it.stackLines }
                     .collect { stackLines ->
@@ -140,7 +141,7 @@ class TSDebugProcess(
                     }
             }
 
-            scope.launch {
+            scope.launch(CoroutineName("startup")) {
                 val loginResult = telnetClient!!.login(password)
                 if (loginResult.isFailure) {
                     error("Debugger was unable to login to TelNet Server - ${loginResult.exceptionOrNull()?.message}")
