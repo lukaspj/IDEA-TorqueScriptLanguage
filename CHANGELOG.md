@@ -14,6 +14,12 @@
 
 ### Security
 
+## 1.14.5 - 2024-02-26
+
+### Fixed
+
+- Updated compatibility range
+
 ## 1.14.4 - 2023-10-23
 
 ### Fixed

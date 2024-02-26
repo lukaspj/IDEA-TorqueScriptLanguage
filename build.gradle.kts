@@ -63,7 +63,7 @@ intellij {
     if (isLegacyBuild) {
         version.set("2022.2")
     } else {
-        version.set("2023.2")
+        version.set("2023.3")
     }
 
     //version.set("2021.2")
@@ -90,7 +90,7 @@ tasks {
             untilBuild.set("223")
         } else {
             sinceBuild.set("223")
-            untilBuild.set("232.*")
+            untilBuild.set("233.*")
         }
     }
 

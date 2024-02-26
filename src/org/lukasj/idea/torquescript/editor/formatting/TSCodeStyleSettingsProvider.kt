@@ -1,6 +1,8 @@
 package org.lukasj.idea.torquescript.editor.formatting
 
 import com.intellij.application.options.CodeStyleAbstractConfigurable
+import com.intellij.application.options.IndentOptionsEditor
+import com.intellij.application.options.SmartIndentOptionsEditor
 import com.intellij.application.options.TabbedLanguageCodeStylePanel
 import com.intellij.psi.codeStyle.*
 import com.intellij.psi.codeStyle.CodeStyleSettingsCustomizable.*
