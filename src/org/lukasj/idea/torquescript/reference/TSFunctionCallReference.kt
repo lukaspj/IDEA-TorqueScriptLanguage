@@ -30,7 +30,7 @@ class TSFunctionCallReference(call: TSFunctionCallExpressionElementImpl, rangeIn
 
     override fun resolve(): PsiElement? {
         val resolveResults = multiResolve(false)
-        return if (resolveResults.size == 1) resolveResults[0].element else null
+        return resolveResults.singleOrNull()?.element
     }
 
     override fun getVariants(): Array<Any> =

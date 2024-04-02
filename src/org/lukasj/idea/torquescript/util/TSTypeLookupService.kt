@@ -7,7 +7,11 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
+import com.intellij.psi.util.elementType
+import com.intellij.psi.xml.XmlAttribute
+import com.intellij.psi.xml.XmlTag
 import com.intellij.util.PlatformIcons
 import org.lukasj.idea.torquescript.engine.EngineApiService
 import org.lukasj.idea.torquescript.psi.TSObjectDeclaration
@@ -20,6 +24,7 @@ interface TSCachedObject : NavigationItem {
     val type: String
     val parent: String?
     val containingFile: VirtualFile?
+    val psiElement: PsiElement?
 }
 
 class CachedObjectDeclaration(private val declaration: TSObjectDeclaration) : TSCachedObject {
@@ -38,6 +43,9 @@ class CachedObjectDeclaration(private val declaration: TSObjectDeclaration) : TS
 
     override val containingFile: VirtualFile?
         get() = declaration.containingFile?.virtualFile
+
+    override val psiElement: PsiElement
+        get() = declaration
 
     override fun toString() = objectName
     override fun navigate(requestFocus: Boolean) {
@@ -71,12 +79,21 @@ class ModuleObject(private val module: TamlModule) : TSCachedObject {
     override val type: String
         get() = "SimSet"
 
-    override val parent: String?
+    override val parent: String
         get() = "ModuleRoot"
 
     override val containingFile: VirtualFile
         get() = module.file
 
+    override val psiElement: PsiElement?
+        get() = PsiManager.getInstance(module.project).findFile(containingFile)
+            ?.firstChild
+            ?.children
+            ?.firstOrNull {it is XmlTag }
+            ?.children
+            ?.filterIsInstance<XmlAttribute>()
+            ?.firstOrNull { it.name == "ModuleId" }
+            ?.valueElement
 
     override fun navigate(requestFocus: Boolean) {
         val file = PsiManager.getInstance(module.project).findFile(containingFile)
@@ -110,6 +127,9 @@ abstract class CachedEngineObject : TSCachedObject {
         get() = null
 
     override val containingFile: VirtualFile?
+        get() = null
+
+    override val psiElement: PsiElement?
         get() = null
 
     override fun navigate(requestFocus: Boolean) = Unit
@@ -170,7 +190,6 @@ class TSTypeLookupService {
     fun findObject(project: Project, key: String): List<TSCachedObject> =
         getObjects(project)
             .filter { it.objectName.equals(key, true) }
-
 
     fun getNamespaces(rootNs: String, project: Project): List<String> {
         // Handle edge-case

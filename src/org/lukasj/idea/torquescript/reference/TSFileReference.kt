@@ -42,7 +42,7 @@ class TSFileReference(literal: PsiElement, rangeInElement: TextRange, val isAsse
         )
         if (prevValidSibling != null && prevValidSibling.reference is TSGlobalVarReference) {
             val references = (prevValidSibling.reference as TSGlobalVarReference).multiResolve(false)
-            if (references.size == 1 && references[0].element?.parent is TSAssignmentExpressionImpl) {
+            if (references.singleOrNull()?.element?.parent is TSAssignmentExpressionImpl) {
                 val value = references[0].element?.parent?.lastChild
                 if (value != null) {
                     when (value) {

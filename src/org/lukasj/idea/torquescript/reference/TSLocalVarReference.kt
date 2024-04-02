@@ -17,16 +17,9 @@ class TSLocalVarReference(element: PsiElement, textRange: TextRange) : PsiRefere
 
     override fun multiResolve(incompleteCode: Boolean) =
         ReferenceUtil.findLocalVariablesForContext(element)
-            .let { localVariableExpression ->
-                localVariableExpression
-                    .filter { it.parent is TSAssignmentExpression }
-                    .filterNot { it.textRange.contains(element.textRange) }
-                    .filter { it.text.equals(element.text, true) }
-                    .plus(
-                        localVariableExpression
-                            .filter { it.parent.elementType == TSTypes.PARAMS }
-                    )
-            }
+            .filterNot { it.textRange.contains(element.textRange) }
+            .filter { it.text.equals(element.text, true) }
+            .filter { it.parent is TSAssignmentExpression || it.parent.elementType == TSTypes.PARAMS }
             .map { PsiElementResolveResult(it) }
             .toTypedArray()
 
@@ -62,7 +55,7 @@ class TSLocalVarReference(element: PsiElement, textRange: TextRange) : PsiRefere
 
     override fun resolve(): PsiElement? {
         val resolveResults = multiResolve(false)
-        return if (resolveResults.size == 1) resolveResults[0].element else null
+        return resolveResults.singleOrNull()?.element
     }
 
     override fun handleElementRename(newElementName: String): PsiElement {

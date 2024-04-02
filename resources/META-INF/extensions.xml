@@ -41,6 +41,8 @@
                                        implementationClass="org.lukasj.idea.torquescript.TSSyntaxHighlighterFactory"/>
         <lang.findUsagesProvider language="TorqueScript"
                                  implementationClass="org.lukasj.idea.torquescript.editor.TSFindUsagesProvider"/>
+        <lang.findUsagesProvider language="TAML"
+                                 implementationClass="org.lukasj.idea.torquescript.editor.TamlFindUsagesProvider"/>
         <usageTypeProvider implementation="org.lukasj.idea.torquescript.editor.TSUsageTypeProvider"/>
         <lang.refactoringSupport language="TorqueScript"
                                  implementationClass="org.lukasj.idea.torquescript.editor.TSRefactoringSupportProvider"/>
@@ -82,8 +84,6 @@
         <configurationType implementation="org.lukasj.idea.torquescript.runner.TSAttachConfigurationType"/>
 
         <xdebugger.breakpointType implementation="org.lukasj.idea.torquescript.runner.TSLineBreakpointType"/>
-
-        <projectService serviceImplementation="org.lukasj.idea.torquescript.engine.EngineApiService"/>
 
         <errorHandler implementation="org.lukasj.idea.torquescript.editor.SentryErrorReporter"/>
 

@@ -14,6 +14,17 @@
 
 ### Security
 
+## 1.14.6 - 2024-04-02
+
+### Fixed
+
+- Find references for local variables should now work properly
+- Find usages for types defined in engine
+- Find usages for TAML ModuleDefinitions
+- Find usages categorisation for function definitions
+- Documentation lookup for objects defined in script
+- Documentation lookup for variables when the type is resolvable
+
 ## 1.14.5 - 2023-12-26
 
 ### Fixed
