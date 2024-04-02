@@ -10,26 +10,35 @@ import org.lukasj.idea.torquescript.engine.docstring.parsers.EngineApiDocStringP
 import org.lukasj.idea.torquescript.engine.model.EngineClass
 import org.lukasj.idea.torquescript.engine.model.EngineFunction
 import org.lukasj.idea.torquescript.psi.TSElementFactory
-import org.lukasj.idea.torquescript.psi.impl.TSFunctionCallExpressionElementImpl
-import org.lukasj.idea.torquescript.psi.impl.TSFunctionIdentifierElementImpl
-import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
-import org.lukasj.idea.torquescript.psi.impl.TSPropertyElementImpl
+import org.lukasj.idea.torquescript.psi.impl.*
 import org.lukasj.idea.torquescript.reference.ReferenceUtil
 import org.lukasj.idea.torquescript.reference.TSFunctionReference
+import org.lukasj.idea.torquescript.util.TSCachedObject
 import org.lukasj.idea.torquescript.util.TSTypeLookupService
 
 
 fun renderClassDoc(project: Project, className: String): String {
     val engineApiService = project.getService(EngineApiService::class.java)
+    val typeLookupService = project.getService(TSTypeLookupService::class.java)
+    val objectType = typeLookupService.findObject(project, className).singleOrNull()
     val engineClass = engineApiService.findClass(className)
-    return if (engineClass != null) {
-        renderBuiltinClass(project, engineClass)
-    } else {
-        StringBuilder()
-            .append(DocumentationMarkup.CONTENT_START)
-            .append("Could not resolve $className to a class")
-            .append(DocumentationMarkup.CONTENT_END)
-            .toString()
+
+    return when {
+        engineClass != null -> {
+            renderBuiltinClass(project, engineClass)
+        }
+
+        objectType != null -> {
+            renderObjectWithClass(project, objectType)
+        }
+
+        else -> {
+            StringBuilder()
+                .append(DocumentationMarkup.CONTENT_START)
+                .append("Could not resolve $className to a class")
+                .append(DocumentationMarkup.CONTENT_END)
+                .toString()
+        }
     }
 }
 
@@ -38,6 +47,15 @@ fun renderFunctionCall(element: TSFunctionCallExpressionElementImpl) =
 
 fun renderFunctionCall(element: TSPropertyElementImpl) =
     element.reference?.let { renderFunctionReference(it as TSFunctionReference) }
+
+fun renderVariable(element: TSVarExpressionElementImpl) =
+    ReferenceUtil.tryResolveType(element)?.let { resolvedType ->
+        renderClassDoc(element.project, resolvedType)
+    } ?: StringBuilder()
+        .append(DocumentationMarkup.CONTENT_START)
+        .append("Could not resolve the type of ${element.text}")
+        .append(DocumentationMarkup.CONTENT_END)
+        .toString()
 
 fun renderFunctionReference(funcRef: TSFunctionReference) =
     funcRef.resolve()
@@ -123,9 +141,11 @@ fun renderBuiltinFunction(project: Project, function: EngineFunction): String =
         .parse(function.docs)
         .let { docString ->
             StringBuilder()
-                .append(DocumentationMarkup.CONTENT_START)
+                .append(DocumentationMarkup.DEFINITION_START)
                 .append(function.name)
                 .append(function.arguments.joinToString(", ", "(", ")") { it.toArgString() })
+                .append(DocumentationMarkup.DEFINITION_END)
+                .append(DocumentationMarkup.CONTENT_START)
                 .append(
                     docString.children
                         .flatMap { it.children }
@@ -146,12 +166,19 @@ fun renderBuiltinFunction(project: Project, function: EngineFunction): String =
         }
 
 fun renderBuiltinClass(project: Project, engineClass: EngineClass) =
+    StringBuilder()
+        .append(DocumentationMarkup.DEFINITION_START)
+        .append(engineClass.name)
+        .append(DocumentationMarkup.DEFINITION_END)
+        .append(renderBuiltinClassBody(project, engineClass))
+        .toString()
+
+fun renderBuiltinClassBody(project: Project, engineClass: EngineClass) =
     EngineApiDocStringParser()
         .parse(engineClass.docs)
         .let { docString ->
             StringBuilder()
                 .append(DocumentationMarkup.CONTENT_START)
-                .append(engineClass.name)
                 .append(
                     docString.children
                         .flatMap { it.children }
@@ -169,6 +196,35 @@ fun renderBuiltinClass(project: Project, engineClass: EngineClass) =
                 .append(DocumentationMarkup.SECTIONS_END)
                 .toString()
         }
+
+
+fun renderObjectWithClass(project: Project, objectType: TSCachedObject) =
+    project.getService(EngineApiService::class.java).let { engineApiService ->
+        engineApiService.findClass(objectType.type)
+            .let { engineClass ->
+                if (engineClass != null) {
+                    StringBuilder()
+                        .append(DocumentationMarkup.DEFINITION_START)
+                        .append(objectType.name)
+                        .append(" : ")
+                        .append(objectType.type)
+                        .append(DocumentationMarkup.DEFINITION_END)
+                        .append(renderBuiltinClassBody(project, engineClass))
+                        .toString()
+                } else {
+                    StringBuilder()
+                        .append(DocumentationMarkup.DEFINITION_START)
+                        .append(objectType.name)
+                        .append(" : ")
+                        .append(objectType.type)
+                        .append(DocumentationMarkup.DEFINITION_END)
+                        .append(DocumentationMarkup.CONTENT_START)
+                        .append("Could not resolve ${objectType.type} to a class")
+                        .append(DocumentationMarkup.CONTENT_END)
+                        .toString()
+                }
+            }
+    }
 
 fun renderDocstring(project: Project, element: IDocElement): String =
     when (element) {

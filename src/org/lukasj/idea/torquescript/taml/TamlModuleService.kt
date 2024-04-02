@@ -28,23 +28,22 @@ class TamlModuleService(private val project: Project) {
         }
 
     private val cachedModules =
-        CachedValuesManager.getManager(project)
-            .let { cachedValuesManager ->
-                cachedModuleList.value.associateBy(
-                    { it.nameWithoutExtension },
-                    {
-                        cachedValuesManager.createCachedValue {
-                            CachedValueProvider.Result
-                                .create(
-                                    parseModule(project, it),
-                                    arrayOf(modificationTracker, it)
-                                )
-                        }
-                    })
-            }
+        cachedModuleList
+            .value
+            .map {
+                CachedValuesManager.getManager(project).createCachedValue {
+                    CachedValueProvider.Result.create(
+                        parseModule(project, it),
+                        arrayOf(modificationTracker, it)
+                    )
+                }
+            }.associateBy(
+                { it.value.moduleId },
+                { it.value }
+            )
 
     private fun parseModule(project: Project, file: VirtualFile): TamlModule =
-        TamlModule.parse(project, file)!!
+        TamlModule.parse(project, file)
 
     fun dropCaches() {
         modificationTracker.count++
@@ -56,13 +55,11 @@ class TamlModuleService(private val project: Project) {
             ?.let { TSFileUtil.findFilesWithSuffix(it, ".module") }
             ?: emptyList()
 
-    fun getModules(): List<TamlModule> =
-        cachedModules
-            .values
-            .map { it.value }
+    fun getModules(): Collection<TamlModule> =
+        cachedModules.values
 
     fun getModule(name: String): TamlModule? =
-        cachedModules[name]?.value
+        cachedModules[name]
 
     fun getAsset(moduleName: String, assetName: String): TamlAsset? =
         getAssets(moduleName)

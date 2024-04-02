@@ -9,6 +9,7 @@ import com.intellij.usages.impl.rules.UsageTypeProvider
 import org.lukasj.idea.torquescript.psi.TSLiteralExpression
 import org.lukasj.idea.torquescript.psi.TSTypes
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionIdentifierElementImpl
+import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
 
 object TSUsageTypes {
     val FUNCTION_DEFINITION = UsageType {
@@ -52,13 +53,11 @@ class TSUsageTypeProvider : UsageTypeProvider {
             return UsageType.READ
 
         val funcIdentParent = PsiTreeUtil.findFirstParent(element) {
-            TokenSet.create(TSTypes.FUNCTION_IDENTIFIER)
+            TokenSet.create(TSTypes.FUNCTION_DECLARATION)
                 .contains(it.elementType)
         }
-        if ((funcIdentParent != null
-                && funcIdentParent is TSFunctionIdentifierElementImpl)
-            && funcIdentParent.text.startsWith("${element.text}::")
-        )
+        if (funcIdentParent != null
+                && funcIdentParent is TSFunctionStatementElementImpl)
             return TSUsageTypes.FUNCTION_DEFINITION
 
         return null

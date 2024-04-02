@@ -61,6 +61,8 @@ class TSDocumentationProvider : AbstractDocumentationProvider() {
                         } else {
                             renderFunctionIdentifier(element.parent as TSFunctionIdentifierElementImpl)
                         }
+                    is TSVarExpressionElementImpl ->
+                        renderVariable(element.parent as TSVarExpressionElementImpl)
                     is TSProperty ->
                         element.parent.reference
                             .let {

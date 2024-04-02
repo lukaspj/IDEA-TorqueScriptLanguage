@@ -5,9 +5,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val channel = prop("publishChannel")
 
 plugins {
-    id("org.jetbrains.intellij") version "1.16.1"
-    id("org.jetbrains.kotlin.jvm") version "1.9.21"
-    id("org.jetbrains.grammarkit") version "2022.3.1"
+    id("org.jetbrains.intellij") version "1.17.2"
+    id("org.jetbrains.kotlin.jvm") version "1.9.23"
+    id("org.jetbrains.grammarkit") version "2022.3.2"
     id("org.jetbrains.changelog") version "2.2.0"
 }
 
@@ -58,12 +58,12 @@ sourceSets {
 // Java target version
 java.sourceCompatibility = JavaVersion.VERSION_17
 
-// See https://github.com/JetBrains/gradle-intellij-plugin/
+// See https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
     if (isLegacyBuild) {
         version.set("2022.2")
     } else {
-        version.set("2023.3")
+        version.set("2022.3")
     }
 
     //version.set("2021.2")
@@ -90,7 +90,7 @@ tasks {
             untilBuild.set("223")
         } else {
             sinceBuild.set("223")
-            untilBuild.set("233.*")
+            untilBuild.set("241.*")
         }
     }
 
