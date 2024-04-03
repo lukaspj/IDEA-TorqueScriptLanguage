@@ -3,7 +3,9 @@ package org.lukasj.idea.torquescript.psi.impl
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiReference
 import org.lukasj.idea.torquescript.psi.*
+import org.lukasj.idea.torquescript.reference.TSObjectReference
 
 abstract class TSObjectDeclarationElementImpl(node: ASTNode) : ASTWrapperPsiElement(node),
     TSObjectDeclaration {
@@ -33,5 +35,15 @@ abstract class TSObjectDeclarationElementImpl(node: ASTNode) : ASTWrapperPsiElem
         }
 
         return this
+    }
+
+    override fun getReference(): PsiReference? {
+        return references.singleOrNull()
+    }
+
+    override fun getReferences(): Array<PsiReference> {
+        return arrayOf(
+            TSObjectReference(this, getObjectTypeName().textRangeInParent)
+        )
     }
 }

@@ -10,7 +10,7 @@ class TSObjectReference(element: PsiNamedElement, textRange: TextRange) : PsiRef
     PsiPolyVariantReference {
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
         val project = myElement.project
-        val objects = project.getService(TSTypeLookupService::class.java).findObject(project, rangeInElement.substring(element.text))
+        val objects = project.getService(TSTypeLookupService::class.java).findNamespace(project, rangeInElement.substring(element.text))
 
         return objects.mapNotNull { it.psiElement }
             .map { PsiElementResolveResult(it) }

@@ -25,7 +25,7 @@ class TSPropertiesCompletionContributor : CompletionProvider<CompletionParameter
             ?: return
 
         project.getService(EngineApiService::class.java)
-            .findClass(contextElement.getTypeName())
+            .findClass(contextElement.getObjectTypeName().text)
             ?.let { engineClass ->
                 engineClass.properties
                     .forEach { property ->

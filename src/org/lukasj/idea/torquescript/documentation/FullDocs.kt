@@ -48,6 +48,14 @@ fun renderFunctionCall(element: TSFunctionCallExpressionElementImpl) =
 fun renderFunctionCall(element: TSPropertyElementImpl) =
     element.reference?.let { renderFunctionReference(it as TSFunctionReference) }
 
+fun renderIdentifier(element: TSIdentExpressionElementImpl) =
+    ReferenceUtil.tryResolveType(element)?.let { resolvedType ->
+        renderClassDoc(element.project, resolvedType)
+    } ?: StringBuilder()
+        .append(DocumentationMarkup.CONTENT_START)
+        .append("Could not resolve the type of ${element.text}")
+        .append(DocumentationMarkup.CONTENT_END)
+        .toString()
 fun renderVariable(element: TSVarExpressionElementImpl) =
     ReferenceUtil.tryResolveType(element)?.let { resolvedType ->
         renderClassDoc(element.project, resolvedType)
@@ -67,7 +75,7 @@ fun renderFunctionReference(funcRef: TSFunctionReference) =
                         renderBuiltinFunction(funcRef.element.project, functionName)
                     } else {
                         funcRef.element.project.getService(TSTypeLookupService::class.java)
-                            .getNamespaces(funcRef.namespace, funcRef.element.project)
+                            .getNamespaceInheritanceList(funcRef.namespace, funcRef.element.project)
                             .reversed().firstOrNull {
                                 funcRef.element.project.getService(EngineApiService::class.java)
                                     .findMethod(it, functionName) != null

@@ -75,7 +75,7 @@ class TSMethodCallAnnotator : TSAnnotator() {
 
                 if (namespace != null) {
                     if (
-                        typeLookupService.getNamespaces(namespace, element.project)
+                        typeLookupService.getNamespaceInheritanceList(namespace, element.project)
                             .any {
                                 engineApiService.findMethod(it, functionName.text) != null
                             }

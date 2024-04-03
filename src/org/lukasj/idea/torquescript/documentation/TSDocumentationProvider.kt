@@ -52,6 +52,8 @@ class TSDocumentationProvider : AbstractDocumentationProvider() {
                 renderFunctionCall(element)
             is TSDatablockDeclarationElementImpl ->
                 renderClassDoc(element.project, element.getClassName()!!)
+            is TSIdentExpressionImpl ->
+                renderIdentifier(element)
             else -> {
                 when (element?.parent) {
                     is TSNewInstanceExpression -> renderClassDoc(element.project, element.text)

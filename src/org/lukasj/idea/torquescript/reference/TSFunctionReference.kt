@@ -17,7 +17,7 @@ class TSFunctionReference(
         val project = myElement.project
         val functions = if (namespace != null) {
             project.getService(TSTypeLookupService::class.java)
-                .getNamespaces(namespace, project)
+                .getNamespaceInheritanceList(namespace, project)
                 .flatMap { ReferenceUtil.findFunction(project, "${it}::${functionName ?: element.name}") }
         } else {
             ReferenceUtil.findFunction(project, functionName ?: element.name!!)
