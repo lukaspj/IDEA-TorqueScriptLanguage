@@ -16,18 +16,18 @@ class TSClassNameAnnotator : TSAnnotator() {
 
         val classElement = when (element) {
             is TSDatablockStatement -> {
-                element.firstChild.nextSibling.nextSibling
+                element.getObjectTypeName()
             }
             is TSSingletonStatement -> {
-                element.firstChild.nextSibling.nextSibling
+                element.getObjectTypeName()
             }
             is TSNewInstanceExpression -> {
-                element.firstChild.nextSibling.nextSibling
+                element.getObjectTypeName()
             }
             else -> return
         }
 
-        if (classElement.elementType == TSTypes.IDENT) {
+        if (classElement.elementType == TSTypes.OBJECT_TYPE_NAME) {
             if (engineApiService.findClass(classElement.text) != null) {
                 createSuccessAnnotation(classElement, holder, TSSyntaxHighlightingColors.BUILTIN_CLASS_NAME)
             } else {

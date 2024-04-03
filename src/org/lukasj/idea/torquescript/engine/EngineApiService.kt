@@ -31,17 +31,20 @@ class EngineApiService(private val project: Project) {
         modificationTracker.count++
     }
 
+    fun findEngineApiFile() =
+        TSFileUtil.getRootDirectory(project)
+            ?.let { VfsUtil.findFile(Path.of(it, "engineApi.xml"), false) }
+            ?: VfsUtil.findFileByURL(this::class.java.getResource("/samples/engineApi.xml")!!)
+
     private fun buildCaches() {
         val manager = CachedValuesManager.getManager(project)
-        val dependencies = arrayOf<Any>(modificationTracker)
+        val engineApiFile = findEngineApiFile()
+            ?: return
+        val dependencies = arrayOf<Any>(modificationTracker, engineApiFile)
 
         cachedApi =
             manager.createCachedValue(
                 {
-                    val engineApiFile = TSFileUtil.getRootDirectory(project)
-                        ?.let { VfsUtil.findFile(Path.of(it, "engineApi.xml"), false) }
-                        ?: VfsUtil.findFileByURL(this::class.java.getResource("/samples/engineApi.xml")!!)
-                        ?: return@createCachedValue null
 
                     val xmlStream = String(engineApiFile.inputStream.readAllBytes())
                         .let { removeIllegalXmlCharacters(it) }

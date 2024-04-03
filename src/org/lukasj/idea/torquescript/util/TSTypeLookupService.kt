@@ -1,19 +1,25 @@
 package org.lukasj.idea.torquescript.util
 
 import com.intellij.ide.util.PsiNavigationSupport
+import com.intellij.lang.xml.XMLLanguage
 import com.intellij.navigation.ItemPresentation
 import com.intellij.navigation.NavigationItem
 import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiManager
-import com.intellij.psi.util.elementType
-import com.intellij.psi.xml.XmlAttribute
+import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.util.CachedValuesManager
+import com.intellij.psi.util.descendantsOfType
 import com.intellij.psi.xml.XmlTag
 import com.intellij.util.PlatformIcons
 import org.lukasj.idea.torquescript.engine.EngineApiService
+import org.lukasj.idea.torquescript.engine.model.EngineClass
 import org.lukasj.idea.torquescript.psi.TSObjectDeclaration
 import org.lukasj.idea.torquescript.reference.ReferenceUtil
 import org.lukasj.idea.torquescript.taml.TamlModule
@@ -36,7 +42,7 @@ class CachedObjectDeclaration(private val declaration: TSObjectDeclaration) : TS
         get() = declaration.name!!
 
     override val type: String
-        get() = declaration.getTypeName()
+        get() = declaration.getObjectTypeName().text
 
     override val parent: String?
         get() = declaration.getParentBlock()?.lastChild?.text
@@ -89,10 +95,11 @@ class ModuleObject(private val module: TamlModule) : TSCachedObject {
         get() = PsiManager.getInstance(module.project).findFile(containingFile)
             ?.firstChild
             ?.children
-            ?.firstOrNull {it is XmlTag }
-            ?.children
-            ?.filterIsInstance<XmlAttribute>()
-            ?.firstOrNull { it.name == "ModuleId" }
+            ?.filterIsInstance<XmlTag>()
+            ?.firstOrNull {
+                it.getAttribute("ModuleId") != null
+            }
+            ?.getAttribute("ModuleId")
             ?.valueElement
 
     override fun navigate(requestFocus: Boolean) {
@@ -103,7 +110,64 @@ class ModuleObject(private val module: TamlModule) : TSCachedObject {
 
     override fun canNavigate() = canNavigateToSource()
 
-    override fun canNavigateToSource() = PsiManager.getInstance(module.project).findFile(containingFile)?.let { PsiNavigationSupport.getInstance().getDescriptor(it) } != null
+    override fun canNavigateToSource() = PsiManager.getInstance(module.project).findFile(containingFile)
+        ?.let { PsiNavigationSupport.getInstance().getDescriptor(it) } != null
+
+    override fun getName() = objectName
+
+    override fun getPresentation() = object : ItemPresentation {
+        override fun getPresentableText() = objectName
+        override fun getLocationString() = containingFile.name
+
+        override fun getIcon(unused: Boolean) =
+            PlatformIcons.CLASS_ICON
+    }
+}
+
+class EngineClassObject(private val project: Project, private val engineClass: EngineClass) : TSCachedObject {
+    companion object {
+        fun fromEngineClass(project: Project, engineClass: EngineClass) = EngineClassObject(project, engineClass)
+    }
+
+    var psiFile: PsiFile =
+        PsiFileFactory.getInstance(project).createFileFromText(
+            XMLLanguage.INSTANCE, """
+                                            <?xml version="1.0" encoding="UTF-8" standalone ="yes"?>
+                                            <!-- Stub XML file to allow IDEA to resolve references -->
+                                            <EngineExportScope
+                                                name=""
+                                                docs="">
+                                                <EngineClassType
+                                                    name="${engineClass.name}">
+                                                </EngineClassType>
+                                            </EngineExportScope>
+                                        """.trimIndent()
+        )
+    override val objectName: String
+        get() = engineClass.name
+    override val type: String
+        get() = engineClass.name
+    override val parent: String?
+        get() = engineClass.superType
+    override val containingFile: VirtualFile
+        get() = psiFile.virtualFile
+    override val psiElement: PsiElement?
+        get() =
+            psiFile.firstChild
+                .descendantsOfType<XmlTag>()
+                .mapNotNull { it.getAttribute("name")?.valueElement }
+                .single { it.value == engineClass.name }
+
+    override fun navigate(requestFocus: Boolean) {
+        val file = PsiManager.getInstance(project).findFile(containingFile)
+        val descriptor = file?.let { PsiNavigationSupport.getInstance().getDescriptor(file) }
+        descriptor?.navigate(requestFocus)
+    }
+
+    override fun canNavigate() = canNavigateToSource()
+
+    override fun canNavigateToSource() = PsiManager.getInstance(project).findFile(containingFile)
+        ?.let { PsiNavigationSupport.getInstance().getDescriptor(it) } != null
 
     override fun getName() = objectName
 
@@ -149,8 +213,30 @@ abstract class CachedEngineObject : TSCachedObject {
     }
 }
 
-@Service
-class TSTypeLookupService {
+@Service(Service.Level.PROJECT)
+class TSTypeLookupService(private val project: Project) {
+    val cachedEngineClasses =
+        CachedValuesManager.getManager(project)
+            .let { cachedValuesManaged ->
+                project.service<EngineApiService>()
+                    .findEngineApiFile()!!
+                    .let { engineApiFile ->
+                        cachedValuesManaged.createCachedValue(
+                            {
+                                CachedValueProvider.Result.create(
+                                    project.service<EngineApiService>()
+                                        .getClasses()
+                                        .map { engineClass ->
+                                            EngineClassObject.fromEngineClass(project, engineClass)
+                                        },
+                                    arrayOf<Any>(engineApiFile)
+                                )
+                            },
+                            false
+                        )
+                    }
+            }
+
     fun getObjects(project: Project) =
         ReferenceUtil.getObjects(project)
             .asSequence()
@@ -191,7 +277,25 @@ class TSTypeLookupService {
         getObjects(project)
             .filter { it.objectName.equals(key, true) }
 
-    fun getNamespaces(rootNs: String, project: Project): List<String> {
+    fun getEngineClasses() =
+        cachedEngineClasses.value
+
+    fun getNamespaces(project: Project) =
+        project.getService(EngineApiService::class.java)
+            .findEngineApiFile()!!
+            .let { engineApiFile ->
+                getObjects(project)
+                    .plus(
+                        getEngineClasses()
+                    )
+                    .toList()
+            }
+
+    fun findNamespace(project: Project, key: String): List<TSCachedObject> =
+        getNamespaces(project)
+            .filter { it.objectName.equals(key, true) }
+
+    fun getNamespaceInheritanceList(rootNs: String, project: Project): List<String> {
         // Handle edge-case
         if (rootNs == "EngineObject") return listOf()
 
@@ -206,7 +310,7 @@ class TSTypeLookupService {
                 .findClass(rootNs)
                 ?.superType
             return if (superType != null) {
-                getNamespaces(superType, project)
+                getNamespaceInheritanceList(superType, project)
                     .plus(rootNs)
             } else {
                 logger<TSTypeLookupService>()
@@ -216,9 +320,9 @@ class TSTypeLookupService {
         }
 
         return if (obj[0].parent != null) {
-            getNamespaces(obj[0].parent!!, project)
+            getNamespaceInheritanceList(obj[0].parent!!, project)
         } else {
-            getNamespaces(obj[0].type, project)
+            getNamespaceInheritanceList(obj[0].type, project)
         }.plus(rootNs)
     }
 }

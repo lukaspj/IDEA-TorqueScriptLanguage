@@ -4,6 +4,12 @@ import org.lukasj.idea.torquescript.engine.EngineApiUtil
 import org.lukasj.idea.torquescript.engine.model.EngineClass
 import org.lukasj.idea.torquescript.engine.model.EngineClassProperty
 import org.lukasj.idea.torquescript.engine.model.EngineFunction
+import java.io.BufferedOutputStream
+import java.io.BufferedWriter
+import java.io.ByteArrayOutputStream
+import java.io.OutputStream
+import java.io.PrintWriter
+import java.io.Writer
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.events.StartElement
@@ -19,7 +25,6 @@ class EngineClassParser(private val eventReader: XMLEventReader, private val sco
         val isSingleton = EngineApiUtil.stringToBool(event.getAttributeByName(QName("", "isSingleton")).value)
         var properties = listOf<EngineClassProperty>()
         var methods = listOf<EngineFunction>()
-
 
         while (eventReader.hasNext()) {
             val nextEvent = eventReader.nextEvent()

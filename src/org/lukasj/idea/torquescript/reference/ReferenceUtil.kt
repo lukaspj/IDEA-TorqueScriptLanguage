@@ -125,7 +125,7 @@ object ReferenceUtil {
                 (element as TSObjectDeclaration)
                     .let {
                         it.getParentBlock()?.lastChild?.text
-                            ?: it.getTypeName()
+                            ?: it.getObjectTypeName().text
                     }
             else -> null
         }

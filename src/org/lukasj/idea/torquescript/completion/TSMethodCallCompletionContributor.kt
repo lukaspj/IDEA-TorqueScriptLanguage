@@ -27,7 +27,7 @@ class TSMethodCallCompletionContributor : CompletionProvider<CompletionParameter
         val project = parameters.originalFile.project
         val namespaces =
             if (namespace != null)
-                project.getService(TSTypeLookupService::class.java).getNamespaces(namespace, project)
+                project.getService(TSTypeLookupService::class.java).getNamespaceInheritanceList(namespace, project)
             else
                 listOf()
 
