@@ -1,54 +1,34 @@
 package org.lukasj.idea.torquescript.runner
 
-import com.intellij.openapi.components.Service
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
-import com.intellij.ui.dsl.builder.AlignX
-import com.intellij.ui.dsl.builder.bindIntText
-import com.intellij.ui.dsl.builder.bindText
-import com.intellij.ui.dsl.builder.panel
-import com.intellij.ui.dsl.gridLayout.HorizontalAlign
+import com.intellij.ui.layout.panel
 import org.jetbrains.annotations.ApiStatus
-import org.lukasj.idea.torquescript.TSFileUtil
-import java.nio.file.Path
 import javax.swing.JComponent
 
 class TSAttachConfigurationSettingsEditor(val project: Project) : SettingsEditor<TSAttachConfiguration>() {
     private val model = TSAttachConfigurationEditorModel()
+
     private val mainPanel =
         panel {
-            row("Host:") {
-                textField()
-                    .bindText(model::host)
-                    .comment("Specify the host of the remote Torque App, typically 127.0.0.1")
-                    .align(AlignX.FILL)
-            }
-            row("Port:") {
-                intTextField()
-                    .bindIntText(model::port)
-                    .comment("Specify the port of the remote Torque App")
-                    .align(AlignX.FILL)
-            }
-            row("Password:") {
-                textField()
-                    .bindText(model::password)
-                    .comment("Specify the password for the Torque App telnet process")
-                    .align(AlignX.FILL)
-            }
+            row("Host:") { textField(model::host) }
+            row("Port:") { textField(model::port) }
+            row("Password:") { textField(model::password) }
         }
 
     override fun resetEditorFrom(s: TSAttachConfiguration) {
         model.host = s.host
-        model.port = s.port
+        model.port = s.port.toString()
         model.password = s.password
+
         mainPanel.reset()
     }
 
     override fun applyEditorTo(s: TSAttachConfiguration) {
         s.host = model.host
-        s.port = model.port
+        s.port = model.port.toInt()
         s.password = model.password
+
         mainPanel.apply()
     }
 
@@ -59,6 +39,6 @@ class TSAttachConfigurationSettingsEditor(val project: Project) : SettingsEditor
 @ApiStatus.Internal
 internal data class TSAttachConfigurationEditorModel(
     var host: String = "",
-    var port: Int = 0,
+    var port: String = "",
     var password: String = "",
 )
