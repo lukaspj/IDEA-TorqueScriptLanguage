@@ -18,21 +18,17 @@ import org.lukasj.idea.torquescript.psi.TslTypes;
 DIGIT     = [0-9]
 INTEGER   = {DIGIT}+
 DOUBLE    = ({INTEGER}?\.{INTEGER})|({INTEGER}(\.{INTEGER})?[eE][+-]?{INTEGER})
-FLOAT     = ({INTEGER}?\.{INTEGER})f
+FLOAT     = ({INTEGER}?\.{INTEGER})[fF]
 LETTER    = [A-Za-z_]
 FILECHAR  = [A-Za-z_\.]
-VARMID    = [:A-Za-z0-9_]
 IDTAIL    = [A-Za-z0-9_]
-VARTAIL   = {VARMID}*{IDTAIL}
-VAR       = {LETTER}{VARTAIL}*
-THISVAR   = %this
-LOCALVAR  = %{VAR}
-GLOBALVAR = \${VAR}
+VAR       = {LETTER}{IDTAIL}*
 ID        = {LETTER}{IDTAIL}*
-ILID      = [$%]{DIGIT}+{LETTER}{VARTAIL}*
-FILENAME  = {FILECHAR}+
-SPACE     = [ \t\f]
+ILID      = {DIGIT}{IDTAIL}*
+SPACE     = [ \t\v\f]
 HEXDIGIT  = [a-fA-F0-9]
+
+/*
 BLUEPRINT = [bB][lL][uU][eE][pP][rR][iI][nN][tT]
 POSITION  = [pP][oO][sS][iI][tT][iI][oO][nN]
 BINORMAL  = [bB][iI][nN][oO][rR][mM][aA][lL]
@@ -43,89 +39,94 @@ SV_TARGET = [sS][vV]_[tT][aA][rR][gG][eE][tT]
 SV_DEPTH  = [sS][vV]_[dD][eE][pP][tT][hH]
 
 TEXCOORD  = [tT][eE][xX][cC][oO][oO][rR][dD][0-9]
+ */
 
 DOC_COMMENT_BLOCK = ("///"([^/\n\r][^\n\r]*)?[\n\r]+)+
 LINE_COMMENT = "//"[^\r\n]*
 MULTILINE_COMMENT = "/*" ( ([^"*"]|[\r\n])* ("*"+ [^"*""/"] )? )* ("*" | "*"+"/")?
 
 ESCAPES = [abfnrtv]|c[rpo0-9]
-TAG =      "\'"
-TAG_STRING = {TAG} ( [^\'\\\n\r] | "\\" ("\\" | {TAG} | {ESCAPES} | [0-8xuU] ) )* {TAG}?
 STR =      "\""
-STRING = {STR} ( [^\"\\\n\r] | "\\" ("\\" | {STR} | {ESCAPES} | [0-8xuU] ) )* {STR}?
+STRING = {STR} (\\.|[^\"\\\n\r])* {STR}?
 
 %%
 
 <YYINITIAL> {
     {LINE_COMMENT}                                          { return TslTypes.LINE_COMMENT; }
     {MULTILINE_COMMENT}                                     { return TslTypes.BLOCK_COMMENT; }
+// ----- SEMANTICS START -----
+    BINORMAL[0-9]*                                          { return TslTypes.BINORMAL; }
+    NORMAL[0-9]*                                            { return TslTypes.NORMAL; }
+    TANGENT[0-9]*                                           { return TslTypes.TANGENT; }
+    TANGENTW[0-9]*                                          { return TslTypes.TANGENTW; }
+    COLOR[0-9]*                                             { return TslTypes.COLOR; }
+    TARGET[0-9]*                                            { return TslTypes.TARGET; }
+    POSITION[0-9]*                                          { return TslTypes.POSITION; }
+    SV_POSITION[0-9]*                                       { return TslTypes.SV_POSITION; }
+    // SV_TARGET[0-9]*                                         { return TslTypes.SV_TARGET; }
+    SV_DEPTH[0-9]*                                          { return TslTypes.SV_DEPTH; }
+    SV_ISFRONTFACE                                          { return TslTypes.SV_ISFRONTFACE; }
+    TEXCOORD[0-9]*                                          { return TslTypes.TEXCOORD; }
+    PSIZE                                                   { return TslTypes.PSIZE; }
+    TESSFACTOR[0-9]*                                        { return TslTypes.TESSFACTOR; }
+// ----- SEMANTICS END -----
+// ----- INTRINSIC FUNCTIONS START -----
+    Sample                                                  { return TslTypes.SAMPLEFUNC; }
+    mul                                                     { return TslTypes.MULFUNC; }
+    frac|fract                                              { return TslTypes.FRACFUNC; }
+    lerp|mix                                                { return TslTypes.LERPFUNC; }
+// ----- INTRINSIC FUNCTIONS END -----
 // ----- KEYWORDS START -----
-    {BLUEPRINT}                                             { return TslTypes.BLUEPRINT; }
+    TorqueShader                                            { return TslTypes.TORQUESHADER; }
     struct                                                  { return TslTypes.STRUCT; }
-    VertData                                                { return TslTypes.STRUCT_VERTDATA; }
-    ConnectData                                             { return TslTypes.STRUCT_CONNECTDATA; }
-    FragOut                                                 { return TslTypes.STRUCT_FRAGOUT; }
-    float                                                   { return TslTypes.FLOAT; }
-    float2                                                  { return TslTypes.FLOAT2; }
-    float3                                                  { return TslTypes.FLOAT3; }
-    float4                                                  { return TslTypes.FLOAT4; }
-    float2x2                                                { return TslTypes.FLOAT2X2; }
-    float3x3                                                { return TslTypes.FLOAT3X3; }
-    float4x3                                                { return TslTypes.FLOAT4X3; }
-    float3x4                                                { return TslTypes.FLOAT3X4; }
-    float4x4                                                { return TslTypes.FLOAT4X4; }
-    vec2                                                    { return TslTypes.VEC2; }
-    vec3                                                    { return TslTypes.VEC3; }
-    vec4                                                    { return TslTypes.VEC4; }
-    mat2x2                                                  { return TslTypes.MAT2X2; }
-    mat3x3                                                  { return TslTypes.MAT3X3; }
-    mat4x3                                                  { return TslTypes.MAT4X3; }
-    mat3x4                                                  { return TslTypes.MAT3X4; }
-    mat4x4                                                  { return TslTypes.MAT4X4; }
-    int                                                     { return TslTypes.INT; }
-    int2                                                    { return TslTypes.INT2; }
-    int3                                                    { return TslTypes.INT3; }
-    int4                                                    { return TslTypes.INT4; }
-    {POSITION}                                              { return TslTypes.POSITION; }
-    {BINORMAL}                                              { return TslTypes.BINORMAL; }
-    {NORMAL}                                                { return TslTypes.NORMAL; }
-    {COLOR}                                                 { return TslTypes.COLOR; }
-    {SV_POSITION}                                           { return TslTypes.SV_POSITION; }
-    {SV_TARGET}                                             { return TslTypes.SV_TARGET; }
-    {SV_DEPTH}                                              { return TslTypes.SV_DEPTH; }
-    {TEXCOORD}                                              { return TslTypes.TEXCOORD; }
+    uniform                                                 { return TslTypes.UNIFORM; }
+    // cbuffer                                                 { return TslTypes.CBUFFER; }
     VertexShader                                            { return TslTypes.VERTEX_SHADER; }
     PixelShader                                             { return TslTypes.PIXEL_SHADER; }
-    #pragma                                                 { return TslTypes.PRAGMA; }
-    uniform                                                 { return TslTypes.UNIFORM; }
-    sampler1D                                               { return TslTypes.SAMPLER1D; }
+    GeometryShader                                          { return TslTypes.GEOMETRY_SHADER; }
+    ComputeShader                                           { return TslTypes.COMPUTE_SHADER; }
+    // DomainShader                                            { return TslTypes.DOMAIN_SHADER; }
+    // HullShader                                              { return TslTypes.HULL_SHADER; }
+    float3x4|mat3x4                                         { return TslTypes.MAT3X4; }
+    float4x3|mat4x3                                         { return TslTypes.MAT4X3; }
+    float3x3|mat3|mat3x3                                    { return TslTypes.MAT3X3; }
+    float4x4|mat4|mat4x4                                    { return TslTypes.MAT4X4; }
+    float2|vec2                                             { return TslTypes.FVEC2; }
+    float3|vec3                                             { return TslTypes.FVEC3; }
+    float4|vec4                                             { return TslTypes.FVEC4; }
+    int2|ivec2                                              { return TslTypes.IVEC2; }
+    int3|ivec3                                              { return TslTypes.IVEC3; }
+    int4|ivec4                                              { return TslTypes.IVEC4; }
+    bool2|bvec2                                             { return TslTypes.BVEC2; }
+    bool3|bvec3                                             { return TslTypes.BVEC3; }
+    bool4|bvec4                                             { return TslTypes.BVEC4; }
+    float                                                   { return TslTypes.FLOAT; }
+    int                                                     { return TslTypes.INT; }
+    uint                                                    { return TslTypes.UINT; }
+    bool                                                    { return TslTypes.BOOL; }
     sampler2D                                               { return TslTypes.SAMPLER2D; }
-    sampler3D                                               { return TslTypes.SAMPLER3D; }
-    sampler1DShadow                                         { return TslTypes.SAMPLER1DSHADOW; }
-    sampler2DShadow                                         { return TslTypes.SAMPLER2DSHADOW; }
-    sampler2DArray                                          { return TslTypes.SAMPLER2DARRAY; }
-    samplerCube                                             { return TslTypes.SAMPLERCUBE; }
-    samplerCubeArray                                        { return TslTypes.SAMPLERCUBEARRAY; }
-    return                                                  { return TslTypes.RETURN; }
     if                                                      { return TslTypes.IF; }
     else                                                    { return TslTypes.ELSE; }
+    while                                                   { return TslTypes.WHILE; }
+    do                                                      { return TslTypes.DO; }
+    break                                                   { return TslTypes.BREAK; }
+    // for                                                     { return TslTypes.FOR; }
     switch                                                  { return TslTypes.SWITCH; }
     case                                                    { return TslTypes.CASE; }
     default                                                 { return TslTypes.DEFAULT; }
-    while                                                   { return TslTypes.WHILE; }
-    do                                                      { return TslTypes.DO; }
-    for                                                     { return TslTypes.FOR; }
-    break                                                   { return TslTypes.BREAK; }
     continue                                                { return TslTypes.CONTINUE; }
     discard                                                 { return TslTypes.DISCARD; }
-    branch                                                  { return TslTypes.BRANCH; }
-    flatten                                                 { return TslTypes.FLATTEN; }
-    unroll                                                  { return TslTypes.UNROLL; }
-    loop                                                    { return TslTypes.LOOP; }
-    fastopt                                                 { return TslTypes.FASTOPT; }
-    allow_uav_condition                                     { return TslTypes.ALLOW_UAV_CONDITION; }
-    forcecase                                               { return TslTypes.FORCECASE; }
-    call                                                    { return TslTypes.CALL; }
+    void                                                    { return TslTypes.VOID; }
+    static                                                  { return TslTypes.STATIC; }
+    const                                                   { return TslTypes.CONST; }
+    in                                                      { return TslTypes.IN; }
+    out                                                     { return TslTypes.OUT; }
+    inout                                                   { return TslTypes.INOUT; }
+    // typedef                                                 { return TslTypes.TYPEDEF; }
+    true                                                    { return TslTypes.TRUE; }
+    false                                                   { return TslTypes.FALSE; }
+    return                                                  { return TslTypes.RETURN; }
+
 // ----- KEYWORDS END -----
 // ----- PUNCTUATION START -----
     \(                                                      { return TslTypes.LPAREN; }
@@ -150,7 +151,7 @@ STRING = {STR} ( [^\"\\\n\r] | "\\" ("\\" | {STR} | {ESCAPES} | [0-8xuU] ) )* {S
     >>=                                                     { return TslTypes.BIT_SHIFT_RIGHT_ASSIGN; }
 // ----- ASSIGNMENTS END -----
 // ----- OPERATORS START -----
-    \.                                                      { return TslTypes.DOT; }
+    // \.                                                      { return TslTypes.DOT; }
     ,                                                       { return TslTypes.COMMA; }
     ==                                                      { return TslTypes.EQUAL; }
     \!=                                                     { return TslTypes.NOT_EQUAL; }
@@ -174,15 +175,16 @@ STRING = {STR} ( [^\"\\\n\r] | "\\" ("\\" | {STR} | {ESCAPES} | [0-8xuU] ) )* {S
     %                                                       { return TslTypes.MODULO; }
     --                                                      { return TslTypes.DECREMENT; }
     \+\+                                                    { return TslTypes.INCREMENT; }
-    \?                                                      { return TslTypes.QUESTION_MARK; }
+    // \?                                                      { return TslTypes.QUESTION_MARK; }
     :                                                       { return TslTypes.COLON; }
 // ----- OPERATORS END -----
-    {STRING}                                                { return TslTypes.QUOTED_STRING; }
-    {INTEGER}                                               { return TslTypes.INTEGER; }
-    {FLOAT}                                                 { return TslTypes.FLOAT; }
-    {DOUBLE}                                                { return TslTypes.DOUBLE; }
-    //0[xX]{HEXDIGIT}+                                        { return TslTypes.HEXDIGIT; }
+    {INTEGER}                                               { return TslTypes.LITERAL_INTEGER; }
+    {FLOAT}                                                 { return TslTypes.LITERAL_FLOAT; }
+    {DOUBLE}                                                { return TslTypes.LITERAL_DOUBLE; }
+    0[xX]{HEXDIGIT}+                                        { return TslTypes.LITERAL_HEXDIGIT; }
+    \.{ID}                                                  { return TslTypes.MEMBER_VAR; }
     {ID}                                                    { return TslTypes.IDENT; }
+    // {STRING}                                                { return TslTypes.STRING; }
     {ILID}                                                  { return TokenType.ERROR_ELEMENT; }
 }
 

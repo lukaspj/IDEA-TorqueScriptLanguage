@@ -8,11 +8,7 @@ import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiElement
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.TokenSet
-import com.intellij.psi.xml.XmlAttributeValue
-import com.intellij.psi.xml.XmlTokenType
 import org.lukasj.idea.torquescript.TSLanguage
-import org.lukasj.idea.torquescript.TamlLanguage
-import org.lukasj.idea.torquescript.psi.TSFieldAssignment
 import org.lukasj.idea.torquescript.psi.TSLiteralExpression
 import org.lukasj.idea.torquescript.psi.TSProperty
 import org.lukasj.idea.torquescript.psi.TSTypes

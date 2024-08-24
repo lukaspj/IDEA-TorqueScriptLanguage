@@ -9,9 +9,6 @@ import com.intellij.psi.util.PsiTreeUtil
 import org.lukasj.idea.torquescript.TSFileUtil
 import org.lukasj.idea.torquescript.psi.TSLiteralExpression
 import org.lukasj.idea.torquescript.psi.impl.TSAssignmentExpressionImpl
-import org.lukasj.idea.torquescript.psi.impl.TSLiteralExpressionElementImpl
-import org.lukasj.idea.torquescript.taml.TamlModuleService
-import java.io.File
 import java.nio.file.InvalidPathException
 
 class TSFileReference(literal: PsiElement, rangeInElement: TextRange, val isAssetPath: Boolean = false) :

@@ -1,9 +1,6 @@
 {
     parserClass="org.lukasj.idea.torquescript.parser.TslParser"
     
-    // extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
-    extends(".*Expression")=expression
-    
     psiClassPrefix="Tsl"
     psiImplClassSuffix="Impl"
     psiPackage="org.lukasj.idea.torquescript.psi"
@@ -12,80 +9,161 @@
     elementTypeHolderClass="org.lukasj.idea.torquescript.psi.TslTypes"
     elementTypeClass="org.lukasj.idea.torquescript.psi.TslElementType"
     tokenTypeClass="org.lukasj.idea.torquescript.psi.TslTokenType"
+
+    extends(".*Expression")=expression
 }
 
-torqueshaderlanguageFile ::= blueprintStatement
+torqueshaderlanguageFile ::= TORQUESHADER IDENT LBRACE programGlobals RBRACE
 
-blueprintStatement ::= BLUEPRINT QUOTED_STRING LBRACE blueprintBody RBRACE STMT_SEPARATOR
+programGlobals ::= programGlobalList
 
-blueprintBody ::= blueprintBodyStatement*
+programGlobalList ::= structDecl programGlobalList?
+                    | shaderStage programGlobalList?
 
-blueprintBodyStatement ::= comment
-                         | structStatement
-                         | shaderStatement
+shaderStage ::= VERTEX_SHADER LBRACE shaderBody RBRACE
+              | PIXEL_SHADER LBRACE shaderBody RBRACE
+              | GEOMETRY_SHADER LBRACE shaderBody RBRACE
+              | COMPUTE_SHADER LBRACE shaderBody RBRACE
 
-comment ::= LINE_COMMENT
-          | BLOCK_COMMENT
+shaderBody ::= statementList
 
-structStatement ::= STRUCT structType LBRACE structField* RBRACE STMT_SEPARATOR
-structType ::= STRUCT_VERTDATA | STRUCT_CONNECTDATA | STRUCT_FRAGOUT
-structField ::= type IDENT COLON semantic STMT_SEPARATOR
+structDecl ::= STRUCT IDENT LBRACE structBodyList RBRACE
 
-shaderStatement ::= (VERTEX_SHADER | PIXEL_SHADER) LBRACE shaderProgramStatement* RBRACE STMT_SEPARATOR { pin=1 }
+structBodyList ::= structMember structBodyList?
 
-shaderProgramStatement ::= comment
-                        | pragmaStatement
-                        | uniformStatement
-                        | functionStatement
+structMember ::= varType IDENT COLON structSemantic STMT_SEPARATOR
+               | varType IDENT STMT_SEPARATOR
+               | functionDef
 
-pragmaStatement ::= PRAGMA IDENT QUOTED_STRING { pin=1 }
-uniformStatement ::= UNIFORM type IDENT STMT_SEPARATOR { pin=1 }
-functionStatement ::= (structType | type) IDENT LPAREN structType IDENT RPAREN LBRACE functionBody RBRACE STMT_SEPARATOR { pin=3 }
+uniformDecl ::= UNIFORM varDecl
 
-functionBody ::= functionBodyStatement*
+staticConstDecl ::= STATIC varDecl
+                  | STATIC CONST varDecl
+                  | CONST varDecl
 
-functionBodyStatement ::= comment
-                        | returnStatement
-                        | assignStatement
-                        | ifStatement
-                        | switchStatement
-                        | whileStatement
-                        | doStatement
-                        | forStatement
-                        | breakStatement
-                        | continueStatement
-                        | discardStatement
-                        | expressionStatement
-                        // https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-flow-control
+varDecl ::= varType IDENT STMT_SEPARATOR
+          | varType IDENT ASSIGN expression STMT_SEPARATOR
+          | varType IDENT LBRACK expression RBRACK STMT_SEPARATOR
+          | varType IDENT LBRACK expression RBRACK ASSIGN LBRACE expressionList RBRACE STMT_SEPARATOR
+          | IDENT IDENT STMT_SEPARATOR
 
+paramModifier ::= IN
+                | OUT
+                | INOUT
 
-expressionStatement ::= expression STMT_SEPARATOR
+functionDef ::= varType IDENT LPAREN functionParamList RPAREN LBRACE statementList RBRACE
+              | varType IDENT LPAREN functionParamList RPAREN STMT_SEPARATOR
+              | IDENT IDENT LPAREN functionParamList RPAREN LBRACE statementList RBRACE
+              | IDENT IDENT LPAREN functionParamList RPAREN STMT_SEPARATOR
 
-returnStatement ::= RETURN expression STMT_SEPARATOR
+functionParamList ::= functionParam (COMMA functionParamList)?
 
-assignStatement ::= IDENT accessor? assignOperator expression STMT_SEPARATOR
+functionParam ::= paramModifier varType IDENT
+                | varType IDENT
+                | IDENT IDENT
+                | paramModifier IDENT IDENT
 
-ifStatement ::= ifAttribute* IF LPAREN expression RPAREN functionStatementOrBlock elseStatement?
-elseStatement ::= ELSE functionStatementOrBlock
-switchStatement ::= switchAttribute* SWITCH LPAREN expression RPAREN LBRACE (comment | caseBlock)* RBRACE
-caseBlock ::= (CASE INTEGER | DEFAULT) COLON functionBody
+expressionList ::= expression
+                 | expression COMMA expressionList
 
-whileStatement ::= loopAttribute* WHILE LPAREN expression RPAREN functionStatementOrBlock
-doStatement ::= doAttribute* DO functionStatementOrBlock WHILE LPAREN expression RPAREN
-forStatement ::= loopAttribute* FOR LPAREN expression? STMT_SEPARATOR expression? STMT_SEPARATOR expression? RPAREN functionStatementOrBlock
-// TODO should only be able to break inside for, do or while
-breakStatement ::= BREAK STMT_SEPARATOR
-// TODO should only be able to continue inside for, do or while
+expression ::= binaryExpression
+             | prefixUnaryExpression
+             | postfixUnaryExpression
+             | funcCallExpression
+             | parenExpression
+             | literalExpression
+             | identExpression
+
+literalExpression ::= LITERAL_INTEGER | LITERAL_FLOAT | LITERAL_DOUBLE | LITERAL_HEXDIGIT | TRUE | FALSE
+
+identExpression ::= IDENT
+parenExpression ::= LPAREN expression RPAREN
+
+binaryExpression ::= expression (binaryOperator | assignOperator) expression
+prefixUnaryExpression ::= expression (INCREMENT | DECREMENT | MEMBER_VAR)
+postfixUnaryExpression ::= (NOT | MINUS | INCREMENT | DECREMENT) expression
+
+funcCallExpression ::= MULFUNC LPAREN expression COMMA expression RPAREN
+                 | FRACFUNC LPAREN expression RPAREN
+                 | LERPFUNC LPAREN expression COMMA expression COMMA expression RPAREN
+                 | SAMPLEFUNC LPAREN expression COMMA expression RPAREN
+                 | varType LPAREN expression RPAREN
+                 | IDENT LPAREN expression RPAREN
+
+statementList ::= statement statementList?
+
+statement ::= varDecl
+            | uniformDecl
+            | staticConstDecl
+            | ifStatement
+            | whileStatement
+            | continueStatement
+            | breakStatement
+            | returnStatement
+            | functionDef
+            | expression STMT_SEPARATOR
+            | switchStatement
+            | discardStatement
+            | structDecl
+            | commentStatement
+
+ifStatement ::= IF LPAREN expression RPAREN LBRACE statementList RBRACE ELSE LBRACE statementList RBRACE
+              | IF LPAREN expression RPAREN LBRACE statementList RBRACE
+
+whileStatement ::= WHILE LPAREN expression RPAREN LBRACE statementList RBRACE
+                 | DO LBRACE statementList RBRACE WHILE LPAREN expression RPAREN
+
+switchStatement ::= SWITCH LPAREN expression RPAREN LBRACE caseStatements RBRACE
+
+caseStatements ::= caseRule caseStatements?
+
+caseRule ::= CASE expression COLON statementList
+           | DEFAULT COLON statementList
+
 continueStatement ::= CONTINUE STMT_SEPARATOR
+
+breakStatement ::= BREAK STMT_SEPARATOR
+
+returnStatement ::= RETURN STMT_SEPARATOR
+                  | RETURN expression STMT_SEPARATOR
+
 discardStatement ::= DISCARD STMT_SEPARATOR
 
-private functionStatementOrBlock ::= (LBRACE functionBody RBRACE | functionBodyStatement)
+commentStatement ::= LINE_COMMENT | BLOCK_COMMENT
 
+varType ::= MAT3X4
+          | MAT4X3
+          | MAT3X3
+          | MAT4X4
+          | FVEC2
+          | FVEC3
+          | FVEC4
+          | IVEC2
+          | IVEC3
+          | IVEC4
+          | BVEC2
+          | BVEC3
+          | BVEC4
+          | FLOAT
+          | INT
+          | UINT
+          | BOOL
+          | SAMPLER2D
+          | VOID
 
-ifAttribute ::= LBRACK (BRANCH | FLATTEN) RBRACK
-switchAttribute ::= LBRACK (BRANCH | FLATTEN | FORCECASE | CALL) RBRACK
-doAttribute ::= LBRACK FASTOPT RBRACK
-loopAttribute ::= LBRACK (LOOP | FASTOPT | ALLOW_UAV_CONDITION | UNROLL LPAREN INTEGER RPAREN) RBRACK
+structSemantic ::= SV_POSITION
+                 | POSITION
+                 | NORMAL
+                 | BINORMAL
+                 | TANGENT
+                 | TANGENTW
+                 | TEXCOORD
+                 | COLOR
+                 | TARGET
+                 | SV_DEPTH
+                 | SV_ISFRONTFACE
+                 | TESSFACTOR
+                 | PSIZE
 
 assignOperator ::= ASSIGN
                  | ADD_ASSIGN
@@ -99,7 +177,7 @@ assignOperator ::= ASSIGN
                  | BIT_OR_ASSIGN
                  | BIT_XOR_ASSIGN
 
-binaryOperator ::= BIT_NOT
+private binaryOperator ::= BIT_NOT
                  | BIT_SHIFT_LEFT
                  | BIT_SHIFT_RIGHT
                  | BIT_AND
@@ -119,72 +197,3 @@ binaryOperator ::= BIT_NOT
                  | MULTIPLY
                  | DIVIDE
                  | MODULO
-
-
-accessor ::= DOT IDENT accessor?
-           | LBRACK expression RBRACK accessor?
-
-expression ::= accessorExpression
-             | constructorExpression
-             | variableDeclarationExpression
-             | callExpression
-             | prefixUnaryExpression
-             | postfixUnaryExpression
-             | binaryOperatorExpression
-             | ternaryExpression
-             | literalExpression
-             | identExpression
-
-accessorExpression ::= expression accessor
-constructorExpression ::= type LPAREN expression (COMMA expression)* RPAREN
-variableDeclarationExpression ::= (structType | type) IDENT (ASSIGN expression)? {pin=1}
-callExpression ::= IDENT LPAREN (expression (COMMA expression)*)? RPAREN {pin=2}
-binaryOperatorExpression ::= expression binaryOperator expression {pin=2}
-ternaryExpression ::= expression QUESTION_MARK expression COLON expression {pin=2}
-prefixUnaryExpression ::= (NOT | MINUS | INCREMENT | DECREMENT) expression {pin=1}
-postfixUnaryExpression ::= expression (INCREMENT | DECREMENT) {pin=2}
-literalExpression ::= INTEGER
-                    | FLOAT
-                    | DOUBLE
-
-identExpression ::= IDENT
-
-type ::= FLOAT
-       | FLOAT2
-       | FLOAT3
-       | FLOAT4
-       | FLOAT2X2
-       | FLOAT3X3
-       | FLOAT3X4
-       | FLOAT4X3
-       | FLOAT4X4
-       | VEC2
-       | VEC3
-       | VEC4
-       | MAT2X2
-       | MAT3X3
-       | MAT3X4
-       | MAT4X3
-       | MAT4X4
-       | INT
-       | INT2
-       | INT3
-       | INT4
-       | SAMPLER1D
-       | SAMPLER2D
-       | SAMPLER3D
-       | SAMPLER1DSHADOW
-       | SAMPLER2DSHADOW
-       | SAMPLER2DARRAY
-       | SAMPLERCUBE
-       | SAMPLERCUBEARRAY
-
-semantic ::= POSITION
-           | BINORMAL
-           | NORMAL
-           | COLOR
-           | SV_POSITION
-           | SV_TARGET
-           | SV_DEPTH
-           | TEXCOORD
-

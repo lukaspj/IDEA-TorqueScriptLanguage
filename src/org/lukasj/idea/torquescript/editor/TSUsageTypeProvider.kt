@@ -8,7 +8,6 @@ import com.intellij.usages.impl.rules.UsageType
 import com.intellij.usages.impl.rules.UsageTypeProvider
 import org.lukasj.idea.torquescript.psi.TSLiteralExpression
 import org.lukasj.idea.torquescript.psi.TSTypes
-import org.lukasj.idea.torquescript.psi.impl.TSFunctionIdentifierElementImpl
 import org.lukasj.idea.torquescript.psi.impl.TSFunctionStatementElementImpl
 
 object TSUsageTypes {

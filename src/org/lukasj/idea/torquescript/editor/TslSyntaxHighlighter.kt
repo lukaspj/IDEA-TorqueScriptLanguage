@@ -46,13 +46,11 @@ class TslSyntaxHighlighter : SyntaxHighlighterBase() {
             fillMap(ATTRIBUTES, IDENTIFIER, TslTypes.IDENT)
             fillMap(ATTRIBUTES, COLON, TslTypes.COLON)
             fillMap(ATTRIBUTES, SEMICOLON, TslTypes.STMT_SEPARATOR)
-            fillMap(ATTRIBUTES, STRING, TslTypes.QUOTED_STRING)
             fillMap(ATTRIBUTES, TslParserDefinition.OPERATORS, OPERATOR)
             fillMap(ATTRIBUTES, TslParserDefinition.KEYWORDS, KEYWORD)
             fillMap(ATTRIBUTES, TslParserDefinition.NUMBERS, NUMBER)
             fillMap(ATTRIBUTES, TslParserDefinition.SEMANTICS, SEMANTIC)
             fillMap(ATTRIBUTES, TslParserDefinition.ASSIGNMENT_OPERATORS, ASSIGNMENT_OPERATOR)
-            fillMap(ATTRIBUTES, TslParserDefinition.STRUCT_TYPES, STRUCT_TYPES)
         }
     }
 }

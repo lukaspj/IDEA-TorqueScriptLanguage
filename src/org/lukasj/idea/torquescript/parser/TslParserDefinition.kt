@@ -9,12 +9,10 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IFileElementType
 import com.intellij.psi.tree.TokenSet
-import org.lukasj.idea.torquescript.TSLanguage
 import org.lukasj.idea.torquescript.TslLanguage
 import org.lukasj.idea.torquescript.lexer.TslLexerAdapter
-import org.lukasj.idea.torquescript.psi.TslFile
-import org.lukasj.idea.torquescript.psi.TslTypes
 import org.lukasj.idea.torquescript.psi.TslTypes.*
+import org.lukasj.idea.torquescript.psi.TslFile
 
 class TslParserDefinition : ParserDefinition {
 
@@ -46,13 +44,14 @@ class TslParserDefinition : ParserDefinition {
         val FILE = IFileElementType(TslLanguage.INSTANCE)
 
         val KEYWORDS = TokenSet.create(
-            BLUEPRINT, STRUCT, VERTEX_SHADER, PIXEL_SHADER, PRAGMA, UNIFORM, RETURN,
-            IF, ELSE, DO, WHILE, FOR, SWITCH, CASE, DEFAULT, BREAK, CONTINUE, DISCARD,
-            FLOAT, FLOAT2, FLOAT3, FLOAT4, FLOAT2X2,
-            FLOAT3X3, FLOAT3X4, FLOAT4X3, FLOAT4X4,
-            VEC2, VEC3, VEC4, MAT2X2, MAT3X3, MAT3X4, MAT4X3, MAT4X4,
-            SAMPLER1D, SAMPLER2D, SAMPLER3D, SAMPLER1DSHADOW, SAMPLER2DSHADOW,
-            SAMPLER2DARRAY, SAMPLERCUBE, SAMPLERCUBEARRAY
+            TORQUESHADER, STRUCT, UNIFORM, // CBUFFER,
+            VERTEX_SHADER, PIXEL_SHADER, GEOMETRY_SHADER, COMPUTE_SHADER,
+            MAT3X4, MAT4X3, MAT3X3, MAT4X4,
+            FVEC2, FVEC3, FVEC4, IVEC2, IVEC3, IVEC4, BVEC2, BVEC3, BVEC4,
+            FLOAT, INT, UINT, BOOL, SAMPLER2D,
+            IF, ELSE, WHILE, DO, BREAK, SWITCH, CASE, DEFAULT, CONTINUE, DISCARD,
+            VOID, STATIC, CONST, IN, OUT, INOUT,
+            RETURN,
         )
 
         val OPERATORS = TokenSet.create(
@@ -62,12 +61,13 @@ class TslParserDefinition : ParserDefinition {
         )
 
         val SEMANTICS = TokenSet.create(
-            POSITION, BINORMAL, NORMAL, COLOR, TEXCOORD,
-            SV_POSITION, SV_TARGET, SV_DEPTH
+            BINORMAL, NORMAL, TANGENT, TANGENTW, COLOR,
+            TARGET, POSITION, SV_POSITION, SV_DEPTH, SV_ISFRONTFACE,
+            PSIZE, TESSFACTOR
         )
 
-        val STRUCT_TYPES = TokenSet.create(
-            STRUCT_CONNECTDATA, STRUCT_VERTDATA, STRUCT_FRAGOUT
+        val INTRINSICFUNCTIONS = TokenSet.create(
+            SAMPLEFUNC, MULFUNC, FRACFUNC, LERPFUNC
         )
 
         val ASSIGNMENT_OPERATORS = TokenSet.create(
@@ -76,6 +76,9 @@ class TslParserDefinition : ParserDefinition {
         )
 
         val NUMBERS = TokenSet.create(
+            LITERAL_FLOAT, LITERAL_DOUBLE, LITERAL_INTEGER, LITERAL_HEXDIGIT
         )
+
+        val BOOLEANS = TokenSet.create(TRUE, FALSE)
     }
 }
