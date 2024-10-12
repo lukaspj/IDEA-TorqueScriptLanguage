@@ -14,6 +14,12 @@
 
 ### Security
 
+## 1.14.9 - 2024-10-12
+
+### Fixed
+
+- Updated compatibility range to support 2024.2
+
 ## 1.14.8 - 2024-04-02
 
 ### Fixed

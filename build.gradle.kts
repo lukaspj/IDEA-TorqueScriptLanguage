@@ -1,13 +1,13 @@
 import org.jetbrains.changelog.Changelog
-import org.jetbrains.intellij.tasks.PublishPluginTask
+import org.jetbrains.intellij.platform.gradle.tasks.PublishPluginTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val channel = prop("publishChannel")
 
 plugins {
-    id("org.jetbrains.intellij") version "1.17.2"
-    id("org.jetbrains.kotlin.jvm") version "1.9.23"
-    id("org.jetbrains.grammarkit") version "2022.3.2"
+    id("org.jetbrains.intellij.platform") version "2.1.0"
+    id("org.jetbrains.kotlin.jvm") version "1.9.25"
+    id("org.jetbrains.grammarkit") version "2022.3.2.2"
     id("org.jetbrains.changelog") version "2.2.0"
 }
 
@@ -21,6 +21,10 @@ version = if (isLegacyBuild) {
 
 repositories {
     mavenCentral()
+
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
 dependencies {
@@ -29,6 +33,19 @@ dependencies {
     }
 
     implementation(kotlin("reflect"))
+
+    intellijPlatform {
+        instrumentationTools()
+        pluginVerifier()
+        zipSigner()
+
+        version = if (isLegacyBuild) {
+            intellijIdeaCommunity("2022.2")
+        } else {
+            intellijIdeaCommunity("2022.3")
+            // intellijIdeaCommunity("2024.2.3")
+        }
+    }
 }
 
 idea {
@@ -59,16 +76,12 @@ sourceSets {
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 // See https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
-intellij {
-    if (isLegacyBuild) {
-        version.set("2022.2")
-    } else {
-        version.set("2022.3")
-    }
-
-    //version.set("2021.2")
+intellijPlatform  {
     //type.set("RD")
-    pluginName.set("TorqueScript")
+
+    pluginConfiguration {
+        name.set("TorqueScript")
+    }
 }
 
 changelog {
@@ -90,25 +103,24 @@ tasks {
             untilBuild.set("223")
         } else {
             sinceBuild.set("223")
-            untilBuild.set("241.*")
+            untilBuild.set("242.*")
         }
     }
 
     generateLexer {
         sourceFile.set(file("src/org/lukasj/idea/torquescript/grammar/TorqueScript.flex"))
 
-        targetDir.set("gen/org/lukasj/idea/torquescript/lexer")
-        targetClass.set("TSLexer")
+        targetOutputDir.set(file("gen/org/lukasj/idea/torquescript/lexer"))
 
         purgeOldFiles.set(true)
 
-        outputs.file("${targetDir.get()}/${targetClass.get()}.java")
+        outputs.dir(targetOutputDir.get())
     }
 
     generateParser {
         sourceFile.set(file("src/org/lukasj/idea/torquescript/grammar/TorqueScript.bnf"))
 
-        targetRoot.set("gen")
+        targetRootOutputDir.set(file("gen"))
 
         pathToParser.set("/org/lukasj/idea/torquescript/parser/TSParser")
 
@@ -116,8 +128,8 @@ tasks {
 
         purgeOldFiles.set(true)
 
-        outputs.file("${targetRoot.get()}${pathToParser.get()}.java")
-        outputs.dir("${targetRoot.get()}${pathToPsiRoot.get()}")
+        outputs.file("${targetRootOutputDir.get()}${pathToParser.get()}.java")
+        outputs.dir("${targetRootOutputDir.get()}${pathToPsiRoot.get()}")
     }
 
     // https://plugins.jetbrains.com/docs/intellij/dynamic-plugins.html#diagnosing-leaks
