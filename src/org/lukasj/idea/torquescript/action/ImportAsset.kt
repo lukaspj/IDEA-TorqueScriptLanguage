@@ -2,6 +2,7 @@ package org.lukasj.idea.torquescript.action
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.ui.Messages
 import org.lukasj.idea.torquescript.asset.AssetImporter
 
 class ImportAsset : ImportAssetHandler {
@@ -21,7 +22,16 @@ class ImportAsset : ImportAssetHandler {
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        val file = e.getRequiredData(CommonDataKeys.VIRTUAL_FILE)
+        val file = e.getData(CommonDataKeys.VIRTUAL_FILE)
+        if (file == null || file.isDirectory) {
+            Messages.showMessageDialog(
+                e.project!!,
+                "Tried to import asset from file: $file, but the file was not found",
+                "Asset Import Failed",
+                Messages.getErrorIcon()
+            )
+            return
+        }
         AssetImporter().import(e.project, file)
     }
 }

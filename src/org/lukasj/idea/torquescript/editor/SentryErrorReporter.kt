@@ -1,6 +1,5 @@
 package org.lukasj.idea.torquescript.editor
 
-import com.intellij.diagnostic.IdeaReportingEvent
 import com.intellij.ide.DataManager
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.application.ApplicationManager
@@ -12,9 +11,9 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.util.Consumer
+import com.intellij.util.application
 import org.lukasj.idea.torquescript.SentryService
 import java.awt.Component
-import java.util.*
 
 
 class SentryErrorReporter : ErrorReportSubmitter() {
@@ -37,12 +36,12 @@ class SentryErrorReporter : ErrorReportSubmitter() {
 
         object : Task.Backgroundable(project, "Sending error report") {
             override fun run(indicator: ProgressIndicator) {
-                val hub = project.getService(SentryService::class.java).hub
+                val hub = application.getService(SentryService::class.java).hub
 
                 events
-                    .filterIsInstance<IdeaReportingEvent>()
+                    .filter { it.throwable != null }
                     .forEach {
-                        hub.captureException(it.data.throwable)
+                        hub.captureException(it.throwable)
                     }
 
                 ApplicationManager.getApplication().invokeLater {

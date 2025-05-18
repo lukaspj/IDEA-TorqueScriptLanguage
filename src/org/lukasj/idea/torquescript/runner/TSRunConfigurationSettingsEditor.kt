@@ -21,7 +21,6 @@ class TSRunConfigurationSettingsEditor(val project: Project) : SettingsEditor<TS
                 textFieldWithBrowseButton(
                     "App Path",
                     project,
-                    FileChooserDescriptorFactory.createSingleFileDescriptor(),
                 ) { TSFileUtil.relativePathFromRoot(project, it).toString() }
                     .bindText(model::appPath)
                     .comment("Specify path to Torque App executable")
@@ -31,7 +30,6 @@ class TSRunConfigurationSettingsEditor(val project: Project) : SettingsEditor<TS
                 textFieldWithBrowseButton(
                     "Working Directory",
                     project,
-                    FileChooserDescriptorFactory.createSingleFileDescriptor()
                 ) { TSFileUtil.relativePathFromRoot(project, it).toString() }
                     .bindText(model::workingDirectory)
                     .comment("Specify path to the working directory")
@@ -41,7 +39,6 @@ class TSRunConfigurationSettingsEditor(val project: Project) : SettingsEditor<TS
                 textFieldWithBrowseButton(
                     "Main Script",
                     project,
-                    FileChooserDescriptorFactory.createSingleFileDescriptor()
                 ) { TSFileUtil.relativePathFromRoot(project, it).toString() }
                     .bindText(model::mainScript)
                     .comment("Specify path to the main script file")
@@ -54,8 +51,8 @@ class TSRunConfigurationSettingsEditor(val project: Project) : SettingsEditor<TS
         if (appPath != null) {
             model.appPath = TSFileUtil.relativePathFromRoot(project, Path.of(appPath)).toString().replace('\\', '/')
         }
-        model.workingDirectory = TSFileUtil.relativePathFromRoot(project, Path.of(s.workingDirectory)).toString().replace('\\', '/')
-        model.mainScript = TSFileUtil.relativePathFromRoot(project, Path.of(s.mainScript)).toString().replace('\\', '/')
+        model.workingDirectory = TSFileUtil.relativePathFromRoot(project, Path.of(s.workingDirectory!!)).toString().replace('\\', '/')
+        model.mainScript = TSFileUtil.relativePathFromRoot(project, Path.of(s.mainScript!!)).toString().replace('\\', '/')
         mainPanel.reset()
     }
 

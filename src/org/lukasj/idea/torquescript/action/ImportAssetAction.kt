@@ -1,5 +1,6 @@
 package org.lukasj.idea.torquescript.action
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import kotlin.reflect.full.createInstance
@@ -16,5 +17,9 @@ class ImportAssetAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         ImportAsset().actionPerformed(e)
+    }
+
+    override fun getActionUpdateThread(): ActionUpdateThread {
+        return ActionUpdateThread.BGT
     }
 }

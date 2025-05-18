@@ -15,7 +15,7 @@ import org.lukasj.idea.torquescript.runner.TSProcessHandler
 import org.lukasj.idea.torquescript.runner.TSRunConfiguration
 import java.io.File
 
-@Service
+@Service(Service.Level.PROJECT)
 class TelnetConsoleService {
     fun runTelnetSession(project: Project, timeout: Long = 3000, sessionFn: (TSTelnetClient) -> Unit): Boolean {
         val configuration =

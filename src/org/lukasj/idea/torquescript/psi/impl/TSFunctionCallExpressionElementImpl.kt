@@ -2,16 +2,11 @@ package org.lukasj.idea.torquescript.psi.impl
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
-import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiReference
 import com.intellij.psi.util.elementType
-import com.intellij.psi.util.siblings
-import com.intellij.refactoring.suggested.startOffset
 import org.lukasj.idea.torquescript.psi.*
-import org.lukasj.idea.torquescript.reference.TSFunctionCallReference
 import org.lukasj.idea.torquescript.reference.TSFunctionReference
-import org.lukasj.idea.torquescript.reference.TSObjectReference
 
 abstract class TSFunctionCallExpressionElementImpl(node: ASTNode) : ASTWrapperPsiElement(node),
     TSNamedElement {

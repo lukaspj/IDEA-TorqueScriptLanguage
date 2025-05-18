@@ -10,7 +10,7 @@ import io.sentry.SentryLevel
 import io.sentry.SentryOptions
 import java.util.*
 
-@Service
+@Service(Service.Level.APP)
 class SentryService {
     val hub: Hub
 

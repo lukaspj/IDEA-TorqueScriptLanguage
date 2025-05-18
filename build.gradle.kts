@@ -1,22 +1,26 @@
 import org.jetbrains.changelog.Changelog
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.tasks.PublishPluginTask
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val channel = prop("publishChannel")
 
 plugins {
-    id("org.jetbrains.intellij.platform") version "2.1.0"
-    id("org.jetbrains.kotlin.jvm") version "1.9.25"
+    id("org.jetbrains.intellij.platform") version "2.5.0"
+    id("org.jetbrains.kotlin.jvm") version "2.1.20"
     id("org.jetbrains.grammarkit") version "2022.3.2.2"
-    id("org.jetbrains.changelog") version "2.2.0"
+    id("org.jetbrains.changelog") version "2.2.1"
 }
 
+val pluginVersion = prop("pluginVersion")
 group = "org.lukasj"
+
 val isLegacyBuild = prop("legacyBuild") == "true"
 version = if (isLegacyBuild) {
-    "${prop("pluginVersion")}-legacy"
+    "${pluginVersion}-legacy"
 } else {
-    prop("pluginVersion")
+    pluginVersion
 }
 
 repositories {
@@ -35,14 +39,13 @@ dependencies {
     implementation(kotlin("reflect"))
 
     intellijPlatform {
-        instrumentationTools()
         pluginVerifier()
         zipSigner()
 
         version = if (isLegacyBuild) {
             intellijIdeaCommunity("2022.2")
         } else {
-            intellijIdeaCommunity("2022.3")
+            intellijIdeaCommunity("2025.1")
             // intellijIdeaCommunity("2024.2.3")
         }
     }
@@ -81,6 +84,15 @@ intellijPlatform  {
 
     pluginConfiguration {
         name.set("TorqueScript")
+        version.set(pluginVersion)
+    }
+
+    pluginVerification {
+        ides {
+            ide(IntelliJPlatformType.IntellijIdeaCommunity, "2024.1")
+            ide(IntelliJPlatformType.IntellijIdeaCommunity, "2025.1")
+            recommended()
+        }
     }
 }
 
@@ -102,8 +114,8 @@ tasks {
             sinceBuild.set("221")
             untilBuild.set("223")
         } else {
-            sinceBuild.set("223")
-            untilBuild.set("242.*")
+            sinceBuild.set("243")
+            untilBuild.set("252.*")
         }
     }
 
@@ -158,9 +170,9 @@ tasks {
     // Specify the right jvm target for Kotlin
     withType<KotlinCompile>().configureEach {
         dependsOn("generateLexer", "generateParser")
-        kotlinOptions {
-            jvmTarget = "17"
-            freeCompilerArgs = listOf("-Xjvm-default=all")
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+            freeCompilerArgs.set(listOf("-Xjvm-default=all"))
         }
     }
 }

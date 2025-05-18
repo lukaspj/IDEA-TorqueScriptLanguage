@@ -1,6 +1,7 @@
 package org.lukasj.idea.torquescript.action
 
 import com.intellij.execution.RunManager
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
@@ -25,8 +26,7 @@ class RebuildExportsAction : AnAction() {
                 RunManager.getInstance(project)
                     .allConfigurationsList
                     .filterIsInstance<TSRunConfiguration>()
-                    .filter { !it.appPath.isNullOrEmpty() }
-                    .any()
+                    .any { !it.appPath.isNullOrEmpty() }
         }
     }
 
@@ -102,5 +102,9 @@ class RebuildExportsAction : AnAction() {
                 Messages.getErrorIcon()
             )
         }
+    }
+
+    override fun getActionUpdateThread(): ActionUpdateThread {
+        return ActionUpdateThread.EDT
     }
 }

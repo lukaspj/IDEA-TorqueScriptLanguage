@@ -14,6 +14,16 @@
 
 ### Security
 
+## 1.14.10 - 2025-04-30
+
+### Fixed
+
+- Updated compatibility range to support 2025.2
+
+### Removed
+
+- Support for IDE versions prior to 2024.3
+
 ## 1.14.9 - 2024-10-12
 
 ### Fixed
