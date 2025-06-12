@@ -127,6 +127,7 @@ STRING = {STR} ( [^\"\\\n\r] | "\\" ("\\" | {STR} | {ESCAPES} | [0-8xuU] ) )* {S
     -                                                       { return TSTypes.MINUS; }
     \*                                                      { return TSTypes.MULTIPLY; }
     \/                                                      { return TSTypes.DIVIDE; }
+    %                                                       { return TSTypes.MODULO; }
     NL                                                      { return TSTypes.NL; }
     TAB                                                     { return TSTypes.TAB; }
     SPC                                                     { return TSTypes.SPC; }

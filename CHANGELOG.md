@@ -14,6 +14,12 @@
 
 ### Security
 
+## 1.14.11 - 2025-06-12
+
+### Fixed
+
+- Added missing modulo (`%`) operator to lexer
+
 ## 1.14.10 - 2025-04-30
 
 ### Fixed
