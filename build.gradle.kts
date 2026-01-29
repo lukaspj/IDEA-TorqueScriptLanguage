@@ -115,7 +115,7 @@ tasks {
             untilBuild.set("223")
         } else {
             sinceBuild.set("243")
-            untilBuild.set("252.*")
+            untilBuild.set(provider { null })
         }
     }
 

@@ -14,6 +14,12 @@
 
 ### Security
 
+## 1.14.12 - 2026-01-29
+
+### Fixed
+
+- Removed "untilBuild" so plugin can be used in newer versions of IDEA without actively bumping the version
+
 ## 1.14.11 - 2025-06-12
 
 ### Fixed
